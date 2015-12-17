@@ -2,7 +2,7 @@ defmodule AssertValue do
 
   @prefixes %{eq: " ", ins: "+", del: "-"}
 
-  def text_diff(a, b) do
+  def diff(a, b) do
     a = to_string_list a
     b = to_string_list b
     format_diff :tdiff.diff(a, b)
@@ -25,7 +25,7 @@ defmodule AssertValue do
         end)
       |> List.flatten
       |> Enum.join("\n")
-    formatted <> "\n"
+    (formatted <> "\n") |> to_char_list
   end
 
 end

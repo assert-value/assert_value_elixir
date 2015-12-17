@@ -19,7 +19,7 @@ defmodule AssertValueTest do
     fff
     GGG
     '''
-    assert AssertValue.text_diff(a, b) == to_string '''
+    assert AssertValue.diff(a, b) == '''
      aaa
     -bbb
     -ccc
@@ -34,7 +34,7 @@ defmodule AssertValueTest do
   test "text_diff strings" do
     a = "aaa\nbbb\nccc\nddd\neee\nfff\n"
     b = "aaa\nxxx\nddd\neee\nfff\nGGG\n"
-    assert AssertValue.text_diff(a, b) == to_string '''
+    assert AssertValue.diff(a, b) == '''
      aaa
     -bbb
     -ccc
