@@ -6,18 +6,18 @@ defmodule AssertValue do
     quote do
       left = unquote(left)
       right = unquote(right)
-      if left == right do
-        right
-      else
-        IO.puts "Assertion prototype"
-        IO.puts "    #{unquote(code)}"
-        IO.gets "Reading input ? "
-        raise ExUnit.AssertionError, [
-          left: left,
-          right: right,
-          expr: unquote(expr),
-          message: "AssertValue assertion failed"
-        ]
+      case (left == right) do
+        false ->
+          IO.puts "Assertion prototype"
+          IO.puts "    #{unquote(code)}"
+          IO.gets "Reading input ? "
+          raise ExUnit.AssertionError, [
+            left: left,
+            right: right,
+            expr: unquote(expr),
+            message: "AssertValue assertion failed"
+          ]
+        _ -> right
       end
     end
   end
