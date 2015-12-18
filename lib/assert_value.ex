@@ -7,7 +7,7 @@ defmodule AssertValue do
       left = unquote(left)
       right = unquote(right)
       if left == right do
-        true
+        right
       else
         IO.puts "Assertion prototype"
         IO.puts "    #{unquote(code)}"
