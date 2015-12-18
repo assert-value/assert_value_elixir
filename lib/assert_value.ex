@@ -1,5 +1,27 @@
 defmodule AssertValue do
 
+  defmacro assert_value({:==, meta, [left, right]} = assertion) do
+    code = Macro.to_string(assertion)
+    expr = Macro.escape(assertion)
+    quote do
+      left = unquote(left)
+      right = unquote(right)
+      if left == right do
+        true
+      else
+        IO.puts "Assertion prototype"
+        IO.puts "    #{unquote(code)}"
+        IO.gets "Reading input ? "
+        raise ExUnit.AssertionError, [
+          left: left,
+          right: right,
+          expr: unquote(expr),
+          message: "AssertValue assertion failed"
+        ]
+      end
+    end
+  end
+
   @prefixes %{eq: " ", ins: "+", del: "-"}
 
   def diff(a, b) do

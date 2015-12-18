@@ -1,6 +1,7 @@
 defmodule AssertValueTest do
   use ExUnit.Case
   doctest AssertValue
+  import AssertValue
 
   test "text_diff char lists" do
     a = '''
@@ -46,5 +47,27 @@ defmodule AssertValueTest do
     '''
   end
 
+  test "prototype pass" do
+    actual = '''
+    aaa
+    bbb
+    '''
+    assert_value actual == '''
+    aaa
+    bbb
+    '''
+  end
+
+  test "prototype fail" do
+    actual = '''
+    aaa
+    bbb
+    ccc
+    ddd
+    eee
+    fff
+    '''
+    assert_value actual == "111"
+  end
 
 end
