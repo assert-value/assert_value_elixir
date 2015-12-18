@@ -1,6 +1,6 @@
 defmodule AssertValue do
 
-  defmacro assert_value({:==, meta, [left, right]} = assertion) do
+  defmacro assert_value({:==, _, [left, right]} = assertion) do
     code = Macro.to_string(assertion)
     expr = Macro.escape(assertion)
     quote do
