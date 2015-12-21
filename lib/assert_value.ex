@@ -8,7 +8,11 @@ defmodule AssertValue do
       right = unquote(right)
       case (left == right) do
         false ->
-          IO.puts "Assertion prototype"
+          # HACK: Let ExUnit event handler to finish output
+          # Otherwise ExUnit output will interfere with our output
+          # Since this is interactive part 10 millisecond is not a big deal
+          :timer.sleep(10)
+          IO.puts "\nAssertion prototype"
           IO.puts "    #{unquote(code)}"
           IO.gets "Reading input ? "
           raise ExUnit.AssertionError, [
