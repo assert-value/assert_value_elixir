@@ -12,7 +12,6 @@ defmodule AssertValue do
       case result do
         false ->
           answer = AssertValue.prompt_for_action(unquote(code))
-          IO.inspect answer
           case answer do
             "y" ->
               AssertValue.update_expected(right, unquote(filename))
