@@ -8,13 +8,13 @@ defmodule AssertValue do
     quote do
       left  = unquote(left)
       right = unquote(right)
-      result = (left == right)
+      result = (to_string(left) == to_string(right))
       case result do
         false ->
-          answer = AssertValue.prompt_for_action(unquote(code))
+          answer = AssertValue.prompt_for_action(unquote(code), left, right)
           case answer do
             "y" ->
-              AssertValue.update_expected(right, unquote(filename))
+              AssertValue.update_expected(left, right, unquote(filename))
              _  ->
               raise ExUnit.AssertionError, [
                 left: left,
@@ -37,26 +37,29 @@ defmodule AssertValue do
     end
   end
 
-  def update_expected(expected, nil) when is_binary(expected) do
+  def update_expected(_, expected, nil) when is_binary(expected) do
     IO.puts "Update String not yet implemented"
   end
 
-  def update_expected(expected, nil) when is_list(expected) do
+  def update_expected(_, expected, nil) when is_list(expected) do
     IO.puts "Update Heredoc not yet implemented"
   end
 
-  def update_expected(_, filename) when is_binary(filename) do
-    IO.puts "Mocking #{filename}"
+  def update_expected(actual, _, filename) when is_binary(filename) do
+    IO.inspect "Updating #{filename}"
+    res = File.write!(filename, actual)
+    IO.inspect res
   end
 
 
-  def prompt_for_action(code) do
+  def prompt_for_action(code, left, right) do
     # HACK: Let ExUnit event handler to finish output
     # Otherwise ExUnit output will interfere with our output
     # Since this is interactive part 10 millisecond is not a big deal
     :timer.sleep(10)
     IO.puts "\n<Failed Assertion Message>"
-    IO.puts "    #{code}"
+    IO.puts "    #{code}\n"
+    IO.puts diff(right, left)
     IO.gets("Accept new value [y/n]? ")
     |> String.rstrip(?\n)
   end

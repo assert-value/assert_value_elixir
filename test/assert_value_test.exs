@@ -58,7 +58,7 @@ defmodule AssertValueTest do
     '''
   end
 
-  test "prototype fail" do
+  test "heredoc and file" do
     actual = '''
     aaa
     bbb
@@ -67,42 +67,20 @@ defmodule AssertValueTest do
     eee
     fff
     '''
-    assert_value actual == "111"
+    assert_value actual == File.read!(__DIR__ <> "/data1.log")
   end
 
-  test "prototype fail 2" do
-    actual = '''
+  test "string and file" do
+    actual = "
     aaa
     bbb
     ccc
     ddd
     eee
     fff
-    '''
-    assert_value actual == '''
-    asdasda
-    '''
+    "
+    assert_value actual == File.read!(__DIR__ <> "/data2.log")
   end
-
-  test "prototype with file" do
-    actual = '''
-    aaa
-    bbb
-    ccc
-    ddd
-    eee
-    fff
-    '''
-    assert_value actual == File.read!(__DIR__ <> "/data.txt")
-  end
-
-  test "test unknown argument" do
-    assert_raise RuntimeError, "Unknown argument type: :atom", fn ->
-      actual = 'abc'
-      assert_value actual == :atom
-    end
-  end
-
 
 
 end
