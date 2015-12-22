@@ -47,7 +47,7 @@ defmodule AssertValue do
     heredoc_close_line_index = Enum.find_index(rest, fn(s) ->
       s =~ ~r/^\s*'''/
     end)
-    {heredoc, suffix} = Enum.split(rest, heredoc_close_line_index)
+    {_, suffix} = Enum.split(rest, heredoc_close_line_index)
     [heredoc_close_line | _] = suffix
     [[indentation]] = Regex.scan(~r/^\s*/, heredoc_close_line)
     new_expected =
