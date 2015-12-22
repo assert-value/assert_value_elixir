@@ -46,7 +46,7 @@ defmodule AssertValue do
   end
 
   def update_expected(actual, _, filename) when is_binary(filename) do
-    res = File.write!(filename, actual)
+    File.write!(filename, actual)
   end
 
 
