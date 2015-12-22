@@ -1,20 +1,21 @@
 defmodule AssertValue do
 
-  defmacro assert_value({:==, _, [left, right]} = assertion) do
-    # Check if right argument is "File.read!"
-    filename = try_to_parse_filename(right)
+  defmacro assert_value({:==, meta, [left, right]} = assertion) do
+    source_filename =  __CALLER__.file
+    log_filename = try_to_parse_filename(right)
     code = Macro.to_string(assertion)
     expr = Macro.escape(assertion)
     quote do
       left  = unquote(left)
       right = unquote(right)
+      meta  = unquote(meta)
       result = (to_string(left) == to_string(right))
       case result do
         false ->
           answer = AssertValue.prompt_for_action(unquote(code), left, right)
           case answer do
             "y" ->
-              AssertValue.update_expected(left, right, unquote(filename))
+              AssertValue.update_expected(unquote(source_filename), left, right, meta, unquote(log_filename))
              _  ->
               raise ExUnit.AssertionError, [
                 left: left,
@@ -37,18 +38,37 @@ defmodule AssertValue do
     end
   end
 
-  def update_expected(_, expected, nil) when is_binary(expected) do
+  def update_expected(_, _, expected, _, nil) when is_binary(expected) do
     IO.puts "Update String not yet implemented"
   end
 
-  def update_expected(_, expected, nil) when is_list(expected) do
-    IO.puts "Update Heredoc not yet implemented"
+  def update_expected(source_filename, actual, expected, [line: line_index], nil) when is_list(expected) do
+    source =
+      File.read!(source_filename)
+      |> String.split("\n")
+    {prefix, rest} = Enum.split(source, line_index)
+    heredoc_close_line_index = Enum.find_index(rest, fn(s) ->
+      s =~ ~r/^\s*'''/
+    end)
+    {heredoc, suffix} = Enum.split(rest, heredoc_close_line_index)
+    [heredoc_close_line | _] = suffix
+    [[indentation]] = Regex.scan(~r/^\s*/, heredoc_close_line)
+    new_expected =
+      to_string(actual)
+      |> String.rstrip(?\n)
+      |> String.split("\n")
+      |> Enum.map(&(indentation <> &1))
+      |> Enum.join("\n")
+    File.open!(source_filename, [:write], fn(file) ->
+      IO.puts(file, Enum.join(prefix, "\n"))
+      IO.puts(file, new_expected)
+      IO.write(file, Enum.join(suffix, "\n"))
+    end)
   end
 
-  def update_expected(actual, _, filename) when is_binary(filename) do
+  def update_expected(_, actual, _, _, filename) when is_binary(filename) do
     File.write!(filename, actual)
   end
-
 
   def prompt_for_action(code, left, right) do
     # HACK: Let ExUnit event handler to finish output
