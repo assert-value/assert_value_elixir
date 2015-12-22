@@ -14,7 +14,7 @@ defmodule AssertValue.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    []
+    [mod: {AssertValue.FileOffsets.App, []}]
   end
 
   # Dependencies can be Hex packages:
