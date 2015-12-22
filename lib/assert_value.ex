@@ -38,10 +38,6 @@ defmodule AssertValue do
     end
   end
 
-  def update_expected(_, _, expected, _, nil) when is_binary(expected) do
-    IO.puts "Update String not yet implemented"
-  end
-
   # Update expected when expected is heredoc
   def update_expected(source_filename, actual, expected, [line: line_index], nil) when is_list(expected) do
     source =

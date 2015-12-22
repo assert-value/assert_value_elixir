@@ -113,4 +113,33 @@ defmodule AssertValueTest do
     '''
   end
 
+  test "wrong expected type" do
+    actual = "foo"
+    assert_raise FunctionClauseError, "no function clause matching in AssertValue.update_expected/5", fn ->
+      ExUnit.CaptureIO.capture_io("y\n", fn ->
+        assert_value actual == 1
+      end)
+    end
+    assert_raise FunctionClauseError, "no function clause matching in AssertValue.update_expected/5", fn ->
+      ExUnit.CaptureIO.capture_io("y\n", fn ->
+        assert_value actual == "bar"
+      end)
+    end
+    assert_raise ArithmeticError, "bad argument in arithmetic expression", fn ->
+      ExUnit.CaptureIO.capture_io("y\n", fn ->
+        assert_value actual == []
+      end)
+    end
+    assert_raise Protocol.UndefinedError, "protocol String.Chars not implemented for {}", fn ->
+      ExUnit.CaptureIO.capture_io("y\n", fn ->
+        assert_value actual == {}
+      end)
+    end
+    assert_raise Protocol.UndefinedError, "protocol String.Chars not implemented for %{}", fn ->
+      ExUnit.CaptureIO.capture_io("y\n", fn ->
+        assert_value actual == %{}
+      end)
+    end
+  end
+
 end
