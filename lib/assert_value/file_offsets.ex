@@ -1,6 +1,19 @@
 defmodule AssertValue.FileOffsets do
   use GenServer
 
+  @moduledoc ~S"""
+  ## Usage
+
+      iex> import AssertValue.FileOffsets
+      nil
+      iex> get_file_offset("~/test.exs")
+      0
+      iex> set_file_offset("~/test.exs", -2)
+      :ok
+      iex> get_file_offset("~/test.exs")
+      -2
+  """
+
   def start_link(data) do
     GenServer.start_link(__MODULE__, data, name: __MODULE__)
   end

@@ -1,6 +1,9 @@
 defmodule AssertValueTest do
   use ExUnit.Case
+
+  doctest AssertValue.FileOffsets
   doctest AssertValue
+
   import AssertValue
 
   test "prototype pass" do
