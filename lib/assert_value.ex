@@ -42,6 +42,7 @@ defmodule AssertValue do
     IO.puts "Update String not yet implemented"
   end
 
+  # Update expected when expected is heredoc
   def update_expected(source_filename, actual, expected, [line: line_index], nil) when is_list(expected) do
     source =
       File.read!(source_filename)
@@ -66,6 +67,7 @@ defmodule AssertValue do
     end)
   end
 
+  # Update expected when expected is File.read!
   def update_expected(_, actual, _, _, filename) when is_binary(filename) do
     File.write!(filename, actual)
   end
