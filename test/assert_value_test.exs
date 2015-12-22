@@ -101,6 +101,19 @@ defmodule AssertValueTest do
     '''
   end
 
+  test "string and heredoc" do
+    actual = "aaa\nbbb\nccc\nddd\neee\nfff"
+    assert_value actual == '''
+    aaa
+    bbb
+    cCc
+    ddd
+    eee
+    fff
+    '''
+  end
+
+
 
 
 end
