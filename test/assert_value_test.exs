@@ -82,5 +82,25 @@ defmodule AssertValueTest do
     assert_value actual == File.read!(__DIR__ <> "/data2.log")
   end
 
+  test "heredoc and heredoc" do
+    actual = '''
+    aaa
+    bbb
+    ccc
+    ddd
+    eee
+    fff
+    '''
+    assert_value actual == '''
+    aaa
+    bbb
+    cCc
+    ddd
+    eee
+    fff
+    '''
+  end
+
+
 
 end
