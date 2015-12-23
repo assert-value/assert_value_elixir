@@ -26,7 +26,7 @@ defmodule AssertValueTest do
     eee
     fff
     '''
-    assert_value actual == File.read!(__DIR__ <> "/data1.log")
+    assert_value actual == File.read!(Path.expand("data1.log", __DIR__))
   end
 
   test "string and file" do
@@ -38,7 +38,7 @@ defmodule AssertValueTest do
     eee
     fff
     "
-    assert_value actual == File.read!(__DIR__ <> "/data2.log")
+    assert_value actual == File.read!(Path.expand("data2.log", __DIR__))
   end
 
   test "heredoc and heredoc" do
