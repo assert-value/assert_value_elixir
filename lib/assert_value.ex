@@ -1,3 +1,5 @@
+defmodule AssertValue.ArgumentError, do: defexception [:message]
+
 defmodule AssertValue do
 
   import AssertValue.FileOffsets, only: [get_line_offset: 2, set_line_offset: 3]
@@ -11,13 +13,15 @@ defmodule AssertValue do
       left  = unquote(left)
       right = unquote(right)
       meta  = unquote(meta)
+      log_filename = unquote(log_filename)
+      AssertValue.check_expected_form(right, log_filename)
       result = (to_string(left) == to_string(right))
       case result do
         false ->
           answer = AssertValue.prompt_for_action(unquote(code), left, right)
           case answer do
             "y" ->
-              AssertValue.update_expected(unquote(source_filename), left, right, meta, unquote(log_filename))
+              AssertValue.update_expected(unquote(source_filename), left, right, meta, log_filename)
              _  ->
               raise ExUnit.AssertionError, [
                 left: left,
@@ -28,6 +32,17 @@ defmodule AssertValue do
           end
         _ -> result
       end
+    end
+  end
+
+  def check_expected_form(expected, log_filename) do
+    cond do
+      is_list(expected) and (String.at(inspect(expected), 0) == "'") ->
+        :heredoc
+      is_binary(log_filename) ->
+        :file
+      true ->
+        raise AssertValue.ArgumentError, "Expected should be in the form of heredoc or File.read!"
     end
   end
 
