@@ -31,13 +31,16 @@ defmodule AssertValue do
     end
   end
 
-  defp try_to_parse_filename(ast) do
-    try do
-      {{:., _, [{:__aliases__, _, [:File]}, :read!]}, _, [filename]} = ast
-      filename
-    rescue
-      MatchError -> nil
-    end
+  def prompt_for_action(code, left, right) do
+    # HACK: Let ExUnit event handler to finish output
+    # Otherwise ExUnit output will interfere with our output
+    # Since this is interactive part 10 millisecond is not a big deal
+    :timer.sleep(10)
+    IO.puts "\n<Failed Assertion Message>"
+    IO.puts "    #{code}\n"
+    IO.puts AssertValue.Diff.diff(right, left)
+    IO.gets("Accept new value [y/n]? ")
+    |> String.rstrip(?\n)
   end
 
   # Update expected when expected is heredoc
@@ -72,23 +75,20 @@ defmodule AssertValue do
     File.write!(filename, actual)
   end
 
-  def prompt_for_action(code, left, right) do
-    # HACK: Let ExUnit event handler to finish output
-    # Otherwise ExUnit output will interfere with our output
-    # Since this is interactive part 10 millisecond is not a big deal
-    :timer.sleep(10)
-    IO.puts "\n<Failed Assertion Message>"
-    IO.puts "    #{code}\n"
-    IO.puts AssertValue.Diff.diff(right, left)
-    IO.gets("Accept new value [y/n]? ")
-    |> String.rstrip(?\n)
-  end
-
   defp to_lines(s) do
     s
     |> to_string
     |> String.rstrip(?\n)
     |> String.split("\n")
+  end
+
+  defp try_to_parse_filename(ast) do
+    try do
+      {{:., _, [{:__aliases__, _, [:File]}, :read!]}, _, [filename]} = ast
+      filename
+    rescue
+      MatchError -> nil
+    end
   end
 
 end
