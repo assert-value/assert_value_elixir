@@ -1,6 +1,9 @@
-defmodule AssertValue.ArgumentError, do: defexception [:message]
 
 defmodule AssertValue do
+
+  defmodule ArgumentError do
+    defexception [:message]
+  end
 
   import AssertValue.FileOffsets, only: [get_line_offset: 2, set_line_offset: 3]
 
