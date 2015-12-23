@@ -1,37 +1,32 @@
 defmodule AssertValue.FileOffsets do
   use GenServer
 
-  @moduledoc ~S"""
-  ## Usage
-
-      iex> import AssertValue.FileOffsets
-      nil
-      iex> get_file_offset("~/test.exs")
-      0
-      iex> set_file_offset("~/test.exs", -2)
-      :ok
-      iex> get_file_offset("~/test.exs")
-      -2
-  """
-
   def start_link(data) do
     GenServer.start_link(__MODULE__, data, name: __MODULE__)
   end
 
-  def set_file_offset(filename, offset) do
-    GenServer.cast __MODULE__, {:set_file_offset, filename, offset}
+  def set_line_offset(filename, line, offset) do
+    GenServer.cast __MODULE__, {:set_line_offset, filename, line, offset}
   end
 
-  def get_file_offset(filename) do
-    GenServer.call __MODULE__, {:get_file_offset, filename}
+  def get_line_offset(filename, line) do
+    GenServer.call __MODULE__, {:get_line_offset, filename, line}
   end
 
-  def handle_call({:get_file_offset, filename}, _from, data) do
-    { :reply, (data[filename] || 0), data }
+  def handle_call({:get_line_offset, filename, line}, _from, data) do
+    file_offsets = data[filename] || %{}
+    offset = Enum.reduce(file_offsets, 0, fn({l,o}, total) ->
+      if line > l, do: total + o, else: total
+    end)
+    { :reply, offset, data }
   end
 
-  def handle_cast({:set_file_offset, filename, offset}, data) do
-    { :noreply, Map.put(data, filename, offset)}
+  def handle_cast({:set_line_offset, filename, line, offset}, data) do
+    file_offsets =
+      (data[filename] || %{})
+      |> Map.put(line, offset)
+    data = Map.put(data, filename, file_offsets)
+    { :noreply, data }
   end
 
   def format_status(_reason, [ _pdict, state ]) do
