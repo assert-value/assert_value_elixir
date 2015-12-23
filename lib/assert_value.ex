@@ -39,15 +39,15 @@ defmodule AssertValue do
   end
 
   # Update expected when expected is heredoc
-  def update_expected(source_filename, actual, expected, [line: line_index], nil) when is_list(expected) do
+  def update_expected(source_filename, actual, expected, [line: line_number], nil) when is_list(expected) do
     source =
       File.read!(source_filename)
       |> String.split("\n")
-    {prefix, rest} = Enum.split(source, line_index)
-    heredoc_close_line_index = Enum.find_index(rest, fn(s) ->
+    {prefix, rest} = Enum.split(source, line_number)
+    heredoc_close_line_number = Enum.find_index(rest, fn(s) ->
       s =~ ~r/^\s*'''/
     end)
-    {_, suffix} = Enum.split(rest, heredoc_close_line_index)
+    {_, suffix} = Enum.split(rest, heredoc_close_line_number)
     [heredoc_close_line | _] = suffix
     [[indentation]] = Regex.scan(~r/^\s*/, heredoc_close_line)
     new_expected =
