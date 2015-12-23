@@ -7,6 +7,28 @@ defmodule AssertValue do
 
   import AssertValue.FileOffsets, only: [get_line_offset: 2, set_line_offset: 3]
 
+  defmacro assert_value({:actual, meta, nil} = assertion) do
+    source_filename =  __CALLER__.file
+    code = Macro.to_string(assertion)
+    expr = Macro.escape(assertion)
+    quote do
+      left = unquote(assertion)
+      meta = unquote(meta)
+      answer = AssertValue.prompt_for_action(unquote(code), left, nil)
+      case answer do
+        "y" ->
+          AssertValue.create_expected(unquote(source_filename), left, meta)
+         _  ->
+            raise ExUnit.AssertionError, [
+              left: left,
+              expr: unquote(expr),
+              message: "AssertValue assertion failed"
+            ]
+      end
+      left
+    end
+  end
+
   defmacro assert_value({:==, meta, [left, right]} = assertion) do
     source_filename =  __CALLER__.file
     log_filename = try_to_parse_filename(right)
@@ -61,12 +83,28 @@ defmodule AssertValue do
     |> String.rstrip(?\n)
   end
 
+  def create_expected(source_filename, actual, [line: line_number]) do
+    source = read_source(source_filename)
+    line_number_with_offset = line_number + get_line_offset(source_filename, line_number)
+    {prefix, rest} = Enum.split(source, line_number_with_offset - 1)
+    [code_line | suffix] = rest
+    [[indentation]] = Regex.scan(~r/^\s*/, code_line)
+    new_expected = new_expected_from_actual(actual, indentation)
+    File.open!(source_filename, [:write], fn(file) ->
+      IO.puts(file, Enum.join(prefix, "\n"))
+      IO.puts(file, code_line <> " == '''")
+      IO.puts(file, Enum.join(new_expected, "\n"))
+      IO.puts(file, indentation <> "'''")
+      IO.write(file, Enum.join(suffix, "\n"))
+    end)
+    offset = length(new_expected) + 1
+    set_line_offset(source_filename, line_number, offset)
+  end
+
   # Update expected when expected is heredoc
   def update_expected(source_filename, actual, expected, [line: line_number], nil) when is_list(expected) do
     expected = to_lines(expected)
-    source =
-      File.read!(source_filename)
-      |> String.split("\n")
+    source = read_source(source_filename)
     line_number_with_offset = line_number + get_line_offset(source_filename, line_number)
     {prefix, rest} = Enum.split(source, line_number_with_offset)
     heredoc_close_line_number = Enum.find_index(rest, fn(s) ->
@@ -75,10 +113,7 @@ defmodule AssertValue do
     {_, suffix} = Enum.split(rest, heredoc_close_line_number)
     [heredoc_close_line | _] = suffix
     [[indentation]] = Regex.scan(~r/^\s*/, heredoc_close_line)
-    new_expected =
-      actual
-      |> to_lines
-      |> Enum.map(&(indentation <> &1))
+    new_expected = new_expected_from_actual(actual, indentation)
     File.open!(source_filename, [:write], fn(file) ->
       IO.puts(file, Enum.join(prefix, "\n"))
       IO.puts(file, Enum.join(new_expected, "\n"))
@@ -91,6 +126,10 @@ defmodule AssertValue do
   # Update expected when expected is File.read!
   def update_expected(_, actual, _, _, filename) when is_binary(filename) do
     File.write!(filename, actual)
+  end
+
+  defp read_source(filename) do
+    File.read!(filename) |> String.split("\n")
   end
 
   defp to_lines(s) do
@@ -107,6 +146,12 @@ defmodule AssertValue do
     rescue
       MatchError -> nil
     end
+  end
+
+  defp new_expected_from_actual(actual, indentation) do
+    actual
+    |> to_lines
+    |> Enum.map(&(indentation <> &1))
   end
 
 end
