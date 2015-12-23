@@ -1,4 +1,17 @@
 defmodule AssertValue.FileOffsets do
+
+  defmodule App do
+    use Application
+    def start(_type, _args) do
+      import Supervisor.Spec, warn: false
+      children = [
+        worker(AssertValue.FileOffsets, [%{}])
+      ]
+      opts = [strategy: :one_for_one]
+      Supervisor.start_link(children, opts)
+    end
+  end
+
   use GenServer
 
   def start_link(data) do
@@ -31,20 +44,5 @@ defmodule AssertValue.FileOffsets do
 
   def format_status(_reason, [ _pdict, state ]) do
     [data: [{'State', "Saved file offsets: #{inspect state}"}]]
-  end
-end
-
-defmodule AssertValue.FileOffsets.App do
-  use Application
-
-  def start(_type, _args) do
-    import Supervisor.Spec, warn: false
-
-    children = [
-      worker(AssertValue.FileOffsets, [%{}])
-    ]
-    opts = [strategy: :one_for_one]
-
-    Supervisor.start_link(children, opts)
   end
 end
