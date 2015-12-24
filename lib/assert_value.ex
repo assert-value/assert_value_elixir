@@ -134,7 +134,7 @@ defmodule AssertValue do
   defp to_lines(s) do
     s
     |> to_string
-    |> String.rstrip(?\n)
+    |> String.replace(~r/\n$/, "", global: false)
     |> String.split("\n")
   end
 
