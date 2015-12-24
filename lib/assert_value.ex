@@ -6,7 +6,7 @@ defmodule AssertValue do
 
   import AssertValue.FileOffsets, only: [get_line_offset: 2, set_line_offset: 3]
 
-  defmacro assert_value({:actual, meta, nil} = assertion) do
+  defmacro assert_value({_, meta, nil} = assertion) do
     source_filename =  __CALLER__.file
     code = Macro.to_string(assertion)
     expr = Macro.escape(assertion)
