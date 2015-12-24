@@ -5,7 +5,7 @@ defmodule SimpleTest do
 
   test "simple pass test" do
     test_case = prepare_test_case "simple_pass_test.exs"
-    {result, exitcode} = run_test(test_case)
+    {result, exitcode} = run_test_case(test_case)
     assert exitcode == 0
     assert result == """
     .
