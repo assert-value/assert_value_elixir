@@ -38,7 +38,6 @@ defmodule AssertValue do
       right = unquote(right)
       meta  = unquote(meta)
       log_filename = unquote(log_filename)
-      AssertValue.check_expected_form(right, log_filename)
       result = (to_string(left) == to_string(right))
       case result do
         false ->
@@ -56,17 +55,6 @@ defmodule AssertValue do
           end
         _ -> result
       end
-    end
-  end
-
-  def check_expected_form(expected, log_filename) do
-    cond do
-      is_list(expected) and (String.at(inspect(expected), 0) == "'") ->
-        :heredoc
-      is_binary(log_filename) ->
-        :file
-      true ->
-        raise AssertValue.ArgumentError, "Expected should be in the form of heredoc or File.read!"
     end
   end
 
@@ -91,9 +79,9 @@ defmodule AssertValue do
     new_expected = new_expected_from_actual(actual, indentation)
     File.open!(source_filename, [:write], fn(file) ->
       IO.puts(file, Enum.join(prefix, "\n"))
-      IO.puts(file, code_line <> " == '''")
+      IO.puts(file, code_line <> ~S{ == """})
       IO.puts(file, Enum.join(new_expected, "\n"))
-      IO.puts(file, indentation <> "'''")
+      IO.puts(file, indentation <> ~S{"""})
       IO.write(file, Enum.join(suffix, "\n"))
     end)
     offset = length(new_expected) + 1
@@ -101,13 +89,13 @@ defmodule AssertValue do
   end
 
   # Update expected when expected is heredoc
-  def update_expected(source_filename, actual, expected, [line: line_number], nil) when is_list(expected) do
+  def update_expected(source_filename, actual, expected, [line: line_number], nil) when is_binary(expected) do
     expected = to_lines(expected)
     source = read_source(source_filename)
     line_number_with_offset = line_number + get_line_offset(source_filename, line_number)
     {prefix, rest} = Enum.split(source, line_number_with_offset)
     heredoc_close_line_number = Enum.find_index(rest, fn(s) ->
-      s =~ ~r/^\s*'''/
+      s =~ ~r/^\s*"""/
     end)
     {_, suffix} = Enum.split(rest, heredoc_close_line_number)
     [heredoc_close_line | _] = suffix
@@ -125,6 +113,10 @@ defmodule AssertValue do
   # Update expected when expected is File.read!
   def update_expected(_, actual, _, _, filename) when is_binary(filename) do
     File.write!(filename, actual)
+  end
+
+  def update_expected(_, _, _, _, _) do
+    raise AssertValue.ArgumentError, ~S{Expected should be in the form of string heredoc (""") or File.read!}
   end
 
   defp read_source(filename) do

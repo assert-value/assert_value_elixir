@@ -8,10 +8,10 @@ defmodule AssertValue.Diff do
     format_diff :tdiff.diff(a, b)
   end
 
-  defp to_string_list(string_or_char_list) do
-    string_or_char_list
+  defp to_string_list(value) do
+    value
     |> to_string
-    |> String.rstrip(?\n)
+    |> String.replace(~r/\n$/, "", global: false)
     |> String.split("\n")
   end
 
@@ -25,7 +25,7 @@ defmodule AssertValue.Diff do
         end)
       |> List.flatten
       |> Enum.join("\n")
-    (formatted <> "\n") |> to_char_list
+    (formatted <> "\n")
   end
 
 end
