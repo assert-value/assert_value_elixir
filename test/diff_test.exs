@@ -3,7 +3,7 @@ defmodule AssertValue.DiffTest do
 
   import AssertValue.Diff
 
-  test "text_diff char lists" do
+  test "diff" do
     a = """
     aaa
     bbb
@@ -32,8 +32,8 @@ defmodule AssertValue.DiffTest do
     """
   end
 
-  test "text_diff strings" do
-    a = "aaa\nbbb\nccc\nddd\neee\nfff\n"
+  test "char list diff" do
+    a = 'aaa\nbbb\nccc\nddd\neee\nfff\n'
     b = "aaa\nxxx\nddd\neee\nfff\nGGG\n"
     assert diff(a, b) == """
      aaa
