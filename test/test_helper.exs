@@ -3,7 +3,7 @@ ExUnit.start()
 defmodule AssertValue.TestHelpers do
 
   @source_dir Path.expand("tests_src", __DIR__)
-  @target_dir Path.expand("tmp", __DIR__)
+  @target_dir System.tmp_dir!
 
   def prepare_test_case(test_file) do
     source_filename = Path.expand(test_file <> ".src", @source_dir)
