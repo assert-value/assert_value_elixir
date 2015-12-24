@@ -7,25 +7,25 @@ defmodule AssertValueTest do
   import AssertValue
 
   test "prototype pass" do
-    actual = '''
+    actual = """
     aaa
     bbb
-    '''
-    assert_value actual == '''
+    """
+    assert_value actual == """
     aaa
     bbb
-    '''
+    """
   end
 
   test "heredoc and file" do
-    actual = '''
+    actual = """
     aaa
     bbb
     ccc
     ddd
     eee
     fff
-    '''
+    """
     assert_value actual == File.read!(Path.expand("data1.log", __DIR__))
   end
 
@@ -42,34 +42,34 @@ defmodule AssertValueTest do
   end
 
   test "heredoc and heredoc" do
-    actual = '''
+    actual = """
     aaa
     bbb
     ccc
     ddd
     eee
     fff
-    '''
-    assert_value actual == '''
+    """
+    assert_value actual == """
     aaa
     bbb
     cCc
     ddd
     eee
     fff
-    '''
+    """
   end
 
   test "string and heredoc" do
     actual = "aaa\nbbb\nccc\nddd\neee\nfff"
-    assert_value actual == '''
+    assert_value actual == """
     aaa
     bbb
     cCc
     ddd
     eee
     fff
-    '''
+    """
   end
 
   test "wrong expected type" do
