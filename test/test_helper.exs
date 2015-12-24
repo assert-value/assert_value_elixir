@@ -12,8 +12,9 @@ defmodule AssertValue.TestHelpers do
     target_filename
   end
 
-  def run_test(test_case_file) do
-    {output, exitcode} = System.cmd "mix", ["test", test_case_file]
+  def run_test_case(test_case_file, input \\ "") do
+    %Porcelain.Result{out: output, status: exitcode} =
+      Porcelain.exec("mix", ["test", test_case_file], in: input)
     # Serialize output
     output =
       output
