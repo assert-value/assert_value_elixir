@@ -1,7 +1,7 @@
 defmodule AssertValue do
 
   defmodule ArgumentError do
-    defexception [:message]
+    defexception [message: ~S{Expected should be in the form of string heredoc (""") or File.read!}]
   end
 
   import AssertValue.FileOffsets, only: [get_line_offset: 2, set_line_offset: 3]
@@ -38,7 +38,13 @@ defmodule AssertValue do
       right = unquote(right)
       meta  = unquote(meta)
       log_filename = unquote(log_filename)
-      result = (to_string(left) == to_string(right))
+      # If to_sting raises Protocol.UndefinedError then either left
+      # or right is wrong type and cannot be cast to string
+      result = try do
+        (to_string(left) == to_string(right))
+      rescue
+        Protocol.UndefinedError -> raise AssertValue.ArgumentError
+      end
       case result do
         false ->
           answer = AssertValue.prompt_for_action(unquote(code), left, right)
@@ -97,6 +103,8 @@ defmodule AssertValue do
     heredoc_close_line_number = Enum.find_index(rest, fn(s) ->
       s =~ ~r/^\s*"""/
     end)
+    # If heredoc closing line is not found then right argument is a string
+    unless heredoc_close_line_number, do: raise AssertValue.ArgumentError
     {_, suffix} = Enum.split(rest, heredoc_close_line_number)
     [heredoc_close_line | _] = suffix
     [[indentation]] = Regex.scan(~r/^\s*/, heredoc_close_line)
@@ -116,7 +124,7 @@ defmodule AssertValue do
   end
 
   def update_expected(_, _, _, _, _) do
-    raise AssertValue.ArgumentError, ~S{Expected should be in the form of string heredoc (""") or File.read!}
+    raise AssertValue.ArgumentError
   end
 
   defp read_source(filename) do

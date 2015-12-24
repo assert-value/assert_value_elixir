@@ -74,27 +74,27 @@ defmodule AssertValueTest do
 
   test "wrong expected type" do
     actual = "foo"
-    assert_raise AssertValue.ArgumentError, "Expected should be in the form of heredoc or File.read!", fn ->
+    assert_raise AssertValue.ArgumentError, ~S{Expected should be in the form of string heredoc (""") or File.read!}, fn ->
       ExUnit.CaptureIO.capture_io("y\n", fn ->
         assert_value actual == 1
       end)
     end
-    assert_raise AssertValue.ArgumentError, "Expected should be in the form of heredoc or File.read!", fn ->
+    assert_raise AssertValue.ArgumentError, ~S{Expected should be in the form of string heredoc (""") or File.read!}, fn ->
       ExUnit.CaptureIO.capture_io("y\n", fn ->
         assert_value actual == "bar"
       end)
     end
-    assert_raise AssertValue.ArgumentError, "Expected should be in the form of heredoc or File.read!", fn ->
+    assert_raise AssertValue.ArgumentError, ~S{Expected should be in the form of string heredoc (""") or File.read!}, fn ->
       ExUnit.CaptureIO.capture_io("y\n", fn ->
         assert_value actual == []
       end)
     end
-    assert_raise AssertValue.ArgumentError, "Expected should be in the form of heredoc or File.read!", fn ->
+    assert_raise AssertValue.ArgumentError, ~S{Expected should be in the form of string heredoc (""") or File.read!}, fn ->
       ExUnit.CaptureIO.capture_io("y\n", fn ->
         assert_value actual == {}
       end)
     end
-    assert_raise AssertValue.ArgumentError, "Expected should be in the form of heredoc or File.read!", fn ->
+    assert_raise AssertValue.ArgumentError, ~S{Expected should be in the form of string heredoc (""") or File.read!}, fn ->
       ExUnit.CaptureIO.capture_io("y\n", fn ->
         assert_value actual == %{}
       end)
