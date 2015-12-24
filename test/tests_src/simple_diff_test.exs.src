@@ -1,0 +1,19 @@
+defmodule SimpleDiffTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "simple" do
+    actual = """
+    aaa
+    bbb
+    ccc
+    """
+    assert_value actual == """
+    aaa
+    bBb
+    ccc
+    """
+  end
+
+end
