@@ -22,13 +22,13 @@ defmodule SimpleDiffTest do
     Accept new value [y/n]? 
     
       1) test simple (SimpleDiffTest)
-         /tmp/simple_diff_test.exs:6
+         simple_diff_test.exs:6
          AssertValue assertion failed
          code: actual == "aaa\nbBb\nccc\n"
          lhs:  "aaa\nbbb\nccc\n"
          rhs:  "aaa\nbBb\nccc\n"
          stacktrace:
-           /tmp/simple_diff_test.exs:12
+           simple_diff_test.exs:12
     
     
     1 test, 1 failure
