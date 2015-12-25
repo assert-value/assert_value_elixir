@@ -9,10 +9,10 @@ defmodule SimpleDiffTest do
     test_case = prepare_test_case "simple_diff_test.exs"
     {result, exitcode} = run_test_case(test_case, "n\n")
     assert exitcode == 1
-    assert_value result == ~S"""
+    assert_value result == """
     
     <Failed Assertion Message>
-        actual == "aaa\nbBb\nccc\n"
+        actual == \"aaa\\nbBb\\nccc\\n\"
     
      aaa
     -bBb
@@ -24,9 +24,9 @@ defmodule SimpleDiffTest do
       1) test simple (SimpleDiffTest)
          simple_diff_test.exs:6
          AssertValue assertion failed
-         code: actual == "aaa\nbBb\nccc\n"
-         lhs:  "aaa\nbbb\nccc\n"
-         rhs:  "aaa\nbBb\nccc\n"
+         code: actual == \"aaa\\nbBb\\nccc\\n\"
+         lhs:  \"aaa\\nbbb\\nccc\\n\"
+         rhs:  \"aaa\\nbBb\\nccc\\n\"
          stacktrace:
            simple_diff_test.exs:12
     

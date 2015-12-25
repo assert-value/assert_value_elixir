@@ -151,6 +151,13 @@ defmodule AssertValue do
     actual
     |> to_lines
     |> Enum.map(&(indentation <> &1))
+    |> Enum.map(&escape/1)
+  end
+
+  defp escape(s) do
+    s
+    |> inspect
+    |> String.replace(~r/(\A")|("\Z)/, "")
   end
 
 end
