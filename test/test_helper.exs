@@ -37,7 +37,7 @@ defmodule AssertValue.TestHelpers do
     @log_dir
   end
 
-  def test_case_filenames(test_source_filename) do
+  defp test_case_filenames(test_source_filename) do
     source_filename = Path.expand(test_source_filename <> ".src", @source_dir)
     target_filename = Path.expand(test_source_filename, @target_dir)
     {source_filename, target_filename}
@@ -64,6 +64,13 @@ defmodule AssertValue.TestHelpers do
 
   defp test_log_filename_with_path(test_source_filename) do
     Path.expand(test_source_filename <> ".log", @log_dir)
+  end
+
+  def test_source_diff(test_source_filename) do
+    {original_file, updated_file} = test_case_filenames(test_source_filename)
+    original_source = File.read!(original_file)
+    updated_source = File.read!(updated_file)
+    AssertValue.Diff.diff(original_source, updated_source)
   end
 
 end
