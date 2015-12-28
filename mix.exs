@@ -16,7 +16,7 @@ defmodule AssertValue.Mixfile do
   def application do
     [
       applications: [:porcelain],
-      mod: {AssertValue.FileOffsets.App, []}
+      mod: {AssertValue.TestSourceChanges.App, []}
     ]
   end
 
