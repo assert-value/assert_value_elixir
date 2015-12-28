@@ -2,7 +2,6 @@ defmodule SimpleDiffTest do
   use ExUnit.Case
 
   import AssertValue
-
   import AssertValue.TestHelpers
 
   test "simple diff test" do
