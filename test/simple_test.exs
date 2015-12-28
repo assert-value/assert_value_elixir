@@ -5,14 +5,10 @@ defmodule SimpleTest do
   import AssertValue.TestHelpers
 
   test "simple pass test" do
-    test_filename = "simple_pass_test.exs"
-    log_filename_with_path = test_filename |> test_log_filename_with_path
-    {result, exitcode} =
-      test_filename
-      |> prepare_test_case
-      |> run_test_case
+    {result, exitcode, log_filename} =
+      prepare_and_run_test_case("simple_pass_test.exs")
     assert exitcode == 0
-    assert_value result == File.read!(log_filename_with_path)
+    assert_value result == File.read!(log_filename)
   end
 
 end

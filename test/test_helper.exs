@@ -24,14 +24,23 @@ defmodule AssertValue.TestHelpers do
   @target_dir AssertValue.Tempfile.mktemp_dir("assert-value-")
   @log_dir Path.expand("tests_log", __DIR__)
 
-  def prepare_test_case(test_file) do
+  def prepare_and_run_test_case(test_filename, input \\ "") do
+    log_filename_with_path = test_filename |> test_log_filename_with_path
+    {result, exitcode} =
+      test_filename
+      |> prepare_test_case
+      |> run_test_case(input)
+    {result, exitcode, log_filename_with_path}
+  end
+
+  defp prepare_test_case(test_file) do
     source_filename = Path.expand(test_file <> ".src", @source_dir)
     target_filename = Path.expand(test_file, @target_dir)
     File.cp!(source_filename, target_filename)
     target_filename
   end
 
-  def run_test_case(test_case_file, input \\ "") do
+  defp run_test_case(test_case_file, input) do
     %Porcelain.Result{out: output, status: exitcode} =
       Porcelain.exec("mix", ["test", test_case_file], in: input)
     # Serialize output
@@ -43,7 +52,7 @@ defmodule AssertValue.TestHelpers do
     {output, exitcode}
   end
 
-  def test_log_filename_with_path(test_source_filename) do
+  defp test_log_filename_with_path(test_source_filename) do
     Path.expand(test_source_filename <> ".log", @log_dir)
   end
 
