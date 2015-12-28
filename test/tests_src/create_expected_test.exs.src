@@ -1,0 +1,15 @@
+defmodule CreateExpectedTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "create expected" do
+    value = """
+    aaa
+    bbb
+    ccc
+    """
+    assert_value value
+  end
+
+end

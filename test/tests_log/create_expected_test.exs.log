@@ -1,0 +1,11 @@
+
+<Failed Assertion Message>
+    value
+
+-
++aaa
++bbb
++ccc
+
+Accept new value [y/n]? .
+1 test, 0 failures
