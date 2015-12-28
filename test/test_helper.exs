@@ -23,6 +23,7 @@ defmodule AssertValue.TestHelpers do
 
   @source_dir Path.expand("tests_src", __DIR__)
   @target_dir AssertValue.Tempfile.mktemp_dir("assert-value-")
+  @log_dir Path.expand("tests_log", __DIR__)
 
   def prepare_test_case(test_file) do
     source_filename = Path.expand(test_file <> ".src", @source_dir)
@@ -41,6 +42,10 @@ defmodule AssertValue.TestHelpers do
       |> String.replace(~r/\nFinished in.*\n/m, "")
       |> String.replace(~r/\nRandomized with seed.*\n/m, "")
     {output, exitcode}
+  end
+
+  def test_log_filename_with_path(test_source_filename) do
+    Path.expand(test_source_filename <> ".log", @log_dir)
   end
 
 end
