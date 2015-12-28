@@ -7,8 +7,7 @@ defmodule AssertValue.Tempfile do
     name
   end
 
-  # This function ispired by ruby's tmpname (ruby/lib/tmpdir.rb)
-  # and elixir Plug's upload.ex
+  # Inspired by ruby's tmpname (ruby/lib/tmpdir.rb) and elixir Plug's upload.ex
   defp generate_tmpname(prefix, suffix) do
     {_mega, sec, micro} = :os.timestamp
     pid = :os.getpid
