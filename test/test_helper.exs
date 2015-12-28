@@ -24,18 +24,28 @@ defmodule AssertValue.TestHelpers do
   @target_dir AssertValue.Tempfile.mktemp_dir("assert-value-")
   @log_dir Path.expand("tests_log", __DIR__)
 
-  def prepare_and_run_test_case(test_filename, input \\ "") do
-    log_filename_with_path = test_filename |> test_log_filename_with_path
+  def prepare_and_run_test_case(test_source_filename, input \\ "") do
+    log_filename_with_path = test_source_filename |> test_log_filename_with_path
     {result, exitcode} =
-      test_filename
+      test_source_filename
       |> prepare_test_case
       |> run_test_case(input)
     {result, exitcode, log_filename_with_path}
   end
 
-  defp prepare_test_case(test_file) do
-    source_filename = Path.expand(test_file <> ".src", @source_dir)
-    target_filename = Path.expand(test_file, @target_dir)
+  def log_dir do
+    @log_dir
+  end
+
+  def test_case_filenames(test_source_filename) do
+    source_filename = Path.expand(test_source_filename <> ".src", @source_dir)
+    target_filename = Path.expand(test_source_filename, @target_dir)
+    {source_filename, target_filename}
+  end
+
+  defp prepare_test_case(test_source_filename) do
+    {source_filename, target_filename} =
+      test_case_filenames(test_source_filename)
     File.cp!(source_filename, target_filename)
     target_filename
   end

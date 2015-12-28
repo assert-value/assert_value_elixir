@@ -1,0 +1,20 @@
+ defmodule UpdateExpectedTest do
+   use ExUnit.Case
+ 
+   import AssertValue
+ 
+   test "update_expected" do
+     actual = """
+     aaa
+     bbb
+     ccc
+     """
+     assert_value actual == """
+     aaa
+-    bBb
++    bbb
+     ccc
+     """
+   end
+ 
+ end
