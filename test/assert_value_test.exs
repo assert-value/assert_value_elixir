@@ -1,4 +1,4 @@
-defmodule SimpleTest do
+defmodule AssertValueTest do
   use ExUnit.Case
 
   import AssertValue
