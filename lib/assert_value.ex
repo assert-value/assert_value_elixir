@@ -4,8 +4,6 @@ defmodule AssertValue do
     defexception [message: ~S{Expected should be in the form of string heredoc (""") or File.read!}]
   end
 
-  import AssertValue.FileOffsets, only: [get_line_offset: 2, set_line_offset: 3]
-
   defmacro assert_value({_, meta, nil} = assertion) do
     source_filename =  __CALLER__.file
     code = Macro.to_string(assertion)
@@ -79,7 +77,8 @@ defmodule AssertValue do
 
   def create_expected(source_filename, actual, [line: line_number]) do
     source = read_source(source_filename)
-    line_number_with_offset = line_number + get_line_offset(source_filename, line_number)
+    line_number_with_offset =
+      line_number + AssertValue.FileOffsets.get_line_offset(source_filename, line_number)
     {prefix, rest} = Enum.split(source, line_number_with_offset - 1)
     [code_line | suffix] = rest
     [[indentation]] = Regex.scan(~r/^\s*/, code_line)
@@ -92,14 +91,15 @@ defmodule AssertValue do
       IO.write(file, Enum.join(suffix, "\n"))
     end)
     offset = length(new_expected) + 1
-    set_line_offset(source_filename, line_number, offset)
+    AssertValue.FileOffsets.set_line_offset(source_filename, line_number, offset)
   end
 
   # Update expected when expected is heredoc
   def update_expected(source_filename, actual, expected, [line: line_number], nil) when is_binary(expected) do
     expected = to_lines(expected)
     source = read_source(source_filename)
-    line_number_with_offset = line_number + get_line_offset(source_filename, line_number)
+    line_number_with_offset =
+      line_number + AssertValue.FileOffsets.get_line_offset(source_filename, line_number)
     {prefix, rest} = Enum.split(source, line_number_with_offset)
     heredoc_close_line_number = Enum.find_index(rest, fn(s) ->
       s =~ ~r/^\s*"""/
@@ -116,7 +116,7 @@ defmodule AssertValue do
       IO.write(file, Enum.join(suffix, "\n"))
     end)
     offset = length(new_expected) - length(expected)
-    set_line_offset(source_filename, line_number, offset)
+    AssertValue.FileOffsets.set_line_offset(source_filename, line_number, offset)
   end
 
   # Update expected when expected is File.read!
