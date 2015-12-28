@@ -34,10 +34,11 @@ defmodule AssertValue do
     code = Macro.to_string(assertion)
     expr = Macro.escape(assertion)
     quote do
+      log_filename = unquote(log_filename)
+      AssertValue.create_log_file_if_needed(log_filename)
       left  = unquote(left)
       right = unquote(right)
       meta  = unquote(meta)
-      log_filename = unquote(log_filename)
       # If to_sting raises Protocol.UndefinedError then either left
       # or right is wrong type and cannot be cast to string
       result = try do
@@ -144,6 +145,15 @@ defmodule AssertValue do
       filename
     rescue
       MatchError -> nil
+    end
+  end
+
+  def create_log_file_if_needed(filename) do
+    case filename do
+      nil ->
+        false
+       _  ->
+        File.touch!(filename)
     end
   end
 
