@@ -161,10 +161,13 @@ defmodule AssertValue do
     actual
     |> to_lines
     |> Enum.map(&(indentation <> &1))
-    |> Enum.map(&escape/1)
+    |> Enum.map(&escape_string/1)
   end
 
-  defp escape(s) do
+  # Inspect protocol for String has the best implementation
+  # of string escaping. Use it, but remove leading and trailing ?"
+  # See https://github.com/elixir-lang/elixir/blob/master/lib/elixir/lib/inspect.ex
+  defp escape_string(s) do
     s
     |> inspect
     |> String.replace(~r/(\A")|("\Z)/, "")
