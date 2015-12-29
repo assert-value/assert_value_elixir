@@ -7,6 +7,8 @@ defmodule AssertValue.Mixfile do
      elixir: "~> 1.1",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     description: description,
+     package: package,
      deps: deps]
   end
 
@@ -29,5 +31,17 @@ defmodule AssertValue.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [{:porcelain, "~> 2.0", only: :test}]
+  end
+
+  defp description do
+    "Checks that two values are same and \"magically\" replaces expected value " <>
+    "with the actual in case the new behavior (and new actual value) is correct."
+  end
+
+  defp package do
+    [files: ["config", "lib", "src", "test", "mix.exs", "README.md", "LICENSE"],
+     maintainers: ["Serge Smetana", "Gleb Arshinov"],
+     licenses: ["MIT"],
+     links: %{"GitHub" => "https://github.com/acunote/assert_value_elixir"}]
   end
 end
