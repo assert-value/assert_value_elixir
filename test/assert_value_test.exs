@@ -12,28 +12,8 @@ defmodule AssertValueTest do
     :ok
   end
 
-  test "simple_pass_test.exs" do
-    run_integration_test(__ENV__, "", 0)
-  end
-
-  test "simple_diff_test.exs" do
-    run_integration_test(__ENV__, "n\n", 1)
-  end
-
-  test "update_expected_test.exs" do
-    run_integration_test(__ENV__, "y\n", 0)
-  end
-
-  test "create_expected_test.exs" do
-    run_integration_test(__ENV__, "y\n", 0)
-  end
-
-  test "create_expected_when_left_argument_is_a_string_test.exs" do
-    run_integration_test(__ENV__, "y\n", 0)
-  end
-
-  test "big_integration_test.exs" do
-    run_integration_test(__ENV__, "y\ny\n\y\ny\ny\n", 0)
+  test "integration_test.exs" do
+    run_integration_test(__ENV__, "n\ny\ny\ny\n", 1)
   end
 
   test "update_file_test.exs" do
@@ -78,7 +58,7 @@ defmodule AssertValueTest do
 
     # run the test
     %Porcelain.Result{out: output, status: exitcode} =
-      Porcelain.exec("mix", ["test", runnable_path],
+      Porcelain.exec("mix", ["test", "--seed", "0", runnable_path],
                      in: responses)
     # canonicalize output
     output =

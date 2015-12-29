@@ -1,0 +1,63 @@
+defmodule IntegrationTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "simple pass test" do
+    actual = """
+    aaa
+    bbb
+    """
+    assert_value actual == """
+    aaa
+    bbb
+    """
+  end
+
+  test "simple fail test" do
+    actual = """
+    aaa
+    bbb
+    ccc
+    """
+    assert_value actual == """
+    aaa
+    bBb
+    ccc
+    """
+  end
+
+  test "create expected" do
+    value = """
+    aaa
+     bbb
+      ccc
+    """
+    assert_value value == """
+    aaa
+     bbb
+      ccc
+    """
+  end
+
+  test "update_expected" do
+    actual = """
+     3
+     4
+     5
+    """
+    assert_value actual == """
+     3
+     4
+     5
+    """
+  end
+
+  test "create expected from string" do
+    assert_value "foo\nbar" == """
+    foo
+    bar
+    """
+  end
+
+end

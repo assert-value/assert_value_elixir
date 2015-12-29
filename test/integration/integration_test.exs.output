@@ -1,0 +1,57 @@
+.
+<Failed Assertion Message>
+    actual == "aaa\nbBb\nccc\n"
+
+ aaa
+-bBb
++bbb
+ ccc
+
+Accept new value [y/n]? 
+
+  1) test simple fail test (IntegrationTest)
+     integration_test.exs:17
+     AssertValue assertion failed
+     code: actual == "aaa\nbBb\nccc\n"
+     lhs:  "aaa\nbbb\nccc\n"
+     rhs:  "aaa\nbBb\nccc\n"
+     stacktrace:
+       integration_test.exs:23
+
+
+<Failed Assertion Message>
+    value
+
+-
++aaa
++ bbb
++  ccc
+
+Accept new value [y/n]? .
+<Failed Assertion Message>
+    actual == "-1\n  0\n   1\n  2\n 3\n 4\n 5\n  6\n   7\n  8\n 9\n  0\n   1\n"
+
+--1
+-  0
+-   1
+-  2
+  3
+  4
+  5
+-  6
+-   7
+-  8
+- 9
+-  0
+-   1
+
+Accept new value [y/n]? .
+<Failed Assertion Message>
+    "foo\nbar"
+
+-
++foo
++bar
+
+Accept new value [y/n]? .
+5 tests, 1 failure
