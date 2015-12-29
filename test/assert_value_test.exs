@@ -38,7 +38,6 @@ defmodule AssertValueTest do
     assert_value File.read!(file_runnable_path) == File.read!(file_after_path)
   end
 
-
   # For each test we:
   # * launch a child `mix test our_integration_test.exs`
   # * accept or reject assert_value changes when prompted

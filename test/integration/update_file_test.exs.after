@@ -3,7 +3,7 @@ defmodule UpdateFileTest do
 
   import AssertValue
 
-  test "update_expected" do
+  test "update_file" do
     actual = """
     aaa
     bbb
