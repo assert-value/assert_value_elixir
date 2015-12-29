@@ -16,13 +16,7 @@ defmodule AssertValue do
       left  = unquote(left)
       right = unquote(right)
       meta  = unquote(meta)
-      # If to_sting raises Protocol.UndefinedError then either left
-      # or right is wrong type and cannot be cast to string
-      result = try do
-        (to_string(left) == to_string(right))
-      rescue
-        Protocol.UndefinedError -> raise AssertValue.ArgumentError
-      end
+      result = (AssertValue.canonicalize(left) == AssertValue.canonicalize(right))
       case result do
         false ->
           answer = AssertValue.prompt_for_action(unquote(code), left, right)
@@ -142,14 +136,25 @@ defmodule AssertValue do
     raise AssertValue.ArgumentError
   end
 
+  def canonicalize(arg) do
+    # If to_sting raises Protocol.UndefinedError then arg is wrong type
+    # and cannot be cast to string
+    try do
+      arg
+      |> to_string
+      |> String.replace(~r/\n$/, "", global: false)
+    rescue
+      Protocol.UndefinedError -> raise AssertValue.ArgumentError
+    end
+  end
+
   defp read_source(filename) do
     File.read!(filename) |> String.split("\n")
   end
 
-  defp to_lines(s) do
-    s
-    |> to_string
-    |> String.replace(~r/\n$/, "", global: false)
+  defp to_lines(arg) do
+    arg
+    |> canonicalize
     |> String.split("\n")
   end
 

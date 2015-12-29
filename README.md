@@ -30,14 +30,14 @@ It is better to start with no expected value
 import AssertValue
 
 test "fresh start" do
-  assert_value "foo\n"
+  assert_value "foo"
 end
 ```
 Then run your tests as usual with "mix test".
 As a result you will see diff between expected and actual values:
 ```
 <Failed Assertion Message>
-    "foo\n"
+    "foo"
 
 -
 +foo
@@ -47,7 +47,7 @@ Accept new value [y/n]?
 If you accept the new value your test will be automatically modified to
 ```elixir
 test "fresh start" do
-  assert_value "foo\n" == """
+  assert_value "foo" == """
   foo
   """
 end
