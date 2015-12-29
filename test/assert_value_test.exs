@@ -18,21 +18,17 @@ defmodule AssertValueTest do
      ["update_expected_test.exs", "y\n", 0],
      ["create_expected_test.exs", "y\n", 0]] |>
       Enum.each(fn([basename, responses, expected_exit_code]) ->
-        before_filename =
-          Path.expand(basename <> ".before", integration_test_dir)
-        after_filename =
-          Path.expand(basename <> ".after", integration_test_dir)
-        output_filename =
-          Path.expand(basename <> ".output", integration_test_dir)
+        before_path = Path.expand(basename <> ".before", integration_test_dir)
+        after_path = Path.expand(basename <> ".after", integration_test_dir)
+        output_path = Path.expand(basename <> ".output", integration_test_dir)
 
         # copy the test to a temp dir for running
-        runnable_filename =
-          Path.expand(basename, runnable_test_dir)
-        File.cp!(before_filename, runnable_filename)
+        runnable_path = Path.expand(basename, runnable_test_dir)
+        File.cp!(before_path, runnable_path)
 
         # run the test
         %Porcelain.Result{out: output, status: exitcode} =
-          Porcelain.exec("mix", ["test", runnable_filename],
+          Porcelain.exec("mix", ["test", runnable_path],
                          in: responses)
         # canonicalize output
         output =
@@ -43,10 +39,8 @@ defmodule AssertValueTest do
 
         # compare the results
         assert exitcode == expected_exit_code
-        assert_value output
-          == File.read!(output_filename)
-        assert_value File.read!(runnable_filename)
-          == File.read!(after_filename)
+        assert_value output == File.read!(output_path)
+        assert_value File.read!(runnable_path) == File.read!(after_path)
       end)
   end
 
