@@ -1,0 +1,15 @@
+defmodule CreateFileTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "create_file" do
+    actual = """
+    aaa
+    bbb
+    ccc
+    """
+    assert_value actual == File.read!(Path.expand("file_to_create", __DIR__))
+  end
+
+end
