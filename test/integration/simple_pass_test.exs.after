@@ -1,17 +1,17 @@
- defmodule SimplePassTest do
-   use ExUnit.Case
- 
-   import AssertValue
- 
-   test "simple" do
-     actual = """
-     aaa
-     bbb
-     """
-     assert_value actual == """
-     aaa
-     bbb
-     """
-   end
- 
- end
+defmodule SimplePassTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "simple" do
+    actual = """
+    aaa
+    bbb
+    """
+    assert_value actual == """
+    aaa
+    bbb
+    """
+  end
+
+end

@@ -1,20 +1,19 @@
- defmodule CreateExpectedTest do
-   use ExUnit.Case
- 
-   import AssertValue
- 
-   test "create expected" do
-     value = """
-     aaa
-     bbb
-     ccc
-     """
--    assert_value value
-+    assert_value value == """
-+    aaa
-+    bbb
-+    ccc
-+    """
-   end
- 
- end
+defmodule CreateExpectedTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "create expected" do
+    value = """
+    aaa
+    bbb
+    ccc
+    """
+    assert_value value == """
+    aaa
+    bbb
+    ccc
+    """
+  end
+
+end
