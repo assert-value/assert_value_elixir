@@ -20,7 +20,7 @@ defmodule AssertValueTest do
           prepare_and_run_test_case(test_source_filename, responses)
         assert exitcode == expected_exit_code
         assert_value result == File.read!(log_filename)
-        diff_log = basename <> "_diff.log" |> Path.expand(log_dir)
+        diff_log = basename <> "_diff.log" |> Path.expand(integration_tests_dir)
         assert_value test_source_diff(test_source_filename)
         == File.read!(diff_log)
       end)

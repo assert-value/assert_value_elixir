@@ -20,9 +20,8 @@ defmodule AssertValue.TestHelpers do
 
   require AssertValue.Tempfile
 
-  @source_dir Path.expand("tests_src", __DIR__)
+  @integration_tests_dir Path.expand("integration", __DIR__)
   @target_dir AssertValue.Tempfile.mktemp_dir("assert-value-")
-  @log_dir Path.expand("tests_log", __DIR__)
 
   def prepare_and_run_test_case(test_source_filename, input \\ "") do
     log_filename_with_path = test_source_filename |> test_log_filename_with_path
@@ -33,12 +32,12 @@ defmodule AssertValue.TestHelpers do
     {result, exitcode, log_filename_with_path}
   end
 
-  def log_dir do
-    @log_dir
+  def integration_tests_dir do
+    @integration_tests_dir
   end
 
   defp test_case_filenames(test_source_filename) do
-    source_filename = Path.expand(test_source_filename <> ".src", @source_dir)
+    source_filename = Path.expand(test_source_filename <> ".src", @integration_tests_dir)
     target_filename = Path.expand(test_source_filename, @target_dir)
     {source_filename, target_filename}
   end
@@ -63,7 +62,7 @@ defmodule AssertValue.TestHelpers do
   end
 
   defp test_log_filename_with_path(test_source_filename) do
-    Path.expand(test_source_filename <> ".log", @log_dir)
+    Path.expand(test_source_filename <> ".log", @integration_tests_dir)
   end
 
   def test_source_diff(test_source_filename) do
