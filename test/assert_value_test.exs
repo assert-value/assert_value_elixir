@@ -28,6 +28,10 @@ defmodule AssertValueTest do
     run_integration_test(__ENV__, "y\n", 0)
   end
 
+  test "big_integration_test.exs" do
+    run_integration_test(__ENV__, "y\ny\n\y\ny\ny\n", 0)
+  end
+
   test "update_file_test.exs" do
     filename = "file_to_update"
     file_before_path = Path.expand(filename <> ".before", @integration_test_dir)
@@ -47,7 +51,6 @@ defmodule AssertValueTest do
     assert File.exists?(file_runnable_path)
     assert_value File.read!(file_runnable_path) == File.read!(file_after_path)
   end
-
 
   # For each test we:
   # * launch a child `mix test our_integration_test.exs`

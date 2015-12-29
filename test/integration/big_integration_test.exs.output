@@ -1,0 +1,60 @@
+
+<Failed Assertion Message>
+    actual
+
+-
++aaa
++bbb
++ccc
+
+Accept new value [y/n]? 
+<Failed Assertion Message>
+    actual == "aaa\nccc\n"
+
+ aaa
+-ccc
++bbb
+
+Accept new value [y/n]? 
+<Failed Assertion Message>
+    actual == "0\n1\n2\n6\n7\n8\n"
+
+-0
+ 1
+ 2
++3
++4
++5
+ 6
+ 7
+ 8
++9
++0
+
+Accept new value [y/n]? 
+<Failed Assertion Message>
+    actual == "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n"
+
+-0
+-1
+-2
+-3
+-4
+ 5
+ 6
+ 7
+-8
+-9
+-10
+
+Accept new value [y/n]? 
+<Failed Assertion Message>
+    actual == "aaa\nbBb\nccc\n"
+
+ aaa
+-bBb
++bbb
+ ccc
+
+Accept new value [y/n]? .
+1 test, 0 failures
