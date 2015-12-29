@@ -7,6 +7,11 @@ defmodule AssertValueTest do
   @integration_test_dir Path.expand("integration", __DIR__)
   @runnable_test_dir AssertValue.Tempfile.mktemp_dir("assert-value-")
 
+  setup_all do
+    on_exit fn -> File.rm_rf!(@runnable_test_dir) end
+    :ok
+  end
+
   test "simple_pass_test.exs" do
     run_integration_test(__ENV__, "", 0)
   end
