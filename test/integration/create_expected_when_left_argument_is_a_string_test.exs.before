@@ -1,0 +1,10 @@
+defmodule CreateExpectedWhenLeftArgumentIsAStringTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "create expected" do
+    assert_value "foo\nbar"
+  end
+
+end

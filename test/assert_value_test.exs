@@ -28,6 +28,10 @@ defmodule AssertValueTest do
     run_integration_test(__ENV__, "y\n", 0)
   end
 
+  test "create_expected_when_left_argument_is_a_string_test.exs" do
+    run_integration_test(__ENV__, "y\n", 0)
+  end
+
   test "big_integration_test.exs" do
     run_integration_test(__ENV__, "y\ny\n\y\ny\ny\n", 0)
   end

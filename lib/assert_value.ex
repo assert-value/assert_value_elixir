@@ -4,28 +4,7 @@ defmodule AssertValue do
     defexception [message: ~S{Expected should be in the form of string heredoc (""") or File.read!}]
   end
 
-  defmacro assert_value({_, meta, nil} = assertion) do
-    source_filename =  __CALLER__.file
-    code = Macro.to_string(assertion)
-    expr = Macro.escape(assertion)
-    quote do
-      left = unquote(assertion)
-      meta = unquote(meta)
-      answer = AssertValue.prompt_for_action(unquote(code), left, nil)
-      case answer do
-        "y" ->
-          AssertValue.create_expected(unquote(source_filename), left, meta)
-         _  ->
-            raise ExUnit.AssertionError, [
-              left: left,
-              expr: unquote(expr),
-              message: "AssertValue assertion failed"
-            ]
-      end
-      left
-    end
-  end
-
+  # Assertions with right argument like "assert_value actual == expected"
   defmacro assert_value({:==, meta, [left, right]} = assertion) do
     source_filename =  __CALLER__.file
     log_filename = try_to_parse_filename(right)
@@ -60,6 +39,39 @@ defmodule AssertValue do
           end
         _ -> result
       end
+    end
+  end
+
+  # Assertions without right argument like (assert_value "foo")
+  defmacro assert_value(assertion) do
+    meta =
+      case is_binary(assertion) do
+        true ->
+          # left argument is a string (assert_value "foo")
+          [line: __CALLER__.line]
+        false ->
+          # left argument is variable (assert_value myvar)
+          {_, meta, nil} = assertion
+          meta
+      end
+    source_filename =  __CALLER__.file
+    code = Macro.to_string(assertion)
+    expr = Macro.escape(assertion)
+    quote do
+      left = unquote(assertion)
+      meta = unquote(meta)
+      answer = AssertValue.prompt_for_action(unquote(code), left, nil)
+      case answer do
+        "y" ->
+          AssertValue.create_expected(unquote(source_filename), left, meta)
+         _  ->
+            raise ExUnit.AssertionError, [
+              left: left,
+              expr: unquote(expr),
+              message: "AssertValue assertion failed"
+            ]
+      end
+      left
     end
   end
 
