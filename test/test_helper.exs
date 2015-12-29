@@ -1,3 +1,4 @@
+Porcelain.App.start(:normal, [])
 ExUnit.start()
 
 defmodule AssertValue.Tempfile do

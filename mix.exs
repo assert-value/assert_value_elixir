@@ -14,10 +14,8 @@ defmodule AssertValue.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [
-      applications: [:porcelain],
-      mod: {AssertValue.TestSourceChanges.App, []}
-    ]
+    [ applications: [],
+      mod: {AssertValue.TestSourceChanges.App, []}]
   end
 
   # Dependencies can be Hex packages:
@@ -30,6 +28,6 @@ defmodule AssertValue.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:porcelain, "~> 2.0"}]
+    [{:porcelain, "~> 2.0", only: :test}]
   end
 end
