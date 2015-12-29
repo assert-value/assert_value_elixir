@@ -1,0 +1,15 @@
+defmodule UpdateFileTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "update_expected" do
+    actual = """
+    aaa
+    bbb
+    ccc
+    """
+    assert_value actual == File.read!(Path.expand("file_to_update", __DIR__))
+  end
+
+end
