@@ -40,7 +40,7 @@ defmodule IntegrationTest do
     """
   end
 
-  test "update_expected" do
+  test "update expected" do
     actual = """
      3
      4
@@ -58,6 +58,24 @@ defmodule IntegrationTest do
     foo
     bar
     """
+  end
+
+  test "create file" do
+    actual = """
+    aaa
+    bbb
+    ccc
+    """
+    assert_value actual == File.read!(Path.expand("file_to_create", __DIR__))
+  end
+
+  test "update file" do
+    actual = """
+    aaa
+    bbb
+    ccc
+    """
+    assert_value actual == File.read!(Path.expand("file_to_update", __DIR__))
   end
 
 end

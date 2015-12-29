@@ -54,4 +54,22 @@ Accept new value [y/n]? .
 +bar
 
 Accept new value [y/n]? .
-5 tests, 1 failure
+<Failed Assertion Message>
+    actual == File.read!(Path.expand("file_to_create", __DIR__))
+
+-
++aaa
++bbb
++ccc
+
+Accept new value [y/n]? .
+<Failed Assertion Message>
+    actual == File.read!(Path.expand("file_to_update", __DIR__))
+
+ aaa
+-bBb
++bbb
+ ccc
+
+Accept new value [y/n]? .
+7 tests, 1 failure
