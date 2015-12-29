@@ -22,17 +22,13 @@ end
 
 ## Usage
 
-Import AssertValue module into your test case:
-
-```elixir
-import AssertValue
-```
-
 ### Testing String Values
 
 It is better to start with no expected value
 
 ```elixir
+import AssertValue
+
 test "fresh start" do
   assert_value "foo\n"
 end
@@ -50,9 +46,11 @@ Accept new value [y/n]?
 ```
 If you accept the new value your test will be automatically modified to
 ```elixir
-assert_value "foo\n" == """
-foo
-"""
+test "fresh start" do
+  assert_value "foo\n" == """
+  foo
+  """
+end
 ```
 
 ## License
