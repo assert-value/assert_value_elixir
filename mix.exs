@@ -30,6 +30,6 @@ defmodule AssertValue.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:porcelain, "~> 2.0"}]
+    [{:porcelain, "~> 2.0", only: :test}]
   end
 end
