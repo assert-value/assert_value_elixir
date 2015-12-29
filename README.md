@@ -1,19 +1,25 @@
-# AssertValue
+# assert_value
 
-**TODO: Add description**
+Checks that two values are same and "magically" replaces expected value
+with the actual in case the new behavior (and new actual value) is correct.
+
+For now supports two kind of expected arguments: string heredoc or file
+
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
+Add AssertValue as a dependency to your Mix project:
 
-  1. Add assert_value to your list of dependencies in `mix.exs`:
+```elixir
+def application do
+  [applications: [:assert_value]]
+end
 
-        def deps do
-          [{:assert_value, "~> 0.0.1"}]
-        end
+defp deps do
+  [{:assert_value, "~> 0.0.1"}]
+end
+```
 
-  2. Ensure assert_value is started before your application:
+## Usage
 
-        def application do
-          [applications: [:assert_value]]
-        end
+**TODO: Add usage**
