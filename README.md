@@ -55,6 +55,18 @@ test "fresh start" do
 end
 ```
 
+### Testing Values Stored in Files
+
+Sometimes test string is too large to be inlined into the test source.
+Put it into the file instead.
+
+```elixir
+assert_value "foo" == File.read!("test/log/reference.txt")
+```
+AssertValue is smart enough to recognize File.read! and will update file contents
+instead of test source. If file does not exists it will be created and no error
+will be raised despite default File.read! behaviour.
+
 ## License
 
 This software is licensed under [the MIT license](LICENSE).
