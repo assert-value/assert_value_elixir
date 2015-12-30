@@ -23,7 +23,7 @@ defmodule AssertValueTest do
     basename = "integration_test.exs"
     before_path = Path.expand(basename <> ".before", @integration_test_dir)
     after_path = Path.expand(basename <> ".after", @integration_test_dir)
-    output_path = Path.expand(basename <> ".output", @integration_test_dir)
+    before_output_path = Path.expand(basename <> ".before.output", @integration_test_dir)
 
     # copy the test to a temp dir for running
     runnable_path = Path.expand(basename, @runnable_test_dir)
@@ -46,20 +46,34 @@ defmodule AssertValueTest do
     %Porcelain.Result{out: output, status: exitcode} =
       Porcelain.exec("mix", ["test", "--seed", "0", runnable_path], in: "n\ny\ny\ny\ny\ny\n")
 
-    # canonicalize output
-    output =
-      output
-    |> String.replace(~r{\/tmp\/assert-value-\d+-\d+-\w+/}, "")
-    |> String.replace(~r/\nFinished in.*\n/m, "")
-    |> String.replace(~r/\nRandomized with seed.*\n/m, "")
+    output = output |> canonicalize_test_output
 
     # compare the results
     assert exitcode == 1 # One fail
-    assert_value output == File.read!(output_path)
+    assert_value output == File.read!(before_output_path)
     assert_value File.read!(runnable_path) == File.read!(after_path)
 
     assert_value File.read!(file_to_create_runnable_path) == File.read!(file_to_create_after_path)
     assert_value File.read!(file_to_update_runnable_path) == File.read!(file_to_update_after_path)
+
+    # run result test file again
+    # It have one diff left from the first run and should pass ater accepting result
+    %Porcelain.Result{out: output, status: exitcode} =
+      Porcelain.exec("mix", ["test", "--seed", "0", runnable_path], in: "y\n")
+
+    output = output |> canonicalize_test_output
+
+    # Compare result
+    assert exitcode == 0
+    after_output_path = Path.expand(basename <> ".after.output", @integration_test_dir)
+    assert_value output == File.read!(after_output_path)
+  end
+
+  defp canonicalize_test_output(output) do
+    output
+    |> String.replace(~r{\/tmp\/assert-value-\d+-\d+-\w+/}, "")
+    |> String.replace(~r/\nFinished in.*\n/m, "")
+    |> String.replace(~r/\nRandomized with seed.*\n/m, "")
   end
 
 end
