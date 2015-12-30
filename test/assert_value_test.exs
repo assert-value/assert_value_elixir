@@ -42,9 +42,18 @@ defmodule AssertValueTest do
     file_to_update_runnable_path = Path.expand(file_to_update_name, @runnable_test_dir)
     File.cp!(file_to_update_before_path, file_to_update_runnable_path)
 
+    # extract expected assert_value prompt responses from the test.
+    # We look for lines like '# prompt: y'
+    prompt_responses =
+      Regex.scan(~r/# prompt: (.)/, File.read!(runnable_path))
+    |> Enum.map(fn([_, x]) -> x end)
+    |>  Enum.join("\n")
+    prompt_responses = prompt_responses <> "\n"
+
     # run the test
     %Porcelain.Result{out: output, status: exitcode} =
-      Porcelain.exec("mix", ["test", "--seed", "0", runnable_path], in: "n\ny\ny\ny\ny\ny\ny\ny\n")
+      Porcelain.exec("mix", ["test", "--seed", "0", runnable_path],
+                     in: prompt_responses)
 
     # canonicalize output
     output =
