@@ -17,7 +17,7 @@ defmodule AssertValue.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     [ applications: [],
-      mod: {AssertValue.TestSourceChanges.App, []}]
+      mod: {AssertValue.App, []}]
   end
 
   # Dependencies can be Hex packages:
