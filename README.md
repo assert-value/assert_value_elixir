@@ -12,7 +12,7 @@ Add AssertValue as a test env dependency to your Mix project
 
 ```elixir
 defp deps do
-  [{:assert_value, git: "git@github.com:acunote/assert_value_elixir.git"}, only: :test]
+  [{:assert_value, git: "git@github.com:acunote/assert_value_elixir.git", only: :test}]
 end
 ```
 AssertValue needs its internal application to work. Since we compile AssertValue
