@@ -1,7 +1,7 @@
-defmodule AssertValue.TestSourceChangesTest do
+defmodule AssertValue.FileTrackerTest do
   use ExUnit.Case
 
-  import AssertValue.TestSourceChanges, only: [current_line_number: 2, update_lines_count: 3]
+  import AssertValue.FileTracker, only: [current_line_number: 2, update_lines_count: 3]
 
   test "cumulative offsets" do
     assert current_line_number("~/test.exs", 2) == 2

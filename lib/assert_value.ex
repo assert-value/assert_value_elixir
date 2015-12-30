@@ -84,7 +84,7 @@ defmodule AssertValue do
   def create_expected(source_filename, actual, [line: original_line_number]) do
     source = read_source(source_filename)
     line_number =
-      AssertValue.TestSourceChanges.current_line_number(
+      AssertValue.FileTracker.current_line_number(
         source_filename, original_line_number)
     {prefix, rest} = Enum.split(source, line_number - 1)
     [code_line | suffix] = rest
@@ -97,7 +97,7 @@ defmodule AssertValue do
       IO.puts(file, indentation <> ~S{"""})
       IO.write(file, Enum.join(suffix, "\n"))
     end)
-    AssertValue.TestSourceChanges.update_lines_count(
+    AssertValue.FileTracker.update_lines_count(
       source_filename, original_line_number, length(new_expected) + 1)
   end
 
@@ -106,7 +106,7 @@ defmodule AssertValue do
     expected = to_lines(expected)
     source = read_source(source_filename)
     line_number =
-      AssertValue.TestSourceChanges.current_line_number(
+      AssertValue.FileTracker.current_line_number(
         source_filename, original_line_number)
     {prefix, rest} = Enum.split(source, line_number)
     heredoc_close_line_number = Enum.find_index(rest, fn(s) ->
@@ -123,7 +123,7 @@ defmodule AssertValue do
       IO.puts(file, Enum.join(new_expected, "\n"))
       IO.write(file, Enum.join(suffix, "\n"))
     end)
-    AssertValue.TestSourceChanges.update_lines_count(
+    AssertValue.FileTracker.update_lines_count(
       source_filename, original_line_number, length(new_expected) - length(expected))
   end
 
