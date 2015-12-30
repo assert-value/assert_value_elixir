@@ -8,16 +8,18 @@ For now supports two kind of expected arguments: string heredocs or files
 
 ## Installation
 
-Add AssertValue as a dependency to your Mix project:
+Add AssertValue as a test env dependency to your Mix project
 
 ```elixir
-def application do
-  [applications: [:assert_value]]
-end
-
 defp deps do
-  [{:assert_value, "~> 0.0.1"}]
+  [{:assert_value, git: "git@github.com:acunote/assert_value_elixir.git"}, only: :test]
 end
+```
+AssertValue needs its internal application to work. Since we compile AssertValue
+for test env only we need to start it manually. Add the following line to test/test_helper.exs
+
+```elixir
+AssertValue.App.start(:normal, [])
 ```
 
 ## Usage
