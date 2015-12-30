@@ -72,4 +72,18 @@ Accept new value [y/n]? .
  ccc
 
 Accept new value [y/n]? .
-7 tests, 1 failure
+<Failed Assertion Message>
+    hello("World")
+
+-
++Hello World!
+
+Accept new value [y/n]? .
+<Failed Assertion Message>
+    hello("Elixir") == "Hello World!\n"
+
+-Hello World!
++Hello Elixir!
+
+Accept new value [y/n]? .
+9 tests, 1 failure

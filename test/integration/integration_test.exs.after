@@ -78,4 +78,20 @@ defmodule IntegrationTest do
     assert_value actual == File.read!(Path.expand("file_to_update", __DIR__))
   end
 
+  test "create expected from function" do
+    assert_value hello("World") == """
+    Hello World!
+    """
+  end
+
+  test "update expected from function" do
+    assert_value hello("Elixir") == """
+    Hello Elixir!
+    """
+  end
+
+  defp hello(arg) do
+    "Hello #{arg}!"
+  end
+
 end

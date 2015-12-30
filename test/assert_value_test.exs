@@ -44,7 +44,7 @@ defmodule AssertValueTest do
 
     # run the test
     %Porcelain.Result{out: output, status: exitcode} =
-      Porcelain.exec("mix", ["test", "--seed", "0", runnable_path], in: "n\ny\ny\ny\ny\ny\n")
+      Porcelain.exec("mix", ["test", "--seed", "0", runnable_path], in: "n\ny\ny\ny\ny\ny\ny\ny\n")
 
     # canonicalize output
     output =

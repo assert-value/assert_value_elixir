@@ -44,8 +44,8 @@ defmodule AssertValue do
           # left argument is a string (assert_value "foo")
           [line: __CALLER__.line]
         false ->
-          # left argument is variable (assert_value myvar)
-          {_, meta, nil} = assertion
+          # left argument is variable or function
+          {_, meta, _} = assertion
           meta
       end
     source_filename =  __CALLER__.file
