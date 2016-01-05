@@ -54,8 +54,8 @@ defmodule AssertValue do
           expected_file: expected_file)
 
         case decision do
-          [:ok, value] -> value
-          [:error, error] -> raise ExUnit.AssertionError, error
+          {:ok, value} -> value
+          {:error, error} -> raise ExUnit.AssertionError, error
         end
 
       end
@@ -79,8 +79,8 @@ defmodule AssertValue do
         expected_value: nil)
 
       case decision do
-        [:ok, value] -> value
-        [:error, error] -> raise ExUnit.AssertionError, error
+        {:ok, value} -> value
+        {:error, error} -> raise ExUnit.AssertionError, error
       end
     end
   end
@@ -105,19 +105,19 @@ defmodule AssertValue do
                             opts[:caller][:line],
                             opts[:actual_value])
         end
-        [:ok, opts[:actual_value]] # actual has now become expected
+        {:ok, opts[:actual_value]} # actual has now become expected
       _  ->
         # we pass exception up to the caller and throw it there to
         # avoid having this function be extra frame in exception's
         # call stack
-        [:error,
+        {:error,
          [left: opts[:actual_value],
           # TODO: maybe we should only add right field on update.  In
           # that case it would probably make sense to construct the
           # whole exception in the caller
           right: opts[:expected_value],
           expr: opts[:assertion_code],
-          message: "AssertValue assertion failed"]]
+          message: "AssertValue assertion failed"]}
     end
   end
   
