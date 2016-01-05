@@ -122,9 +122,10 @@ defmodule AssertValue do
   end
   
   def prompt_for_action(code, left, right) do
-    # HACK: Let ExUnit event handler to finish output
-    # Otherwise ExUnit output will interfere with our output
-    # Since this is interactive part 10 millisecond is not a big deal
+    # HACK: sleep to let ExUnit event handler finish output. Otherwise
+    # ExUnit output will interfere with our output. Since this only
+    # happens when doing the interactive prompt/action, sleeping some
+    # is not a big deal
     :timer.sleep(30)
     IO.puts "\n<Failed Assertion Message>"
     IO.puts "    #{code}\n"
