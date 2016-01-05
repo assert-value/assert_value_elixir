@@ -12,6 +12,7 @@ defmodule IntegrationTest do
     assert_value actual == """
     aaa
     bbb
+
     """
   end
 

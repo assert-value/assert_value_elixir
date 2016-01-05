@@ -5,70 +5,122 @@ defmodule AssertValue do
   end
 
   # Assertions with right argument like "assert_value actual == expected"
-  defmacro assert_value({:==, meta, [left, right]} = assertion) do
-    source_filename =  __CALLER__.file
-    log_filename = try_to_parse_filename(right)
-    code = Macro.to_string(assertion)
-    expr = Macro.escape(assertion)
+  defmacro assert_value({:==, _, [left, right]} = assertion) do
+    [expected_type, expected_file] = case right do
+      # File.read!("/path/to/file")
+      {{:., _, [{:__aliases__, _, [:File]}, :read!]}, _, [filename]} ->
+        [:file, filename]
+      # string, hopefully heredoc
+      str when is_binary(str) -> [:source, nil]
+      # any other expression, we don't support.  But we want to wait
+      # till runtime to report it, otherwise it's confusing.  TODO: or
+      # maybe not confusing, may want to just put here:
+      # _ -> raise AssertValue.ArgumentError
+      _ -> [:unsupported_value, nil]
+    end
+
     quote do
-      log_filename = unquote(log_filename)
-      AssertValue.create_log_file_if_needed(log_filename)
-      left  = unquote(left)
-      right = unquote(right)
-      meta  = unquote(meta)
-      result = (AssertValue.canonicalize(left) == AssertValue.canonicalize(right))
-      case result do
-        false ->
-          answer = AssertValue.prompt_for_action(unquote(code), left, right)
-          case answer do
-            "y" ->
-              AssertValue.update_expected(unquote(source_filename), left, right, meta, log_filename)
-             _  ->
-              raise ExUnit.AssertionError, [
-                left: left,
-                right: right,
-                expr: unquote(expr),
-                message: "AssertValue assertion failed"
-              ]
-          end
-        _ -> result
+      assertion_code = unquote(Macro.to_string(assertion))
+      actual_value = unquote(left)
+      expected_type = unquote(expected_type)
+      expected_file = unquote(expected_file)
+      expected_value = 
+        case expected_type do
+          :source -> unquote(right) |>
+              String.replace(~r/\n\Z/, "", global: false)
+          # TODO: should deal with a no-bang File.read instead, may
+          # want to deal with different errors differently
+          :file -> File.exists?(expected_file)
+            && File.read!(expected_file)
+            || ""
+          :unsupported_value -> raise AssertValue.ArgumentError
+        end
+
+      assertion_result = (actual_value == expected_value)
+
+      if assertion_result do
+        assertion_result
+      else 
+        decision = AssertValue.ask_user_about_diff(
+          caller: [
+            file: unquote(__CALLER__.file),
+            line: unquote(__CALLER__.line),
+          ],
+          assertion_code: assertion_code,
+          actual_value: actual_value,
+          expected_type: expected_type,
+          expected_action: :update,
+          expected_value: expected_value,
+          expected_file: expected_file)
+
+        case decision do
+          [:ok, value] -> value
+          [:error, error] -> raise ExUnit.AssertionError, error
+        end
+
       end
     end
   end
 
   # Assertions without right argument like (assert_value "foo")
   defmacro assert_value(assertion) do
-    meta =
-      case is_binary(assertion) do
-        true ->
-          # left argument is a string (assert_value "foo")
-          [line: __CALLER__.line]
-        false ->
-          # left argument is variable or function
-          {_, meta, _} = assertion
-          meta
-      end
-    source_filename =  __CALLER__.file
-    code = Macro.to_string(assertion)
-    expr = Macro.escape(assertion)
     quote do
-      left = unquote(assertion)
-      meta = unquote(meta)
-      answer = AssertValue.prompt_for_action(unquote(code), left, nil)
-      case answer do
-        "y" ->
-          AssertValue.create_expected(unquote(source_filename), left, meta)
-         _  ->
-            raise ExUnit.AssertionError, [
-              left: left,
-              expr: unquote(expr),
-              message: "AssertValue assertion failed"
-            ]
+      assertion_code = unquote(Macro.to_string(assertion))
+      actual_value = unquote(assertion) # in this case
+      decision = AssertValue.ask_user_about_diff(
+        caller: [
+          file: unquote(__CALLER__.file),
+          line: unquote(__CALLER__.line),
+        ],
+        actual_value: actual_value,
+        assertion_code: assertion_code,
+        expected_type: :source,
+        expected_action: :create,
+        expected_value: nil)
+
+      case decision do
+        [:ok, value] -> value
+        [:error, error] -> raise ExUnit.AssertionError, error
       end
-      left
     end
   end
 
+  def ask_user_about_diff(opts) do
+    answer = prompt_for_action(opts[:assertion_code],
+                               opts[:actual_value],
+                               opts[:expected_value])
+    
+    case answer do
+      "y" ->
+        case opts[:expected_action] do
+          :update ->
+            update_expected(opts[:expected_type],
+                            opts[:caller][:file],
+                            opts[:caller][:line],
+                            opts[:actual_value],
+                            opts[:expected_value],
+                            opts[:expected_file]) # TODO: expected_filename
+          :create ->
+            create_expected(opts[:caller][:file],
+                            opts[:caller][:line],
+                            opts[:actual_value])
+        end
+        [:ok, opts[:actual_value]] # actual has now become expected
+      _  ->
+        # we pass exception up to the caller and throw it there to
+        # avoid having this function be extra frame in exception's
+        # call stack
+        [:error,
+         [left: opts[:actual_value],
+          # TODO: maybe we should only add right field on update.  In
+          # that case it would probably make sense to construct the
+          # whole exception in the caller
+          right: opts[:expected_value],
+          expr: opts[:assertion_code],
+          message: "AssertValue assertion failed"]]
+    end
+  end
+  
   def prompt_for_action(code, left, right) do
     # HACK: Let ExUnit event handler to finish output
     # Otherwise ExUnit output will interfere with our output
@@ -81,7 +133,7 @@ defmodule AssertValue do
     |> String.rstrip(?\n)
   end
 
-  def create_expected(source_filename, actual, [line: original_line_number]) do
+  def create_expected(source_filename, original_line_number, actual) do
     source = read_source(source_filename)
     line_number =
       AssertValue.FileTracker.current_line_number(
@@ -102,7 +154,8 @@ defmodule AssertValue do
   end
 
   # Update expected when expected is heredoc
-  def update_expected(source_filename, actual, expected, [line: original_line_number], nil) when is_binary(expected) do
+  def update_expected(:source, source_filename, original_line_number,
+                      actual, expected, _) do
     expected = to_lines(expected)
     source = read_source(source_filename)
     line_number =
@@ -128,24 +181,8 @@ defmodule AssertValue do
   end
 
   # Update expected when expected is File.read!
-  def update_expected(_, actual, _, _, filename) when is_binary(filename) do
-    File.write!(filename, actual)
-  end
-
-  def update_expected(_, _, _, _, _) do
-    raise AssertValue.ArgumentError
-  end
-
-  def canonicalize(arg) do
-    # If to_sting raises Protocol.UndefinedError then arg is wrong type
-    # and cannot be cast to string
-    try do
-      arg
-      |> to_string
-      |> String.replace(~r/\n$/, "", global: false)
-    rescue
-      Protocol.UndefinedError -> raise AssertValue.ArgumentError
-    end
+  def update_expected(:file, _, _, actual, _, expected_filename) do
+    File.write!(expected_filename, actual)
   end
 
   defp read_source(filename) do
@@ -154,26 +191,7 @@ defmodule AssertValue do
 
   defp to_lines(arg) do
     arg
-    |> canonicalize
     |> String.split("\n")
-  end
-
-  defp try_to_parse_filename(ast) do
-    try do
-      {{:., _, [{:__aliases__, _, [:File]}, :read!]}, _, [filename]} = ast
-      filename
-    rescue
-      MatchError -> nil
-    end
-  end
-
-  def create_log_file_if_needed(filename) do
-    case filename do
-      nil ->
-        false
-       _  ->
-        File.touch!(filename)
-    end
   end
 
   defp new_expected_from_actual(actual, indentation) do

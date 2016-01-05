@@ -12,6 +12,7 @@ defmodule IntegrationTest do
     assert_value actual == """
     aaa
     bbb
+
     """
   end
 
@@ -40,6 +41,7 @@ defmodule IntegrationTest do
     aaa
      bbb
       ccc
+    
     """
   end
 
@@ -54,6 +56,7 @@ defmodule IntegrationTest do
      3
      4
      5
+    
     """
   end
 

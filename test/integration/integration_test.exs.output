@@ -10,13 +10,13 @@
 Accept new value [y/n]? 
 
   1) test simple fail test (IntegrationTest)
-     integration_test.exs:18
+     integration_test.exs:19
      AssertValue assertion failed
      code: actual == "aaa\nbBb\nccc\n"
      lhs:  "aaa\nbbb\nccc\n"
-     rhs:  "aaa\nbBb\nccc\n"
+     rhs:  "aaa\nbBb\nccc"
      stacktrace:
-       integration_test.exs:25
+       integration_test.exs:26
 
 
 <Failed Assertion Message>
