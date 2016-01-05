@@ -73,7 +73,7 @@ defmodule AssertValue do
     # HACK: Let ExUnit event handler to finish output
     # Otherwise ExUnit output will interfere with our output
     # Since this is interactive part 10 millisecond is not a big deal
-    :timer.sleep(10)
+    :timer.sleep(30)
     IO.puts "\n<Failed Assertion Message>"
     IO.puts "    #{code}\n"
     IO.puts AssertValue.Diff.diff(right, left)
