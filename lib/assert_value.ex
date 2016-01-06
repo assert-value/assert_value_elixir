@@ -6,17 +6,17 @@ defmodule AssertValue do
 
   # Assertions with right argument like "assert_value actual == expected"
   defmacro assert_value({:==, _, [left, right]} = assertion) do
-    [expected_type, expected_file] = case right do
+    {expected_type, expected_file} = case right do
       # File.read!("/path/to/file")
       {{:., _, [{:__aliases__, _, [:File]}, :read!]}, _, [filename]} ->
-        [:file, filename]
+        {:file, filename}
       # string, hopefully heredoc
-      str when is_binary(str) -> [:source, nil]
+      str when is_binary(str) -> {:source, nil}
       # any other expression, we don't support.  But we want to wait
       # till runtime to report it, otherwise it's confusing.  TODO: or
       # maybe not confusing, may want to just put here:
       # _ -> raise AssertValue.ArgumentError
-      _ -> [:unsupported_value, nil]
+      _ -> {:unsupported_value, nil}
     end
 
     quote do
