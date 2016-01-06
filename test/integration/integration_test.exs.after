@@ -14,7 +14,11 @@ defmodule IntegrationTest do
     aaa
      bbb
       ccc
-    
+    """
+
+    # prompt: y
+    assert_value "foo" == """
+    foo<NOEOL>
     """
   end
 
@@ -29,7 +33,6 @@ defmodule IntegrationTest do
      3
      4
      5
-    
     """
   end
 
@@ -37,7 +40,7 @@ defmodule IntegrationTest do
     # prompt: y
     assert_value "foo\nbar" == """
     foo
-    bar
+    bar<NOEOL>
     """
   end
 
@@ -64,14 +67,14 @@ defmodule IntegrationTest do
   test "create expected from function" do
     # prompt: y
     assert_value hello("World") == """
-    Hello World!
+    Hello World!<NOEOL>
     """
   end
 
   test "update expected from function" do
     # prompt: y
     assert_value hello("Elixir") == """
-    Hello Elixir!
+    Hello Elixir!<NOEOL>
     """
   end
 
@@ -92,7 +95,6 @@ defmodule IntegrationTest do
     assert_value actual == """
     aaa
     bbb
-
     """
   end
 

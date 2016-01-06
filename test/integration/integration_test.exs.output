@@ -7,6 +7,13 @@
 + bbb
 +  ccc
 
+Accept new value [y/n]? 
+<Failed Assertion Message>
+    "foo"
+
+-
++foo
+
 Accept new value [y/n]? .
 <Failed Assertion Message>
     actual == "-1\n  0\n   1\n  2\n 3\n 4\n 5\n  6\n   7\n  8\n 9\n  0\n   1\n"
@@ -77,13 +84,13 @@ Accept new value [y/n]? ..
 Accept new value [y/n]? 
 
   1) test simple fail test (IntegrationTest)
-     integration_test.exs:98
+     integration_test.exs:100
      AssertValue assertion failed
      code: actual == "aaa\nbBb\nccc\n"
      lhs:  "aaa\nbbb\nccc\n"
-     rhs:  "aaa\nbBb\nccc"
+     rhs:  "aaa\nbBb\nccc\n"
      stacktrace:
-       integration_test.exs:105
+       integration_test.exs:107
 
 
 9 tests, 1 failure

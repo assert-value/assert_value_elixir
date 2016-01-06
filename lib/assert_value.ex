@@ -27,7 +27,7 @@ defmodule AssertValue do
       expected_value = 
         case expected_type do
           :source -> unquote(right) |>
-              String.replace(~r/\n\Z/, "", global: false)
+              String.replace(~r/<NOEOL>\n\Z/, "", global: false)
           # TODO: should deal with a no-bang File.read instead, may
           # want to deal with different errors differently
           :file -> File.exists?(expected_file)
@@ -192,10 +192,23 @@ defmodule AssertValue do
 
   defp to_lines(arg) do
     arg
+    # remove trailing newline otherwise String.split will give us an
+    # empty line at the end
+    |> String.replace(~r/\n\Z/, "", global: false)
     |> String.split("\n")
   end
 
   defp new_expected_from_actual(actual, indentation) do
+    # to work as a heredoc a string must end with a newline.  For
+    # strings that don't we append a special token and a newline when
+    # writing them to source file.  This way we can look for this
+    # special token when we read it back and strip it at that time.
+    actual = unless actual =~ ~r/\n\Z/ do
+      actual <> "<NOEOL>\n"
+    else
+      actual
+    end
+    
     actual
     |> to_lines
     |> Enum.map(&(indentation <> &1))

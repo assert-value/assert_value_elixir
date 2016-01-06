@@ -11,6 +11,9 @@ defmodule IntegrationTest do
     """
     # prompt: y
     assert_value value
+
+    # prompt: y
+    assert_value "foo"
   end
 
   test "update expected" do
@@ -91,7 +94,6 @@ defmodule IntegrationTest do
     assert_value actual == """
     aaa
     bbb
-
     """
   end
 
