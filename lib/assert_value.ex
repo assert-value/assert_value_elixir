@@ -45,6 +45,7 @@ defmodule AssertValue do
           caller: [
             file: unquote(__CALLER__.file),
             line: unquote(__CALLER__.line),
+            function: unquote(__CALLER__.function),
           ],
           assertion_code: assertion_code,
           actual_value: actual_value,
@@ -71,6 +72,7 @@ defmodule AssertValue do
         caller: [
           file: unquote(__CALLER__.file),
           line: unquote(__CALLER__.line),
+          function: unquote(__CALLER__.function),
         ],
         actual_value: actual_value,
         assertion_code: assertion_code,
@@ -88,6 +90,7 @@ defmodule AssertValue do
   def ask_user_about_diff(opts) do
     answer = prompt_for_action(opts[:caller][:file],
                                opts[:caller][:line],
+                               opts[:caller][:function],
                                opts[:assertion_code],
                                opts[:actual_value],
                                opts[:expected_value])
@@ -123,18 +126,21 @@ defmodule AssertValue do
     end
   end
   
-  def prompt_for_action(file, line, code, left, right) do
+  def prompt_for_action(file, line, function, code, left, right) do
     # HACK: sleep to let ExUnit event handler finish output. Otherwise
     # ExUnit output will interfere with our output. Since this only
     # happens when doing the interactive prompt/action, sleeping some
     # is not a big deal
     :timer.sleep(30)
-    file = Path.relative_to(file, System.cwd!)
+    file = Path.relative_to(file, System.cwd!) # make it shorter
     # the prompt we print here should
     # * let user easily identify which assert failed
     # * work with editors's automatic go-to-error-line file:line:
     #   format handling
-    IO.puts "#{file}:#{line}: assert_value #{code} failed.  Diff:"
+    # * not be unreasonably long, so the user sees it on the screen
+    #   grouped with the diff
+    {function, _} = function
+    IO.puts "#{file}:#{line}:\"#{Atom.to_string function}\" assert_value #{code} failed. Diff:"
     IO.write AssertValue.Diff.diff(right, left)
     IO.gets("Accept new value [y/n]? ")
     |> String.rstrip(?\n)
