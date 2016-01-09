@@ -140,7 +140,7 @@ defmodule AssertValue do
     # * not be unreasonably long, so the user sees it on the screen
     #   grouped with the diff
     {function, _} = function
-    IO.puts "#{file}:#{line}:\"#{Atom.to_string function}\" assert_value #{code} failed. Diff:"
+    IO.puts "\n#{file}:#{line}:\"#{Atom.to_string function}\" assert_value #{code} failed. Diff:"
     IO.write AssertValue.Diff.diff(right, left)
     IO.gets("Accept new value [y/n]? ")
     |> String.rstrip(?\n)
