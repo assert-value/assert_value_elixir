@@ -19,7 +19,7 @@ defmodule AssertValueTest do
   # * accept or reject assert_value changes when prompted
   # * compare test source file itself after the run with a reference copy
   # * compare test output with a reference copy
-  test "integration test" do
+  test "integration" do
     basename = "integration_test.exs"
     before_path = Path.expand(basename <> ".before", @integration_test_dir)
     after_path = Path.expand(basename <> ".after", @integration_test_dir)

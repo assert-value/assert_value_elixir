@@ -84,7 +84,7 @@ defmodule IntegrationTest do
 
   # tests with prompt answer n go below here
 
-  test "simple pass test" do
+  test "simple pass" do
     actual = """
     aaa
     bbb
@@ -98,7 +98,7 @@ defmodule IntegrationTest do
     """
   end
 
-  test "simple fail test" do
+  test "simple fail" do
     actual = """
     aaa
     bbb

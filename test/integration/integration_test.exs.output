@@ -40,14 +40,14 @@ Accept new value [y/n]? .integration_test.exs:70:"test create expected from func
 Accept new value [y/n]? .integration_test.exs:75:"test update expected from function" assert_value hello("Elixir") == "Hello World!\n" failed. Diff:
 -Hello World!
 +Hello Elixir!
-Accept new value [y/n]? ..integration_test.exs:107:"test simple fail test" assert_value actual == "aaa\nbBb\nccc\n" failed. Diff:
+Accept new value [y/n]? ..integration_test.exs:107:"test simple fail" assert_value actual == "aaa\nbBb\nccc\n" failed. Diff:
  aaa
 -bBb
 +bbb
  ccc
 Accept new value [y/n]? 
 
-  1) test simple fail test (IntegrationTest)
+  1) test simple fail (IntegrationTest)
      integration_test.exs:100
      AssertValue assertion failed
      code: actual == "aaa\nbBb\nccc\n"
