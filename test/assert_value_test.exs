@@ -61,6 +61,12 @@ defmodule AssertValueTest do
     |> String.replace(~r{\/tmp\/assert-value-\d+-\d+-\w+/}, "")
     |> String.replace(~r/\nFinished in.*\n/m, "")
     |> String.replace(~r/\nRandomized with seed.*\n/m, "")
+    # canonicalize ExUnit error formatting:
+    # - remove fancy spacing
+    # - canonicalize lhs/rhs vs left/right
+    |> String.replace(~r/\s{5}code:\s+actual/m,   "     code: actual")
+    |> String.replace(~r/\s{5}(lhs|left):\s+"/m,  "     left: \"")
+    |> String.replace(~r/\s{5}(rhs|right):\s+"/m, "     right: \"")
 
     # compare the results
     assert_value File.read!(runnable_path) == File.read!(after_path)

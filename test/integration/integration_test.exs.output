@@ -60,10 +60,10 @@ Accept new value [y/n]?
      integration_test.exs:100
      AssertValue assertion failed
      code: actual == "aaa\nbBb\nccc\n"
-     lhs:  "aaa\nbbb\nccc\n"
-     rhs:  "aaa\nbBb\nccc\n"
+     left: "aaa\nbbb\nccc\n"
+     right: "aaa\nbBb\nccc\n"
      stacktrace:
-       integration_test.exs:107
+       integration_test.exs:107: (test)
 
 
 9 tests, 1 failure
