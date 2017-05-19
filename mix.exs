@@ -42,6 +42,6 @@ defmodule AssertValue.Mixfile do
     [files: ["config", "lib", "src", "test", "mix.exs", "README.md", "LICENSE"],
      maintainers: ["Serge Smetana", "Gleb Arshinov"],
      licenses: ["MIT"],
-     links: %{"GitHub" => "https://github.com/acunote/assert_value_elixir"}]
+     links: %{"GitHub" => "https://github.com/assert-value/assert_value_elixir"}]
   end
 end
