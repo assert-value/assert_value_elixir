@@ -1,4 +1,3 @@
-Porcelain.App.start(:normal, [])
 ExUnit.start()
 
 defmodule AssertValue.Tempfile do
@@ -17,3 +16,38 @@ defmodule AssertValue.Tempfile do
   end
 end
 
+defmodule AssertValue.System do
+  # This helper is used to start external process, feed it with input,
+  # and collect output.
+  #
+  # Inspired by Sasa Juric's post about running external programs with
+  # Elixir's Port module:
+  #   http://theerlangelist.blogspot.com/2015/08/outside-elixir.html
+  #
+  # and Alexei Sholik's Porcelain basic driver
+  #   https://github.com/alco/porcelain/tree/master/lib/porcelain/drivers
+  #
+  # Usage example:
+  # Run integration test session as external process, provide "yes" answers
+  # for two prompts, and collect output and test results code:
+  #
+  #   {output, exitcode} = AssertValue.System.exec("mix",
+  #      ["test", "--seed", "0", "/tmp/intergration_test.exs"], input: "y\ny\n")
+  def exec(cmd, args, opts) do
+    cmd = cmd |> System.find_executable
+    port = Port.open({:spawn_executable, cmd}, [{:args, args}, :binary, :exit_status])
+    Port.command(port, opts[:input])
+    handle_output(port, "")
+  end
+
+  # This function recursively collects data provided by external
+  # process indentified with port until it get :exit_status message.
+  defp handle_output(port, output) do
+    receive do
+      {^port, {:data, data}} ->
+        handle_output(port, output <> data)
+      {^port, {:exit_status, exitcode}} ->
+        {output, exitcode}
+    end
+  end
+end

@@ -51,9 +51,8 @@ defmodule AssertValueTest do
     prompt_responses = prompt_responses <> "\n"
 
     # run the test
-    %Porcelain.Result{out: output, status: exitcode} =
-      Porcelain.exec("mix", ["test", "--seed", "0", runnable_path],
-                     in: prompt_responses)
+    {output, exitcode} = AssertValue.System.exec("mix",
+      ["test", "--seed", "0", runnable_path], input: prompt_responses)
 
     # canonicalize output
     output =
