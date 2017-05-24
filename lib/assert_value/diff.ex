@@ -5,7 +5,8 @@ defmodule AssertValue.Diff do
   def diff(a, b) do
     a = to_string_list a
     b = to_string_list b
-    format_diff :tdiff.diff(a, b)
+    List.myers_difference(a, b)
+    |> format_diff
   end
 
   defp to_string_list(value) do

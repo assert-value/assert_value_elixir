@@ -5,6 +5,9 @@ with the actual in case the new behavior (and new actual value) is correct.
 
 For now supports two kind of expected arguments: string heredocs or files
 
+## Requirements
+
+Elixir ~> 1.4
 
 ## Installation
 
@@ -12,7 +15,7 @@ Add AssertValue as a test env dependency to your Mix project
 
 ```elixir
 defp deps do
-  [{:assert_value, git: "git@github.com:acunote/assert_value_elixir.git", only: :test}]
+  [{:assert_value, git: "git@github.com:assert-value/assert_value_elixir.git", only: :test}]
 end
 ```
 AssertValue needs its internal application to work. Since we compile AssertValue

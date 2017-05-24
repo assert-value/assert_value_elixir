@@ -4,7 +4,7 @@ defmodule AssertValue.Mixfile do
   def project do
     [app: :assert_value,
      version: "0.0.1",
-     elixir: "~> 1.1",
+     elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      description: description(),
@@ -39,7 +39,7 @@ defmodule AssertValue.Mixfile do
   end
 
   defp package do
-    [files: ["config", "lib", "src", "test", "mix.exs", "README.md", "LICENSE"],
+    [files: ["config", "lib", "test", "mix.exs", "README.md", "LICENSE"],
      maintainers: ["Serge Smetana", "Gleb Arshinov"],
      licenses: ["MIT"],
      links: %{"GitHub" => "https://github.com/assert-value/assert_value_elixir"}]
