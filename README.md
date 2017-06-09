@@ -5,6 +5,11 @@ with the actual in case the new behavior (and new actual value) is correct.
 
 For now supports two kind of expected arguments: string heredocs or files
 
+# Screencast
+
+![Screencast](https://github.com/assert-value/assert_value_screencasts/raw/master/elixir/screencast.gif)
+
+
 ## Requirements
 
 Elixir ~> 1.4
