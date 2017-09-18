@@ -11,7 +11,7 @@ defmodule AssertValue.App do
     # (different from ExUnit.CLIFormatter)
     Mix.Config.persist(ex_unit: [formatters: [AssertValue.Formatter]])
     children = [
-      worker(AssertValue.FileTracker, [%{}], restart: :temporary)
+      worker(AssertValue.Server, [%{}], restart: :temporary)
     ]
     opts = [strategy: :one_for_one]
     Supervisor.start_link(children, opts)
