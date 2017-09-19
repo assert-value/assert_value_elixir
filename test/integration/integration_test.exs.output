@@ -8,7 +8,7 @@ Accept new value [y/n]?
 integration_test.exs:16:"test create expected" assert_value "foo" failed. Diff:
 -
 +foo
-Accept new value [y/n]? 
+Accept new value [y/n]? .
 integration_test.exs:26:"test update expected" assert_value actual == "-1\n  0\n   1\n  2\n 3\n 4\n 5\n  6\n   7\n  8\n 9\n  0\n   1\n" failed. Diff:
 --1
 -  0
@@ -23,32 +23,32 @@ integration_test.exs:26:"test update expected" assert_value actual == "-1\n  0\n
 - 9
 -  0
 -   1
-Accept new value [y/n]? 
+Accept new value [y/n]? .
 integration_test.exs:45:"test create expected from string" assert_value "foo\nbar" failed. Diff:
 -
 +foo
 +bar
-Accept new value [y/n]? 
+Accept new value [y/n]? .
 integration_test.exs:55:"test create file" assert_value actual == File.read!(Path.expand("file_to_create", __DIR__)) failed. Diff:
 -
 +aaa
 +bbb
 +ccc
-Accept new value [y/n]? 
+Accept new value [y/n]? .
 integration_test.exs:65:"test update file" assert_value actual == File.read!(Path.expand("file_to_update", __DIR__)) failed. Diff:
  aaa
 -bBb
 +bbb
  ccc
-Accept new value [y/n]? 
+Accept new value [y/n]? .
 integration_test.exs:70:"test create expected from function" assert_value hello("World") failed. Diff:
 -
 +Hello World!
-Accept new value [y/n]? 
+Accept new value [y/n]? .
 integration_test.exs:75:"test update expected from function" assert_value hello("Elixir") == "Hello World!\n" failed. Diff:
 -Hello World!
 +Hello Elixir!
-Accept new value [y/n]? 
+Accept new value [y/n]? ..
 integration_test.exs:107:"test simple fail" assert_value actual == "aaa\nbBb\nccc\n" failed. Diff:
  aaa
 -bBb

@@ -13,6 +13,10 @@ defmodule AssertValue.Server do
   # This a synchronous call
   # No other AssertValue diffs will be shown until user give answer
   def handle_call({:ask_user_about_diff, opts}, _from, data) do
+    # Hack. Wait for captured io to flush buffer.
+    # TODO: Change this to waiting message from captured io.
+    :timer.sleep(30)
+    AssertValue.IO.mute
     answer = __MODULE__.prompt_for_action(
       opts[:caller][:file],
       opts[:caller][:line],
@@ -45,6 +49,7 @@ defmodule AssertValue.Server do
       _  ->
         data
     end
+    AssertValue.IO.unmute
     {:reply, answer, data}
   end
 
