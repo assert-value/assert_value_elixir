@@ -2,12 +2,29 @@ defmodule AssertValue.Server do
 
   use GenServer
 
-  def start_link(data) do
-    GenServer.start_link(__MODULE__, data, name: __MODULE__)
+  def start_link do
+    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
-  def format_status(_reason, [ _pdict, state ]) do
-    [data: [{'State', "Saved file offsets: #{inspect state}"}]]
+  def init(_) do
+    state = %{
+      original_io_pid: nil,
+      captured_io_pid: nil,
+      file_changes: %{}
+    }
+    {:ok, state}
+  end
+
+  def handle_cast({:set_io_pids, original_io_pid, captured_io_pid}, state) do
+    {:noreply, %{state | original_io_pid: original_io_pid,
+      captured_io_pid: captured_io_pid}}
+  end
+
+  def handle_cast({:loop}, state) do
+    contents = StringIO.flush(state.captured_io_pid)
+    if contents != "", do: IO.write contents
+    loop()
+    {:noreply, state}
   end
 
   # This a synchronous call
@@ -16,8 +33,7 @@ defmodule AssertValue.Server do
     # Hack. Wait for captured io to flush buffer.
     # TODO: Change this to waiting message from captured io.
     :timer.sleep(30)
-    AssertValue.IO.mute
-    answer = __MODULE__.prompt_for_action(
+    answer = prompt_for_action(
       opts[:caller][:file],
       opts[:caller][:line],
       opts[:caller][:function],
@@ -25,12 +41,12 @@ defmodule AssertValue.Server do
       opts[:actual_value],
       opts[:expected_value]
     )
-    data = case answer do
+    file_changes = case answer do
       "y" ->
         case opts[:expected_action] do
           :update ->
-            __MODULE__.update_expected(
-              data,
+            update_expected(
+              state.file_changes,
               opts[:expected_type],
               opts[:caller][:file],
               opts[:caller][:line],
@@ -39,18 +55,25 @@ defmodule AssertValue.Server do
               opts[:expected_file] # TODO: expected_filename
             )
           :create ->
-            __MODULE__.create_expected(
-              data,
+            create_expected(
+              state.file_changes,
               opts[:caller][:file],
               opts[:caller][:line],
               opts[:actual_value]
             )
         end
       _  ->
-        data
+        state.file_changes
     end
-    AssertValue.IO.unmute
-    {:reply, answer, data}
+    {:reply, answer, %{state | file_changes: file_changes}}
+  end
+
+  def set_io_pids(original_io_pid, captured_io_pid) do
+    GenServer.cast __MODULE__, {:set_io_pids, original_io_pid, captured_io_pid}
+  end
+
+  def loop() do
+    GenServer.cast __MODULE__, {:loop}
   end
 
   def ask_user_about_diff(opts) do
@@ -84,9 +107,9 @@ defmodule AssertValue.Server do
     |> String.rstrip(?\n)
   end
 
-  def create_expected(data, source_filename, original_line_number, actual) do
+  def create_expected(file_changes, source_filename, original_line_number, actual) do
     source = read_source(source_filename)
-    line_number = current_line_number(data, source_filename, original_line_number)
+    line_number = current_line_number(file_changes, source_filename, original_line_number)
     {prefix, rest} = Enum.split(source, line_number - 1)
     [code_line | suffix] = rest
     [[indentation]] = Regex.scan(~r/^\s*/, code_line)
@@ -98,15 +121,15 @@ defmodule AssertValue.Server do
       IO.puts(file, indentation <> ~S{"""})
       IO.write(file, Enum.join(suffix, "\n"))
     end)
-    update_lines_count(data, source_filename, original_line_number, length(new_expected) + 1)
+    update_lines_count(file_changes, source_filename, original_line_number, length(new_expected) + 1)
   end
 
   # Update expected when expected is heredoc
-  def update_expected(data, :source, source_filename, original_line_number,
+  def update_expected(file_changes, :source, source_filename, original_line_number,
                       actual, expected, _) do
     expected = to_lines(expected)
     source = read_source(source_filename)
-    line_number = current_line_number(data, source_filename, original_line_number)
+    line_number = current_line_number(file_changes, source_filename, original_line_number)
     {prefix, rest} = Enum.split(source, line_number)
     heredoc_close_line_number = Enum.find_index(rest, fn(s) ->
       s =~ ~r/^\s*"""/
@@ -122,30 +145,30 @@ defmodule AssertValue.Server do
       IO.puts(file, Enum.join(new_expected, "\n"))
       IO.write(file, Enum.join(suffix, "\n"))
     end)
-    update_lines_count(data, source_filename, original_line_number, length(new_expected) - length(expected))
+    update_lines_count(file_changes, source_filename, original_line_number, length(new_expected) - length(expected))
   end
 
   # Update expected when expected is File.read!
-  def update_expected(data, :file, _, _, actual, _, expected_filename) do
+  def update_expected(file_changes, :file, _, _, actual, _, expected_filename) do
     File.write!(expected_filename, actual)
-    data
+    file_changes
   end
 
   # File tracking
 
-  def current_line_number(data, filename, original_line_number) do
-    file_changes = data[filename] || %{}
-    cumulative_offset = Enum.reduce(file_changes, 0, fn({l,o}, total) ->
+  def current_line_number(file_changes, filename, original_line_number) do
+    current_file_changes = file_changes[filename] || %{}
+    cumulative_offset = Enum.reduce(current_file_changes, 0, fn({l,o}, total) ->
       if original_line_number > l, do: total + o, else: total
     end)
     original_line_number + cumulative_offset
   end
 
-  def update_lines_count(data, filename, original_line_number, diff) do
-    file_changes =
-      (data[filename] || %{})
+  def update_lines_count(file_changes, filename, original_line_number, diff) do
+    current_file_changes =
+      (file_changes[filename] || %{})
       |> Map.put(original_line_number, diff)
-    Map.put(data, filename, file_changes)
+    Map.put(file_changes, filename, current_file_changes)
   end
 
   # Private
