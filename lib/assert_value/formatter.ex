@@ -11,10 +11,13 @@ defmodule AssertValue.Formatter do
     {:ok, captured_io_pid} = StringIO.open("")
     AssertValue.Server.set_io_pids(original_io_pid, captured_io_pid)
     Process.group_leader(self(), captured_io_pid)
-    AssertValue.Server.loop()
     {:ok, config}
   end
 
-  defdelegate handle_cast(test, config), to: ExUnit.CLIFormatter
+  def handle_cast(test, config) do
+    {:noreply, config} = ExUnit.CLIFormatter.handle_cast(test, config)
+    AssertValue.Server.flush()
+    {:noreply, config}
+  end
 
 end

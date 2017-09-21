@@ -20,19 +20,15 @@ defmodule AssertValue.Server do
       captured_io_pid: captured_io_pid}}
   end
 
-  def handle_cast({:loop}, state) do
+  def handle_cast({:flush}, state) do
     contents = StringIO.flush(state.captured_io_pid)
     if contents != "", do: IO.write contents
-    loop()
     {:noreply, state}
   end
 
   # This a synchronous call
   # No other AssertValue diffs will be shown until user give answer
   def handle_call({:ask_user_about_diff, opts}, _from, data) do
-    # Hack. Wait for captured io to flush buffer.
-    # TODO: Change this to waiting message from captured io.
-    :timer.sleep(30)
     answer = prompt_for_action(
       opts[:caller][:file],
       opts[:caller][:line],
@@ -72,11 +68,14 @@ defmodule AssertValue.Server do
     GenServer.cast __MODULE__, {:set_io_pids, original_io_pid, captured_io_pid}
   end
 
-  def loop() do
-    GenServer.cast __MODULE__, {:loop}
+  def flush() do
+    GenServer.cast __MODULE__, {:flush}
   end
 
   def ask_user_about_diff(opts) do
+    # Hack. Wait for captured io to flush buffer.
+    # TODO: Change this to waiting message from captured io.
+    :timer.sleep(30)
     # Wait for user's input forever
     answer = GenServer.call __MODULE__, {:ask_user_about_diff, opts}, :infinity
     case answer do
