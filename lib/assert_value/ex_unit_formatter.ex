@@ -1,5 +1,15 @@
-defmodule AssertValue.Formatter do
+defmodule AssertValue.ExUnitFormatter do
   @moduledoc false
+
+  # This module is used to suppress and capture ExUnit's output while waiting
+  # for user input on assert_value diffs.  After user's answer we print all
+  # collected output.
+
+  # TODO: User may use custom formatter(s) that even don't write to stdout. But
+  # we don't know it when this application starts. Find the way to do it at
+  # runtime. We should not suppress output other than to stdout and we should
+  # not produce extra output when user formatters don't write to stdout.
+
   use GenServer
 
   def init(opts) do
