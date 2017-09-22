@@ -18,7 +18,7 @@ defmodule AssertValue.Server do
     {:noreply, %{state | captured_ex_unit_io_pid: pid}}
   end
 
-  def handle_cast({:flush}, state) do
+  def handle_cast({:flush_ex_unit_io}, state) do
     contents = StringIO.flush(state.captured_ex_unit_io_pid)
     if contents != "", do: IO.write contents
     {:noreply, state}
@@ -66,8 +66,8 @@ defmodule AssertValue.Server do
     GenServer.cast __MODULE__, {:set_captured_ex_unit_io_pid, pid}
   end
 
-  def flush() do
-    GenServer.cast __MODULE__, {:flush}
+  def flush_ex_unit_io do
+    GenServer.cast __MODULE__, {:flush_ex_unit_io}
   end
 
   def ask_user_about_diff(opts) do

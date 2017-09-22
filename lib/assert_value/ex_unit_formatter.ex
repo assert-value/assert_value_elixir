@@ -25,7 +25,7 @@ defmodule AssertValue.ExUnitFormatter do
 
   def handle_cast(test, config) do
     {:noreply, config} = ExUnit.CLIFormatter.handle_cast(test, config)
-    AssertValue.Server.flush()
+    AssertValue.Server.flush_ex_unit_io()
     {:noreply, config}
   end
 
