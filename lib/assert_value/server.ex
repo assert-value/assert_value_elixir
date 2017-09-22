@@ -8,20 +8,18 @@ defmodule AssertValue.Server do
 
   def init(_) do
     state = %{
-      original_io_pid: nil,
-      captured_io_pid: nil,
+      captured_ex_unit_io_pid: nil,
       file_changes: %{}
     }
     {:ok, state}
   end
 
-  def handle_cast({:set_io_pids, original_io_pid, captured_io_pid}, state) do
-    {:noreply, %{state | original_io_pid: original_io_pid,
-      captured_io_pid: captured_io_pid}}
+  def handle_cast({:set_captured_ex_unit_io_pid, pid}, state) do
+    {:noreply, %{state | captured_ex_unit_io_pid: pid}}
   end
 
   def handle_cast({:flush}, state) do
-    contents = StringIO.flush(state.captured_io_pid)
+    contents = StringIO.flush(state.captured_ex_unit_io_pid)
     if contents != "", do: IO.write contents
     {:noreply, state}
   end
@@ -64,8 +62,8 @@ defmodule AssertValue.Server do
     {:reply, answer, %{state | file_changes: file_changes}}
   end
 
-  def set_io_pids(original_io_pid, captured_io_pid) do
-    GenServer.cast __MODULE__, {:set_io_pids, original_io_pid, captured_io_pid}
+  def set_captured_ex_unit_io_pid(pid) do
+    GenServer.cast __MODULE__, {:set_captured_ex_unit_io_pid, pid}
   end
 
   def flush() do
