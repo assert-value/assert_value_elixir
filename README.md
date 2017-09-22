@@ -23,11 +23,14 @@ defp deps do
   [{:assert_value, git: "git@github.com:assert-value/assert_value_elixir.git", only: :test}]
 end
 ```
-AssertValue needs its internal application to work. Since we compile AssertValue
-for test env only we need to start it manually. Add the following line to test/test_helper.exs
+Add to config/test.exs to avoid timeouts
 
 ```elixir
-AssertValue.App.start(:normal, [])
+# Avoid timeouts while waiting for user input in assert_value
+config :ex_unit, timeout: :infinity
+config :my_app, MyApp.Repo,
+  timeout: :infinity,
+  ownership_timeout: :infinity
 ```
 
 ## Usage
