@@ -26,7 +26,14 @@ defmodule AssertValue.Server do
 
   # This a synchronous call
   # No other AssertValue diffs will be shown until user give answer
-  def handle_call({:ask_user_about_diff, opts}, _from, data) do
+  def handle_call({:ask_user_about_diff, opts}, _from, state) do
+    # Hack: We try to wait until previous test asking about diff (and fail) will
+    # output test results. Otherwise user will get previous failed test result
+    # message right after the answer for current test.
+    # TODO: Refactor to messaging
+    Process.sleep(30)
+    contents = StringIO.flush(state.captured_ex_unit_io_pid)
+    if contents != "", do: IO.write contents
     answer = prompt_for_action(
       opts[:caller][:file],
       opts[:caller][:line],
@@ -71,9 +78,6 @@ defmodule AssertValue.Server do
   end
 
   def ask_user_about_diff(opts) do
-    # Hack. Wait for captured io to flush buffer.
-    # TODO: Change this to waiting message from captured io.
-    :timer.sleep(30)
     # Wait for user's input forever
     answer = GenServer.call __MODULE__, {:ask_user_about_diff, opts}, :infinity
     case answer do
