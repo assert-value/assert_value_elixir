@@ -101,9 +101,16 @@ defmodule AssertValue.Server do
     # * not be unreasonably long, so the user sees it on the screen
     #   grouped with the diff
     {function, _} = function
-    IO.puts "\n#{file}:#{line}:\"#{Atom.to_string function}\" assert_value #{code} failed. Diff:"
-    IO.write AssertValue.Diff.diff(right, left)
-    IO.gets("Accept new value [y/n]? ")
+    code = smart_truncate_string(code, 40)
+    diff_context = "\n#{file}:#{line}:\"#{Atom.to_string function}\" assert_value #{code} failed"
+    IO.puts diff_context <> "\n"
+    diff =  AssertValue.Diff.diff(right, left)
+    diff_lines_count = String.split(diff, "\n") |> Enum.count()
+    IO.write diff
+    if diff_lines_count > 37 do
+      IO.puts diff_context
+    end
+    IO.gets("\nAccept new value [y/n]? ")
     |> String.rstrip(?\n)
   end
 
@@ -218,6 +225,16 @@ defmodule AssertValue.Server do
     s
     |> inspect
     |> String.replace(~r/(\A")|("\Z)/, "")
+  end
+
+  defp smart_truncate_string(s, length) when is_binary(s) and length > 0 do
+    if String.length(s) <= length do
+      s
+    else
+      s
+      |> String.slice(0..length - 1)
+      |> Kernel.<>("...")
+    end
   end
 
 end

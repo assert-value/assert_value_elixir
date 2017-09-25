@@ -1,15 +1,20 @@
 
-integration_test.exs:13:"test create expected" assert_value value failed. Diff:
+integration_test.exs:13:"test create expected" assert_value value failed
+
 -
 +aaa
 + bbb
 +  ccc
+
 Accept new value [y/n]? 
-integration_test.exs:16:"test create expected" assert_value "foo" failed. Diff:
+integration_test.exs:16:"test create expected" assert_value "foo" failed
+
 -
 +foo
+
 Accept new value [y/n]? .
-integration_test.exs:26:"test update expected" assert_value actual == "-1\n  0\n   1\n  2\n 3\n 4\n 5\n  6\n   7\n  8\n 9\n  0\n   1\n" failed. Diff:
+integration_test.exs:26:"test update expected" assert_value actual == "-1\n  0\n   1\n  2\n 3\n 4\n ... failed
+
 --1
 -  0
 -   1
@@ -23,59 +28,119 @@ integration_test.exs:26:"test update expected" assert_value actual == "-1\n  0\n
 - 9
 -  0
 -   1
+
 Accept new value [y/n]? .
-integration_test.exs:45:"test create expected from string" assert_value "foo\nbar" failed. Diff:
+integration_test.exs:45:"test create expected from string" assert_value "foo\nbar" failed
+
 -
 +foo
 +bar
+
 Accept new value [y/n]? .
-integration_test.exs:55:"test create file" assert_value actual == File.read!(Path.expand("file_to_create", __DIR__)) failed. Diff:
+integration_test.exs:55:"test create file" assert_value actual == File.read!(Path.expand("file_t... failed
+
 -
 +aaa
 +bbb
 +ccc
+
 Accept new value [y/n]? .
-integration_test.exs:65:"test update file" assert_value actual == File.read!(Path.expand("file_to_update", __DIR__)) failed. Diff:
+integration_test.exs:65:"test update file" assert_value actual == File.read!(Path.expand("file_t... failed
+
  aaa
 -bBb
 +bbb
  ccc
+
 Accept new value [y/n]? .
-integration_test.exs:70:"test create expected from function" assert_value hello("World") failed. Diff:
+integration_test.exs:70:"test create expected from function" assert_value hello("World") failed
+
 -
 +Hello World!
+
 Accept new value [y/n]? .
-integration_test.exs:75:"test update expected from function" assert_value hello("Elixir") == "Hello World!\n" failed. Diff:
+integration_test.exs:75:"test update expected from function" assert_value hello("Elixir") == "Hello World!\n" failed
+
 -Hello World!
 +Hello Elixir!
+
 Accept new value [y/n]? .
-integration_test.exs:82:"test bad expected in the form of string" assert_value "foo" == "bar" failed. Diff:
+integration_test.exs:83:"test reprompt context" assert_value actual failed
+
+-
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
+
+integration_test.exs:83:"test reprompt context" assert_value actual failed
+
+Accept new value [y/n]? .
+integration_test.exs:88:"test bad expected in the form of string" assert_value "foo" == "bar" failed
+
 -bar
 +foo
+
 Accept new value [y/n]? 
 
   1) test bad expected in the form of string (IntegrationTest)
-     integration_test.exs:80
+     integration_test.exs:86
      ** (AssertValue.ArgumentError) Expected should be in the form of string heredoc (""") or File.read!
      stacktrace:
-       integration_test.exs:82: (test)
+       integration_test.exs:88: (test)
 
 .
-integration_test.exs:112:"test simple fail" assert_value actual == "aaa\nbBb\nccc\n" failed. Diff:
+integration_test.exs:118:"test simple fail" assert_value actual == "aaa\nbBb\nccc\n" failed
+
  aaa
 -bBb
 +bbb
  ccc
+
 Accept new value [y/n]? 
 
   2) test simple fail (IntegrationTest)
-     integration_test.exs:105
+     integration_test.exs:111
      AssertValue assertion failed
      code: actual == "aaa\nbBb\nccc\n"
      left: "aaa\nbbb\nccc\n"
      right: "aaa\nbBb\nccc\n"
      stacktrace:
-       integration_test.exs:112: (test)
+       integration_test.exs:118: (test)
 
 
-10 tests, 2 failures
+11 tests, 2 failures

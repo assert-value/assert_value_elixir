@@ -78,6 +78,51 @@ defmodule IntegrationTest do
     """
   end
 
+  test "reprompt context" do
+    actual = String.duplicate("line\n", 38)
+    # prompt: y
+    assert_value actual == """
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    """
+  end
+
   test "bad expected in the form of string" do
     # prompt: y
     assert_value "foo" == "bar"
