@@ -23,8 +23,16 @@ defmodule AssertValue.ExUnitFormatter do
     {:ok, config}
   end
 
-  def handle_cast(test, config) do
-    {:noreply, config} = ExUnit.CLIFormatter.handle_cast(test, config)
+  def handle_cast(msg, config) do
+    {:noreply, config} = ExUnit.CLIFormatter.handle_cast(msg, config)
+    case msg do
+      # Notify AssertValue.Server that test is finished.
+      # Server may wait for tests with diff to finish its output
+      {:test_finished, test} ->
+        AssertValue.Server.test_finished({test.tags.file, test.name})
+      _ ->
+        true
+    end
     AssertValue.Server.flush_ex_unit_io()
     {:noreply, config}
   end

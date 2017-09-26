@@ -9,6 +9,8 @@ defmodule AssertValue.Server do
   def init(_) do
     state = %{
       captured_ex_unit_io_pid: nil,
+      tests_waiting_to_ask: [],
+      tests_waiting_to_finish: [],
       file_changes: %{}
     }
     {:ok, state}
@@ -16,6 +18,27 @@ defmodule AssertValue.Server do
 
   def handle_cast({:set_captured_ex_unit_io_pid, pid}, state) do
     {:noreply, %{state | captured_ex_unit_io_pid: pid}}
+  end
+
+  def handle_cast({:test_finished, filename_and_test}, state) do
+    tests_left_to_finish =
+      state.tests_waiting_to_finish
+      |> Enum.filter(&(&1 != filename_and_test))
+
+    if (tests_left_to_finish == [] && state.tests_waiting_to_ask != []) do
+      [{reply_to, opts} | tests_left_to_ask] = state.tests_waiting_to_ask
+      contents = StringIO.flush(state.captured_ex_unit_io_pid)
+      if contents != "", do: IO.write contents
+      filename_and_test = filename_and_test(opts)
+      tests_waiting_to_finish = tests_left_to_finish ++ [filename_and_test]
+      {reply, state} = do_ask(opts, state)
+      GenServer.reply(reply_to, reply)
+      {:noreply, %{state |
+        tests_waiting_to_ask: tests_left_to_ask,
+        tests_waiting_to_finish: tests_waiting_to_finish}}
+    else
+      {:noreply, %{state | tests_waiting_to_finish: tests_left_to_finish}}
+    end
   end
 
   def handle_cast({:flush_ex_unit_io}, state) do
@@ -26,14 +49,27 @@ defmodule AssertValue.Server do
 
   # This a synchronous call
   # No other AssertValue diffs will be shown until user give answer
-  def handle_call({:ask_user_about_diff, opts}, _from, state) do
-    # Hack: We try to wait until previous test asking about diff (and fail) will
-    # output test results. Otherwise user will get previous failed test result
-    # message right after the answer for current test.
-    # TODO: Refactor to messaging
-    Process.sleep(30)
-    contents = StringIO.flush(state.captured_ex_unit_io_pid)
-    if contents != "", do: IO.write contents
+  def handle_call({:ask_user_about_diff, opts}, from, state) do
+    filename_and_test = filename_and_test(opts)
+    # Check that there are no tests to finish output or
+    # this is the same test we asked previous time. Then
+    # we can ask again becase this will be the same output.
+    other_tests_left_to_finish =
+      state.tests_waiting_to_finish
+      |> Enum.filter(&(&1 != filename_and_test))
+
+    if other_tests_left_to_finish == [] do
+      tests_waiting_to_finish = other_tests_left_to_finish ++ [filename_and_test]
+      state = %{state | tests_waiting_to_finish: tests_waiting_to_finish}
+      {reply, state} = do_ask(opts, state)
+      {:reply, reply, state}
+    else
+      {:noreply, %{state |
+        tests_waiting_to_ask: state.tests_waiting_to_ask ++ [{from, opts}]}}
+    end
+  end
+
+  defp do_ask(opts, state) do
     answer = prompt_for_action(
       opts[:caller][:file],
       opts[:caller][:line],
@@ -65,13 +101,13 @@ defmodule AssertValue.Server do
         end
         case result do
           {:ok, file_changes} ->
-            {:reply, {:ok, opts[:actual_value]}, %{state | file_changes: file_changes}}
+            {{:ok, opts[:actual_value]}, %{state | file_changes: file_changes}}
           {:error, :unsupported_value} ->
-            {:reply, {:error, :unsupported_value}, state}
+            {{:error, :unsupported_value}, state}
         end
       _  ->
         # Fail test. Pass exception up to the caller and throw it there
-        {:reply,  {:error, :ex_unit_assertion_error, [left: opts[:actual_value],
+        {{:error, :ex_unit_assertion_error, [left: opts[:actual_value],
             right: opts[:expected_value],
             expr: opts[:assertion_code],
             message: "AssertValue assertion failed"]},
@@ -81,6 +117,10 @@ defmodule AssertValue.Server do
 
   def set_captured_ex_unit_io_pid(pid) do
     GenServer.cast __MODULE__, {:set_captured_ex_unit_io_pid, pid}
+  end
+
+  def test_finished(filename_and_test) do
+    GenServer.cast __MODULE__, {:test_finished, filename_and_test}
   end
 
   def flush_ex_unit_io do
@@ -181,6 +221,12 @@ defmodule AssertValue.Server do
   end
 
   # Private
+
+  defp filename_and_test(opts) do
+    test_filename = opts[:caller][:file]
+    {test_name, _arity} = opts[:caller][:function]
+    {test_filename, test_name}
+  end
 
   defp read_source(filename) do
     File.read!(filename) |> String.split("\n")
