@@ -42,7 +42,7 @@ defmodule AssertValue.Server do
       opts[:actual_value],
       opts[:expected_value]
     )
-    file_changes = case answer do
+    result = case answer do
       "y" ->
         case opts[:expected_action] do
           :update ->
@@ -64,9 +64,14 @@ defmodule AssertValue.Server do
             )
         end
       _  ->
-        state.file_changes
+        {:ok, state.file_changes}
     end
-    {:reply, answer, %{state | file_changes: file_changes}}
+    case result do
+      {:ok, file_changes} ->
+        {:reply, {:ok, answer}, %{state | file_changes: file_changes}}
+      {:error, :unsupported_value} ->
+        {:reply, {:error, :unsupported_value}, state}
+    end
   end
 
   def set_captured_ex_unit_io_pid(pid) do
@@ -79,17 +84,20 @@ defmodule AssertValue.Server do
 
   def ask_user_about_diff(opts) do
     # Wait for user's input forever
-    answer = GenServer.call __MODULE__, {:ask_user_about_diff, opts}, :infinity
-    case answer do
-      "y" ->
+    result = GenServer.call __MODULE__, {:ask_user_about_diff, opts}, :infinity
+    case result do
+      {:ok, "y"} ->
         {:ok, opts[:actual_value]} # actual has now become expected
-      _  ->
-        # we pass exception up to the caller and throw it there
+      {:ok, _} ->
+        # Fail test. Pass exception up to the caller and throw it there
         {:error,
          [left: opts[:actual_value],
           right: opts[:expected_value],
           expr: opts[:assertion_code],
           message: "AssertValue assertion failed"]}
+      {:error, :unsupported_value} ->
+        # Raise ArgumentError in test
+        {:error, :unsupported_value}
     end
   end
 
@@ -122,10 +130,12 @@ defmodule AssertValue.Server do
       IO.puts(file, indentation <> ~S{"""})
       IO.write(file, Enum.join(suffix, "\n"))
     end)
-    update_lines_count(file_changes, source_filename, original_line_number, length(new_expected) + 1)
+    {:ok, update_lines_count(file_changes, source_filename,
+      original_line_number, length(new_expected) + 1)}
   end
 
   # Update expected when expected is heredoc
+  # return {:error, :unsupported_value} if not
   def update_expected(file_changes, :source, source_filename, original_line_number,
                       actual, expected, _) do
     expected = to_lines(expected)
@@ -135,24 +145,28 @@ defmodule AssertValue.Server do
     heredoc_close_line_number = Enum.find_index(rest, fn(s) ->
       s =~ ~r/^\s*"""/
     end)
+    if heredoc_close_line_number do
+      {_, suffix} = Enum.split(rest, heredoc_close_line_number)
+      [heredoc_close_line | _] = suffix
+      [[indentation]] = Regex.scan(~r/^\s*/, heredoc_close_line)
+      new_expected = new_expected_from_actual(actual, indentation)
+      File.open!(source_filename, [:write], fn(file) ->
+        IO.puts(file, Enum.join(prefix, "\n"))
+        IO.puts(file, Enum.join(new_expected, "\n"))
+        IO.write(file, Enum.join(suffix, "\n"))
+      end)
+      {:ok, update_lines_count(file_changes, source_filename,
+        original_line_number, length(new_expected) - length(expected))}
     # If heredoc closing line is not found then right argument is a string
-    unless heredoc_close_line_number, do: raise AssertValue.ArgumentError
-    {_, suffix} = Enum.split(rest, heredoc_close_line_number)
-    [heredoc_close_line | _] = suffix
-    [[indentation]] = Regex.scan(~r/^\s*/, heredoc_close_line)
-    new_expected = new_expected_from_actual(actual, indentation)
-    File.open!(source_filename, [:write], fn(file) ->
-      IO.puts(file, Enum.join(prefix, "\n"))
-      IO.puts(file, Enum.join(new_expected, "\n"))
-      IO.write(file, Enum.join(suffix, "\n"))
-    end)
-    update_lines_count(file_changes, source_filename, original_line_number, length(new_expected) - length(expected))
+    else
+      {:error, :unsupported_value}
+    end
   end
 
   # Update expected when expected is File.read!
   def update_expected(file_changes, :file, _, _, actual, _, expected_filename) do
     File.write!(expected_filename, actual)
-    file_changes
+    {:ok, file_changes}
   end
 
   # File tracking

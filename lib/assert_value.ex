@@ -56,6 +56,7 @@ defmodule AssertValue do
 
         case decision do
           {:ok, value} -> value
+          {:error, :unsupported_value} -> raise AssertValue.ArgumentError
           {:error, error} -> raise ExUnit.AssertionError, error
         end
 
