@@ -42,9 +42,9 @@ defmodule AssertValue.Server do
       opts[:actual_value],
       opts[:expected_value]
     )
-    result = case answer do
+    case answer do
       "y" ->
-        case opts[:expected_action] do
+        result = case opts[:expected_action] do
           :update ->
             update_expected(
               state.file_changes,
@@ -63,14 +63,19 @@ defmodule AssertValue.Server do
               opts[:actual_value]
             )
         end
+        case result do
+          {:ok, file_changes} ->
+            {:reply, {:ok, opts[:actual_value]}, %{state | file_changes: file_changes}}
+          {:error, :unsupported_value} ->
+            {:reply, {:error, :unsupported_value}, state}
+        end
       _  ->
-        {:ok, state.file_changes}
-    end
-    case result do
-      {:ok, file_changes} ->
-        {:reply, {:ok, answer}, %{state | file_changes: file_changes}}
-      {:error, :unsupported_value} ->
-        {:reply, {:error, :unsupported_value}, state}
+        # Fail test. Pass exception up to the caller and throw it there
+        {:reply,  {:error, :ex_unit_assertion_error, [left: opts[:actual_value],
+            right: opts[:expected_value],
+            expr: opts[:assertion_code],
+            message: "AssertValue assertion failed"]},
+        state}
     end
   end
 
@@ -84,21 +89,7 @@ defmodule AssertValue.Server do
 
   def ask_user_about_diff(opts) do
     # Wait for user's input forever
-    result = GenServer.call __MODULE__, {:ask_user_about_diff, opts}, :infinity
-    case result do
-      {:ok, "y"} ->
-        {:ok, opts[:actual_value]} # actual has now become expected
-      {:ok, _} ->
-        # Fail test. Pass exception up to the caller and throw it there
-        {:error,
-         [left: opts[:actual_value],
-          right: opts[:expected_value],
-          expr: opts[:assertion_code],
-          message: "AssertValue assertion failed"]}
-      {:error, :unsupported_value} ->
-        # Raise ArgumentError in test
-        {:error, :unsupported_value}
-    end
+    GenServer.call __MODULE__, {:ask_user_about_diff, opts}, :infinity
   end
 
   def prompt_for_action(file, line, function, code, left, right) do
