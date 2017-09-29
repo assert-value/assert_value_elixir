@@ -132,11 +132,14 @@ defmodule AssertValue.Server do
     expected = to_lines(expected)
     source = read_source(source_filename)
     line_number = current_line_number(file_changes, source_filename, original_line_number)
-    {prefix, rest} = Enum.split(source, line_number)
-    heredoc_close_line_number = Enum.find_index(rest, fn(s) ->
-      s =~ ~r/^\s*"""/
-    end)
-    if heredoc_close_line_number do
+    line = Enum.at(source, line_number - 1)
+    heredoc_open = Regex.named_captures(
+      ~r/assert_value.*==\s*(?<heredoc>\"{3}).*/, line)["heredoc"]
+    if heredoc_open do
+      {prefix, rest} = Enum.split(source, line_number)
+      heredoc_close_line_number = Enum.find_index(rest, fn(s) ->
+        s =~ ~r/^\s*#{Regex.escape(heredoc_open)}/
+      end)
       {_, suffix} = Enum.split(rest, heredoc_close_line_number)
       [heredoc_close_line | _] = suffix
       [[indentation]] = Regex.scan(~r/^\s*/, heredoc_close_line)

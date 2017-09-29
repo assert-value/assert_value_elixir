@@ -77,6 +77,11 @@ defmodule IntegrationTest do
     """
   end
 
+  test "bad expected in the form of string" do
+    # prompt: y
+    assert_value "foo" == "bar"
+  end
+
   defp hello(arg) do
     "Hello #{arg}!"
   end

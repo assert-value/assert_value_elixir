@@ -16,17 +16,15 @@ defmodule BadExpectedTest do
     assert_raise AssertValue.ArgumentError, ~S{Expected should be in the form of string heredoc (""") or File.read!}, fn ->
       assert_value "foo" == %{}
     end
+    # Heredoc is charlist. We don't know the difference between
+    # charlist and list. In Elixir [65] == 'A' is true
+    assert_raise AssertValue.ArgumentError, ~S{Expected should be in the form of string heredoc (""") or File.read!}, fn ->
+      assert_value "foo" == '''
+        foo
+      '''
+    end
+    # See test/integration/integration_test.exs.before for test expected
+    # in the form of string
   end
-
-  # TODO: Make this test work.
-  #
-  # To do this we need to check if expected value is a string in the form
-  # of heredoc and not regular string _before_ asking user about diff.
-  # Since we use separate process to interact with user ExUnit.CaptureIO
-  # does not work for us.
-  #
-  #   assert_raise AssertValue.ArgumentError, ~S{Expected should be in the form of string heredoc (""") or File.read!}, fn ->
-  #     assert_value "foo" == "bar"
-  #   end
 
 end
