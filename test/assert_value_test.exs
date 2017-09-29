@@ -45,7 +45,7 @@ defmodule AssertValueTest do
     # extract expected assert_value prompt responses from the test.
     # We look for lines like '# prompt: y'
     prompt_responses =
-      Regex.scan(~r/# prompt: (.)/, File.read!(runnable_path))
+      Regex.scan(~r/#\s*prompt:\s*(.)/, File.read!(runnable_path))
     |> Enum.map(fn([_, x]) -> x end)
     |>  Enum.join("\n")
     prompt_responses = prompt_responses <> "\n"
