@@ -85,7 +85,7 @@ defmodule AssertValueTest do
     # compare the results
     assert_value File.read!(runnable_path) == File.read!(after_path)
     assert_value output == File.read!(output_path)
-    assert exitcode == 1 # One fail
+    assert exitcode == 1 # There were failed tests
 
     assert_value File.read!(file_to_create_runnable_path) == File.read!(file_to_create_after_path)
     assert_value File.read!(file_to_update_runnable_path) == File.read!(file_to_update_after_path)

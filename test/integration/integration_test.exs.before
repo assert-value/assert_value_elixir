@@ -3,6 +3,17 @@ defmodule IntegrationTest do
 
   import AssertValue
 
+  test "simple pass" do
+    actual = """
+    aaa
+    bbb
+    """
+    assert_value actual == """
+    aaa
+    bbb
+    """
+  end
+
   test "create expected" do
     value = """
     aaa
@@ -94,20 +105,6 @@ defmodule IntegrationTest do
 
   # tests with prompt answer n go below here
 
-  test "simple pass" do
-    actual = """
-    aaa
-    bbb
-    """
-    # lhs matches rhs, but still answer the prompt in case
-    # assert_value breaks - we don't want out integration test to hang
-    # prompt: n
-    assert_value actual == """
-    aaa
-    bbb
-    """
-  end
-
   test "simple fail" do
     actual = """
     aaa
@@ -120,6 +117,21 @@ defmodule IntegrationTest do
     bBb
     ccc
     """
+  end
+
+  # Test prompts
+
+  test "promt help and accept" do
+    # prompt: ?
+    # prompt: y
+    assert_value "foo"
+  end
+
+  test "promt help then diff then fail" do
+    # prompt: ?
+    # prompt: d
+    # prompt: n
+    assert_value "foo"
   end
 
 end

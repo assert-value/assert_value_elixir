@@ -86,6 +86,11 @@ defmodule AssertValue.Server do
   end
 
   def prompt_for_action(opts) do
+    print_diff_and_context(opts)
+    get_answer(opts)
+  end
+
+  defp print_diff_and_context(opts) do
     file = opts[:caller][:file] |> Path.relative_to(System.cwd!) # make it shorter
     line = opts[:caller][:line]
     # the prompt we print here should
@@ -102,8 +107,34 @@ defmodule AssertValue.Server do
     IO.puts "\n" <> diff_context <> "\n"
     IO.puts diff
     if diff_lines_count > 37, do: IO.puts diff_context
-    IO.gets("Accept new value [y/n]? ")
-    |> String.trim_trailing("\n")
+  end
+
+  defp get_answer(opts) do
+    answer =
+      IO.gets("Accept new value [y/n/d/?]? ")
+      |> String.trim_trailing("\n")
+    case answer do
+      "?" ->
+        print_help()
+        get_answer(opts)
+      "d" ->
+        print_diff_and_context(opts)
+        get_answer(opts)
+      _ ->
+        answer
+    end
+  end
+
+  defp print_help do
+    """
+
+    y - Accept and overwrite new expected value in test code. Test will pass
+    n - Do not accept new expected value. Test will fail
+    d - Show diff between actual and expected value
+    ? - This help
+    """
+    |> String.replace(~r/^/m, "    ") # Indent all lines
+    |> IO.puts
   end
 
   def create_expected(file_changes, source_filename, original_line_number, actual) do
