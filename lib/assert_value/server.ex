@@ -111,7 +111,7 @@ defmodule AssertValue.Server do
       IO.puts diff_context
     end
     IO.gets("\nAccept new value [y/n]? ")
-    |> String.rstrip(?\n)
+    |> String.trim_trailing("\n")
   end
 
   def create_expected(file_changes, source_filename, original_line_number, actual) do
