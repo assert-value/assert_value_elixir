@@ -142,45 +142,4 @@ Accept new value [y/n/d/?]?
        integration_test.exs:115: (test)
 
 
-integration_test.exs:127:"test promt help and accept" assert_value "foo" failed
-
--
-+foo
-
-Accept new value [y/n/d/?]?     
-    y - Accept and overwrite new expected value in test code. Test will pass
-    n - Do not accept new expected value. Test will fail
-    d - Show diff between actual and expected value
-    ? - This help
-
-Accept new value [y/n/d/?]? .
-integration_test.exs:134:"test promt help then diff then fail" assert_value "foo" failed
-
--
-+foo
-
-Accept new value [y/n/d/?]?     
-    y - Accept and overwrite new expected value in test code. Test will pass
-    n - Do not accept new expected value. Test will fail
-    d - Show diff between actual and expected value
-    ? - This help
-
-Accept new value [y/n/d/?]? 
-integration_test.exs:134:"test promt help then diff then fail" assert_value "foo" failed
-
--
-+foo
-
-Accept new value [y/n/d/?]? 
-
-  3) test promt help then diff then fail (IntegrationTest)
-     integration_test.exs:130
-     AssertValue assertion failed
-     code:  "foo"
-     left: "foo"
-     right: nil
-     stacktrace:
-       integration_test.exs:134: (test)
-
-
-13 tests, 3 failures
+11 tests, 2 failures

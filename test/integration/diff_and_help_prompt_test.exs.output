@@ -1,0 +1,43 @@
+
+diff_and_help_prompt_test.exs:9:"test promt help and accept" assert_value "foo" failed
+
+-
++foo
+
+Accept new value [y/n/d/?]?     
+    y - Accept and overwrite new expected value in test code. Test will pass
+    n - Do not accept new expected value. Test will fail
+    d - Show diff between actual and expected value
+    ? - This help
+
+Accept new value [y/n/d/?]? .
+diff_and_help_prompt_test.exs:16:"test promt help then diff then fail" assert_value "foo" failed
+
+-
++foo
+
+Accept new value [y/n/d/?]?     
+    y - Accept and overwrite new expected value in test code. Test will pass
+    n - Do not accept new expected value. Test will fail
+    d - Show diff between actual and expected value
+    ? - This help
+
+Accept new value [y/n/d/?]? 
+diff_and_help_prompt_test.exs:16:"test promt help then diff then fail" assert_value "foo" failed
+
+-
++foo
+
+Accept new value [y/n/d/?]? 
+
+  1) test promt help then diff then fail (DiffAndHelpPromptTest)
+     diff_and_help_prompt_test.exs:12
+     AssertValue assertion failed
+     code:  "foo"
+     left: "foo"
+     right: nil
+     stacktrace:
+       diff_and_help_prompt_test.exs:16: (test)
+
+
+2 tests, 1 failure

@@ -159,21 +159,4 @@ defmodule IntegrationTest do
     """
   end
 
-  # Test prompts
-
-  test "promt help and accept" do
-    # prompt: ?
-    # prompt: y
-    assert_value "foo" == """
-    foo<NOEOL>
-    """
-  end
-
-  test "promt help then diff then fail" do
-    # prompt: ?
-    # prompt: d
-    # prompt: n
-    assert_value "foo"
-  end
-
 end
