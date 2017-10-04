@@ -11,7 +11,9 @@ defmodule AssertValue.Tempfile do
   defp generate_tmpname(prefix, suffix) do
     {_mega, sec, micro} = :os.timestamp
     pid = :os.getpid
-    random_string = Integer.to_string(:rand.uniform(0x100000000), 36) |> String.downcase
+    random_string =
+      Integer.to_string(:rand.uniform(0x100000000), 36)
+      |> String.downcase
     "#{prefix}#{sec}#{micro}-#{pid}-#{random_string}#{suffix}"
   end
 end
@@ -35,7 +37,8 @@ defmodule AssertValue.System do
   #      ["test", "--seed", "0", "/tmp/intergration_test.exs"], input: "y\ny\n")
   def exec(cmd, args, opts) do
     cmd = cmd |> System.find_executable
-    port = Port.open({:spawn_executable, cmd}, [{:args, args}, :binary, :exit_status])
+    port = Port.open({:spawn_executable, cmd},
+      [{:args, args}, :binary, :exit_status])
     Port.command(port, opts[:input])
     handle_output(port, "")
   end

@@ -55,9 +55,12 @@ defmodule AssertValue do
           expected_file: expected_file)
 
         case decision do
-          {:ok, value} -> value
-          {:error, :unsupported_value} -> raise AssertValue.ArgumentError
-          {:error, :ex_unit_assertion_error, error} -> raise ExUnit.AssertionError, error
+          {:ok, value} ->
+            value
+          {:error, :unsupported_value} ->
+            raise AssertValue.ArgumentError
+          {:error, :ex_unit_assertion_error, error} ->
+            raise ExUnit.AssertionError, error
         end
 
       end
@@ -82,8 +85,10 @@ defmodule AssertValue do
         expected_value: nil)
 
       case decision do
-        {:ok, value} -> value
-        {:error, :ex_unit_assertion_error, error} -> raise ExUnit.AssertionError, error
+        {:ok, value} ->
+          value
+        {:error, :ex_unit_assertion_error,  error} ->
+          raise ExUnit.AssertionError, error
       end
     end
   end
