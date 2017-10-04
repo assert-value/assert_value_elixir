@@ -199,7 +199,7 @@ defmodule AssertValue.Server do
 
   def current_line_number(file_changes, filename, original_line_number) do
     current_file_changes = file_changes[filename] || %{}
-    cumulative_offset = Enum.reduce(current_file_changes, 0, fn({l,o}, total) ->
+    cumulative_offset = Enum.reduce(current_file_changes, 0, fn({l, o}, total) ->
       if original_line_number > l, do: total + o, else: total
     end)
     original_line_number + cumulative_offset
