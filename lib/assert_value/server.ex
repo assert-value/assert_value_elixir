@@ -231,10 +231,10 @@ defmodule AssertValue.Server do
     # strings that don't we append a special token and a newline when
     # writing them to source file.  This way we can look for this
     # special token when we read it back and strip it at that time.
-    actual = unless actual =~ ~r/\n\Z/ do
-      actual <> "<NOEOL>\n"
-    else
+    actual = if actual =~ ~r/\n\Z/ do
       actual
+    else
+      actual <> "<NOEOL>\n"
     end
 
     actual
