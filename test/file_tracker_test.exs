@@ -34,5 +34,4 @@ defmodule AssertValue.FileTrackerTest do
     assert current_line_number(file_changes, "~/second_test.exs", 6) == 10
   end
 
-
 end
