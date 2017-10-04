@@ -13,4 +13,4 @@ matrix:
 
 script:
   - mix test
-  - mix credo --format=oneline
+  - MIX_ENV=test mix credo --format=oneline
