@@ -106,6 +106,8 @@ defmodule AssertValue.Server do
     diff_lines_count = String.split(diff, "\n") |> Enum.count()
     IO.puts "\n" <> diff_context <> "\n"
     IO.puts diff
+    # If diff is too long diff context does not fit to screen
+    # we need to repeat it
     if diff_lines_count > 37, do: IO.puts diff_context
   end
 
