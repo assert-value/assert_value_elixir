@@ -62,7 +62,8 @@ defmodule AssertValueTest do
       #   stacktrace:
       #     integration_test.exs:82: (test)
       #
-      |> String.replace(~r/(\(AssertValue.ArgumentError\).*?)\n\s{5}code:.*?\n/, "\\1\n")
+      |> String.replace(
+        ~r/(\(AssertValue.ArgumentError\).*?)\n\s{5}code:.*?\n/, "\\1\n")
 
     {output, exitcode}
   end
@@ -80,15 +81,20 @@ defmodule AssertValueTest do
 
     # Prepare data for file comparisons (create)
     file_to_create_name = "file_to_create"
-    file_to_create_after_path = Path.expand(file_to_create_name <> ".after", @integration_test_dir)
-    file_to_create_runnable_path = Path.expand(file_to_create_name, @runnable_test_dir)
+    file_to_create_after_path = Path.expand(file_to_create_name <> ".after",
+      @integration_test_dir)
+    file_to_create_runnable_path = Path.expand(file_to_create_name,
+      @runnable_test_dir)
     refute File.exists?(file_to_create_runnable_path)
 
     # Prepare data for file comparisons (update)
     file_to_update_name = "file_to_update"
-    file_to_update_before_path = Path.expand(file_to_update_name <> ".before", @integration_test_dir)
-    file_to_update_after_path = Path.expand(file_to_update_name <> ".after", @integration_test_dir)
-    file_to_update_runnable_path = Path.expand(file_to_update_name, @runnable_test_dir)
+    file_to_update_before_path = Path.expand(file_to_update_name <> ".before",
+      @integration_test_dir)
+    file_to_update_after_path = Path.expand(file_to_update_name <> ".after",
+      @integration_test_dir)
+    file_to_update_runnable_path = Path.expand(file_to_update_name,
+      @runnable_test_dir)
     File.cp!(file_to_update_before_path, file_to_update_runnable_path)
 
     {output, exitcode} = run_tests(runnable_path)
@@ -98,8 +104,10 @@ defmodule AssertValueTest do
     assert_value File.read!(runnable_path) == File.read!(after_path)
     assert_value output == File.read!(output_path)
 
-    assert_value File.read!(file_to_create_runnable_path) == File.read!(file_to_create_after_path)
-    assert_value File.read!(file_to_update_runnable_path) == File.read!(file_to_update_after_path)
+    assert_value File.read!(file_to_create_runnable_path) ==
+      File.read!(file_to_create_after_path)
+    assert_value File.read!(file_to_update_runnable_path) ==
+      File.read!(file_to_update_after_path)
   end
 
   test "diff and help prompt" do

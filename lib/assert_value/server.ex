@@ -58,7 +58,8 @@ defmodule AssertValue.Server do
         end
         case result do
           {:ok, file_changes} ->
-            {:reply, {:ok, opts[:actual_value]}, %{state | file_changes: file_changes}}
+            {:reply, {:ok, opts[:actual_value]},
+              %{state | file_changes: file_changes}}
           {:error, :unsupported_value} ->
             {:reply, {:error, :unsupported_value}, state}
         end
@@ -91,7 +92,9 @@ defmodule AssertValue.Server do
   end
 
   defp print_diff_and_context(opts) do
-    file = opts[:caller][:file] |> Path.relative_to(System.cwd!) # make it shorter
+    file =
+      opts[:caller][:file]
+      |> Path.relative_to(System.cwd!) # make it shorter
     line = opts[:caller][:line]
     # the prompt we print here should
     # * let user easily identify which assert failed
@@ -141,7 +144,8 @@ defmodule AssertValue.Server do
 
   def create_expected(file_changes, source_filename, original_line_number, actual) do
     source = read_source(source_filename)
-    line_number = current_line_number(file_changes, source_filename, original_line_number)
+    line_number = current_line_number(
+      file_changes, source_filename, original_line_number)
     {prefix, rest} = Enum.split(source, line_number - 1)
     [code_line | suffix] = rest
     [[indentation]] = Regex.scan(~r/^\s*/, code_line)
@@ -163,7 +167,8 @@ defmodule AssertValue.Server do
                       actual, expected, _) do
     expected = to_lines(expected)
     source = read_source(source_filename)
-    line_number = current_line_number(file_changes, source_filename, original_line_number)
+    line_number = current_line_number(
+      file_changes, source_filename, original_line_number)
     line = Enum.at(source, line_number - 1)
     heredoc_open = Regex.named_captures(
       ~r/assert_value.*==\s*(?<heredoc>\"{3}).*/, line)["heredoc"]
@@ -199,9 +204,10 @@ defmodule AssertValue.Server do
 
   def current_line_number(file_changes, filename, original_line_number) do
     current_file_changes = file_changes[filename] || %{}
-    cumulative_offset = Enum.reduce(current_file_changes, 0, fn({l,o}, total) ->
-      if original_line_number > l, do: total + o, else: total
-    end)
+    cumulative_offset = Enum.reduce(current_file_changes, 0,
+      fn({l, o}, total) ->
+        if original_line_number > l, do: total + o, else: total
+      end)
     original_line_number + cumulative_offset
   end
 
@@ -231,10 +237,10 @@ defmodule AssertValue.Server do
     # strings that don't we append a special token and a newline when
     # writing them to source file.  This way we can look for this
     # special token when we read it back and strip it at that time.
-    actual = unless actual =~ ~r/\n\Z/ do
-      actual <> "<NOEOL>\n"
-    else
+    actual = if actual =~ ~r/\n\Z/ do
       actual
+    else
+      actual <> "<NOEOL>\n"
     end
 
     actual
@@ -245,7 +251,7 @@ defmodule AssertValue.Server do
 
   # Inspect protocol for String has the best implementation
   # of string escaping. Use it, but remove leading and trailing ?"
-  # See https://github.com/elixir-lang/elixir/blob/master/lib/elixir/lib/inspect.ex
+  # https://github.com/elixir-lang/elixir/blob/master/lib/elixir/lib/inspect.ex
   defp escape_string(s) do
     s
     |> inspect

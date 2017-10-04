@@ -24,7 +24,7 @@ defmodule AssertValue do
       actual_value = unquote(left)
       expected_type = unquote(expected_type)
       expected_file = unquote(expected_file)
-      expected_value = 
+      expected_value =
         case expected_type do
           :source -> unquote(right) |>
               String.replace(~r/<NOEOL>\n\Z/, "", global: false)
@@ -40,7 +40,7 @@ defmodule AssertValue do
 
       if assertion_result do
         assertion_result
-      else 
+      else
         decision = AssertValue.Server.ask_user_about_diff(
           caller: [
             file: unquote(__CALLER__.file),
@@ -55,9 +55,12 @@ defmodule AssertValue do
           expected_file: expected_file)
 
         case decision do
-          {:ok, value} -> value
-          {:error, :unsupported_value} -> raise AssertValue.ArgumentError
-          {:error, :ex_unit_assertion_error, error} -> raise ExUnit.AssertionError, error
+          {:ok, value} ->
+            value
+          {:error, :unsupported_value} ->
+            raise AssertValue.ArgumentError
+          {:error, :ex_unit_assertion_error, error} ->
+            raise ExUnit.AssertionError, error
         end
 
       end
@@ -82,8 +85,10 @@ defmodule AssertValue do
         expected_value: nil)
 
       case decision do
-        {:ok, value} -> value
-        {:error, :ex_unit_assertion_error, error} -> raise ExUnit.AssertionError, error
+        {:ok, value} ->
+          value
+        {:error, :ex_unit_assertion_error,  error} ->
+          raise ExUnit.AssertionError, error
       end
     end
   end

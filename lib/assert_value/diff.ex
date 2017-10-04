@@ -19,7 +19,7 @@ defmodule AssertValue.Diff do
   defp format_diff(diff) do
     formatted =
       diff
-      |> Enum.map(fn({k,v}) ->
+      |> Enum.map(fn({k, v}) ->
           Enum.map(v, fn(s) ->
             @prefixes[k] <> s
           end)
