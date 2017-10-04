@@ -66,6 +66,21 @@ defmodule AssertValueTest do
     |> String.replace(~r/\s{5}code:\s+actual/m,   "     code: actual")
     |> String.replace(~r/\s{5}(lhs|left):\s+"/m,  "     left: \"")
     |> String.replace(~r/\s{5}(rhs|right):\s+"/m, "     right: \"")
+    # canonicalize messages about raised AssertValue.ArgumentError exceptions
+    # ExUnit in Elixir 1.5 has "code:" line in message:
+    #
+    #   ** (AssertValue.ArgumentError) ...
+    #   code: assert_value "foo" = "bar"
+    #   stacktrace:
+    #     integration_test.exs:82: (test)
+    #
+    # ExUnit in Elixir 1.4 does not
+    #
+    #   ** (AssertValue.ArgumentError) ...
+    #   stacktrace:
+    #     integration_test.exs:82: (test)
+    #
+    |> String.replace(~r/(\(AssertValue.ArgumentError\).*?)\n\s{5}code:.*?\n/, "\\1\n")
 
     # compare the results
     assert_value File.read!(runnable_path) == File.read!(after_path)

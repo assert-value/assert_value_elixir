@@ -1,4 +1,4 @@
-ExUnit.start()
+ExUnit.start([timeout: :infinity])
 
 defmodule AssertValue.Tempfile do
   def mktemp_dir(prefix \\ "", suffix \\ "") do

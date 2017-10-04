@@ -41,7 +41,7 @@ defmodule AssertValue do
       if assertion_result do
         assertion_result
       else 
-        decision = AssertValue.ask_user_about_diff(
+        decision = AssertValue.Server.ask_user_about_diff(
           caller: [
             file: unquote(__CALLER__.file),
             line: unquote(__CALLER__.line),
@@ -56,7 +56,8 @@ defmodule AssertValue do
 
         case decision do
           {:ok, value} -> value
-          {:error, error} -> raise ExUnit.AssertionError, error
+          {:error, :unsupported_value} -> raise AssertValue.ArgumentError
+          {:error, :ex_unit_assertion_error, error} -> raise ExUnit.AssertionError, error
         end
 
       end
@@ -68,7 +69,7 @@ defmodule AssertValue do
     quote do
       assertion_code = unquote(Macro.to_string(assertion))
       actual_value = unquote(assertion) # in this case
-      decision = AssertValue.ask_user_about_diff(
+      decision = AssertValue.Server.ask_user_about_diff(
         caller: [
           file: unquote(__CALLER__.file),
           line: unquote(__CALLER__.line),
@@ -82,158 +83,9 @@ defmodule AssertValue do
 
       case decision do
         {:ok, value} -> value
-        {:error, error} -> raise ExUnit.AssertionError, error
+        {:error, :ex_unit_assertion_error, error} -> raise ExUnit.AssertionError, error
       end
     end
-  end
-
-  def ask_user_about_diff(opts) do
-    answer = prompt_for_action(opts[:caller][:file],
-                               opts[:caller][:line],
-                               opts[:caller][:function],
-                               opts[:assertion_code],
-                               opts[:actual_value],
-                               opts[:expected_value])
-    
-    case answer do
-      "y" ->
-        case opts[:expected_action] do
-          :update ->
-            update_expected(opts[:expected_type],
-                            opts[:caller][:file],
-                            opts[:caller][:line],
-                            opts[:actual_value],
-                            opts[:expected_value],
-                            opts[:expected_file]) # TODO: expected_filename
-          :create ->
-            create_expected(opts[:caller][:file],
-                            opts[:caller][:line],
-                            opts[:actual_value])
-        end
-        {:ok, opts[:actual_value]} # actual has now become expected
-      _  ->
-        # we pass exception up to the caller and throw it there to
-        # avoid having this function be extra frame in exception's
-        # call stack
-        {:error,
-         [left: opts[:actual_value],
-          # TODO: maybe we should only add right field on update.  In
-          # that case it would probably make sense to construct the
-          # whole exception in the caller
-          right: opts[:expected_value],
-          expr: opts[:assertion_code],
-          message: "AssertValue assertion failed"]}
-    end
-  end
-  
-  def prompt_for_action(file, line, function, code, left, right) do
-    # HACK: sleep to let ExUnit event handler finish output. Otherwise
-    # ExUnit output will interfere with our output. Since this only
-    # happens when doing the interactive prompt/action, sleeping some
-    # is not a big deal
-    :timer.sleep(30)
-    file = Path.relative_to(file, System.cwd!) # make it shorter
-    # the prompt we print here should
-    # * let user easily identify which assert failed
-    # * work with editors's automatic go-to-error-line file:line:
-    #   format handling
-    # * not be unreasonably long, so the user sees it on the screen
-    #   grouped with the diff
-    {function, _} = function
-    IO.puts "\n#{file}:#{line}:\"#{Atom.to_string function}\" assert_value #{code} failed. Diff:"
-    IO.write AssertValue.Diff.diff(right, left)
-    IO.gets("Accept new value [y/n]? ")
-    |> String.rstrip(?\n)
-  end
-
-  def create_expected(source_filename, original_line_number, actual) do
-    source = read_source(source_filename)
-    line_number =
-      AssertValue.FileTracker.current_line_number(
-        source_filename, original_line_number)
-    {prefix, rest} = Enum.split(source, line_number - 1)
-    [code_line | suffix] = rest
-    [[indentation]] = Regex.scan(~r/^\s*/, code_line)
-    new_expected = new_expected_from_actual(actual, indentation)
-    File.open!(source_filename, [:write], fn(file) ->
-      IO.puts(file, Enum.join(prefix, "\n"))
-      IO.puts(file, code_line <> ~S{ == """})
-      IO.puts(file, Enum.join(new_expected, "\n"))
-      IO.puts(file, indentation <> ~S{"""})
-      IO.write(file, Enum.join(suffix, "\n"))
-    end)
-    AssertValue.FileTracker.update_lines_count(
-      source_filename, original_line_number, length(new_expected) + 1)
-  end
-
-  # Update expected when expected is heredoc
-  def update_expected(:source, source_filename, original_line_number,
-                      actual, expected, _) do
-    expected = to_lines(expected)
-    source = read_source(source_filename)
-    line_number =
-      AssertValue.FileTracker.current_line_number(
-        source_filename, original_line_number)
-    {prefix, rest} = Enum.split(source, line_number)
-    heredoc_close_line_number = Enum.find_index(rest, fn(s) ->
-      s =~ ~r/^\s*"""/
-    end)
-    # If heredoc closing line is not found then right argument is a string
-    unless heredoc_close_line_number, do: raise AssertValue.ArgumentError
-    {_, suffix} = Enum.split(rest, heredoc_close_line_number)
-    [heredoc_close_line | _] = suffix
-    [[indentation]] = Regex.scan(~r/^\s*/, heredoc_close_line)
-    new_expected = new_expected_from_actual(actual, indentation)
-    File.open!(source_filename, [:write], fn(file) ->
-      IO.puts(file, Enum.join(prefix, "\n"))
-      IO.puts(file, Enum.join(new_expected, "\n"))
-      IO.write(file, Enum.join(suffix, "\n"))
-    end)
-    AssertValue.FileTracker.update_lines_count(
-      source_filename, original_line_number, length(new_expected) - length(expected))
-  end
-
-  # Update expected when expected is File.read!
-  def update_expected(:file, _, _, actual, _, expected_filename) do
-    File.write!(expected_filename, actual)
-  end
-
-  defp read_source(filename) do
-    File.read!(filename) |> String.split("\n")
-  end
-
-  defp to_lines(arg) do
-    arg
-    # remove trailing newline otherwise String.split will give us an
-    # empty line at the end
-    |> String.replace(~r/\n\Z/, "", global: false)
-    |> String.split("\n")
-  end
-
-  defp new_expected_from_actual(actual, indentation) do
-    # to work as a heredoc a string must end with a newline.  For
-    # strings that don't we append a special token and a newline when
-    # writing them to source file.  This way we can look for this
-    # special token when we read it back and strip it at that time.
-    actual = unless actual =~ ~r/\n\Z/ do
-      actual <> "<NOEOL>\n"
-    else
-      actual
-    end
-    
-    actual
-    |> to_lines
-    |> Enum.map(&(indentation <> &1))
-    |> Enum.map(&escape_string/1)
-  end
-
-  # Inspect protocol for String has the best implementation
-  # of string escaping. Use it, but remove leading and trailing ?"
-  # See https://github.com/elixir-lang/elixir/blob/master/lib/elixir/lib/inspect.ex
-  defp escape_string(s) do
-    s
-    |> inspect
-    |> String.replace(~r/(\A")|("\Z)/, "")
   end
 
 end
