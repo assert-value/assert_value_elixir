@@ -108,7 +108,6 @@ integration_test.exs:83:"test reprompt context" assert_value actual failed
 +line
 
 integration_test.exs:83:"test reprompt context" assert_value actual failed
-
 Accept new value [y/n]? .
 integration_test.exs:88:"test bad expected in the form of string" assert_value "foo" == "bar" failed
 

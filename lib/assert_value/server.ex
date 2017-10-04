@@ -34,14 +34,7 @@ defmodule AssertValue.Server do
     Process.sleep(30)
     contents = StringIO.flush(state.captured_ex_unit_io_pid)
     if contents != "", do: IO.write contents
-    answer = prompt_for_action(
-      opts[:caller][:file],
-      opts[:caller][:line],
-      opts[:caller][:function],
-      opts[:assertion_code],
-      opts[:actual_value],
-      opts[:expected_value]
-    )
+    answer = prompt_for_action(opts)
     case answer do
       "y" ->
         result = case opts[:expected_action] do
@@ -92,25 +85,24 @@ defmodule AssertValue.Server do
     GenServer.call __MODULE__, {:ask_user_about_diff, opts}, :infinity
   end
 
-  def prompt_for_action(file, line, function, code, left, right) do
-    file = Path.relative_to(file, System.cwd!) # make it shorter
+  def prompt_for_action(opts) do
+    file = opts[:caller][:file] |> Path.relative_to(System.cwd!) # make it shorter
+    line = opts[:caller][:line]
     # the prompt we print here should
     # * let user easily identify which assert failed
     # * work with editors's automatic go-to-error-line file:line:
     #   format handling
     # * not be unreasonably long, so the user sees it on the screen
     #   grouped with the diff
-    {function, _} = function
-    code = smart_truncate_string(code, 40)
-    diff_context = "\n#{file}:#{line}:\"#{Atom.to_string function}\" assert_value #{code} failed"
-    IO.puts diff_context <> "\n"
-    diff =  AssertValue.Diff.diff(right, left)
+    {function, _} = opts[:caller][:function]
+    code = opts[:assertion_code] |> smart_truncate_string(40)
+    diff_context = "#{file}:#{line}:\"#{Atom.to_string function}\" assert_value #{code} failed"
+    diff = AssertValue.Diff.diff(opts[:expected_value], opts[:actual_value])
     diff_lines_count = String.split(diff, "\n") |> Enum.count()
-    IO.write diff
-    if diff_lines_count > 37 do
-      IO.puts diff_context
-    end
-    IO.gets("\nAccept new value [y/n]? ")
+    IO.puts "\n" <> diff_context <> "\n"
+    IO.puts diff
+    if diff_lines_count > 37, do: IO.puts diff_context
+    IO.gets("Accept new value [y/n]? ")
     |> String.trim_trailing("\n")
   end
 
