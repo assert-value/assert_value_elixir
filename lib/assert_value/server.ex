@@ -36,41 +36,40 @@ defmodule AssertValue.Server do
     contents = StringIO.flush(state.captured_ex_unit_io_pid)
     if contents != "", do: IO.write contents
     {answer, state} = prompt_for_action(opts, state)
-    cond do
-      answer in ["y", "Y"] ->
-        result = case opts[:expected_action] do
-          :update ->
-            update_expected(
-              state.file_changes,
-              opts[:expected_type],
-              opts[:caller][:file],
-              opts[:caller][:line],
-              opts[:actual_value],
-              opts[:expected_value],
-              opts[:expected_file] # TODO: expected_filename
-            )
-          :create ->
-            create_expected(
-              state.file_changes,
-              opts[:caller][:file],
-              opts[:caller][:line],
-              opts[:actual_value]
-            )
-        end
-        case result do
-          {:ok, file_changes} ->
-            {:reply, {:ok, opts[:actual_value]},
-              %{state | file_changes: file_changes}}
-          {:error, :unsupported_value} ->
-            {:reply, {:error, :unsupported_value}, state}
-        end
-      true ->
-        # Fail test. Pass exception up to the caller and throw it there
-        {:reply,  {:error, :ex_unit_assertion_error, [left: opts[:actual_value],
-            right: opts[:expected_value],
-            expr: opts[:assertion_code],
-            message: "AssertValue assertion failed"]},
-        state}
+    if answer in ["y", "Y"] do
+      result = case opts[:expected_action] do
+        :update ->
+          update_expected(
+            state.file_changes,
+            opts[:expected_type],
+            opts[:caller][:file],
+            opts[:caller][:line],
+            opts[:actual_value],
+            opts[:expected_value],
+            opts[:expected_file] # TODO: expected_filename
+          )
+        :create ->
+          create_expected(
+            state.file_changes,
+            opts[:caller][:file],
+            opts[:caller][:line],
+            opts[:actual_value]
+          )
+      end
+      case result do
+        {:ok, file_changes} ->
+          {:reply, {:ok, opts[:actual_value]},
+            %{state | file_changes: file_changes}}
+        {:error, :unsupported_value} ->
+          {:reply, {:error, :unsupported_value}, state}
+      end
+    else
+      # Fail test. Pass exception up to the caller and throw it there
+      {:reply,  {:error, :ex_unit_assertion_error, [left: opts[:actual_value],
+          right: opts[:expected_value],
+          expr: opts[:assertion_code],
+          message: "AssertValue assertion failed"]},
+      state}
     end
   end
 
