@@ -1,0 +1,26 @@
+defmodule AcceptAllTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  # prompt: Y
+
+  test "all pass" do
+    assert_value "foo" == """
+    bar<NOEOL>
+    """
+    assert_value "foo" == """
+    baz<NOEOL>
+    """
+  end
+
+  test "all pass again" do
+    assert_value "foo" == """
+    foo<NOEOL>
+    """
+    assert_value "bar" == """
+    baz<NOEOL>
+    """
+  end
+
+end

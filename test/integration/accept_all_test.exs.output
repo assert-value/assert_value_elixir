@@ -1,0 +1,8 @@
+
+accept_all_test.exs:9:"test all pass" assert_value "foo" == "bar<NOEOL>\n" failed
+
+-bar
++foo
+
+Accept new value [y/n/Y/N/d/?]? ..
+2 tests, 0 failures

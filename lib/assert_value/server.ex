@@ -9,7 +9,8 @@ defmodule AssertValue.Server do
   def init(_) do
     state = %{
       captured_ex_unit_io_pid: nil,
-      file_changes: %{}
+      file_changes: %{},
+      recurring_answer: nil
     }
     {:ok, state}
   end
@@ -34,9 +35,9 @@ defmodule AssertValue.Server do
     Process.sleep(30)
     contents = StringIO.flush(state.captured_ex_unit_io_pid)
     if contents != "", do: IO.write contents
-    answer = prompt_for_action(opts)
-    case answer do
-      "y" ->
+    {answer, state} = prompt_for_action(opts, state)
+    cond do
+      answer in ["y", "Y"] ->
         result = case opts[:expected_action] do
           :update ->
             update_expected(
@@ -63,7 +64,7 @@ defmodule AssertValue.Server do
           {:error, :unsupported_value} ->
             {:reply, {:error, :unsupported_value}, state}
         end
-      _  ->
+      true ->
         # Fail test. Pass exception up to the caller and throw it there
         {:reply,  {:error, :ex_unit_assertion_error, [left: opts[:actual_value],
             right: opts[:expected_value],
@@ -86,9 +87,13 @@ defmodule AssertValue.Server do
     GenServer.call __MODULE__, {:ask_user_about_diff, opts}, :infinity
   end
 
-  def prompt_for_action(opts) do
-    print_diff_and_context(opts)
-    get_answer(opts)
+  def prompt_for_action(opts, state) do
+    if state.recurring_answer do
+      {state.recurring_answer, state}
+    else
+      print_diff_and_context(opts)
+      get_answer(opts, state)
+    end
   end
 
   defp print_diff_and_context(opts) do
@@ -114,19 +119,22 @@ defmodule AssertValue.Server do
     if diff_lines_count > 37, do: IO.puts diff_context
   end
 
-  defp get_answer(opts) do
+  defp get_answer(opts, state) do
     answer =
-      IO.gets("Accept new value [y/n/d/?]? ")
+      IO.gets("Accept new value [y/n/Y/N/d/?]? ")
       |> String.trim_trailing("\n")
     case answer do
       "?" ->
         print_help()
-        get_answer(opts)
+        get_answer(opts, state)
       "d" ->
         print_diff_and_context(opts)
-        get_answer(opts)
+        get_answer(opts, state)
+      c when c in ["Y", "N"]  ->
+        # Save answer in state and use it in future
+        {c, %{state | recurring_answer: c}}
       _ ->
-        answer
+        {answer, state}
     end
   end
 
@@ -135,6 +143,10 @@ defmodule AssertValue.Server do
 
     y - Accept and overwrite new expected value in test code. Test will pass
     n - Do not accept new expected value. Test will fail
+    Y - Accept and overwrite all new expected values in this and next tests
+        All these tests will pass
+    N - Do not accept any new expected value in this and next tests. All these
+        tests will fail
     d - Show diff between actual and expected value
     ? - This help
     """

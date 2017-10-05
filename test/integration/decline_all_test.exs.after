@@ -1,0 +1,35 @@
+defmodule DeclineAllTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  # prompt: N
+
+  test "all fail" do
+    assert_value "foo" == """
+    bar<NOEOL>
+    """
+    assert_value "foo" == """
+    baz<NOEOL>
+    """
+  end
+
+  test "all pass" do
+    assert_value "foo" == """
+    foo<NOEOL>
+    """
+    assert_value "foo" == """
+    foo<NOEOL>
+    """
+  end
+
+  test "all fail again" do
+    assert_value "foo" == """
+    bar<NOEOL>
+    """
+    assert_value "bar" == """
+    baz<NOEOL>
+    """
+  end
+
+end

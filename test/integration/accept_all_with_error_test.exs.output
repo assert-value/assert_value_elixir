@@ -1,0 +1,16 @@
+
+accept_all_with_error_test.exs:9:"test all pass" assert_value "foo" failed
+
+-
++foo
+
+Accept new value [y/n/Y/N/d/?]? .
+
+  1) test one fail with error (AcceptAllWithErrorTest)
+     accept_all_with_error_test.exs:18
+     ** (AssertValue.ArgumentError) Expected should be in the form of string heredoc (""") or File.read!
+     stacktrace:
+       accept_all_with_error_test.exs:20: (test)
+
+.
+3 tests, 1 failure

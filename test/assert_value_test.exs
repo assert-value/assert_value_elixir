@@ -121,4 +121,37 @@ defmodule AssertValueTest do
     assert_value output == File.read!(output_path)
   end
 
+  test "accept all (Y)" do
+    {runnable_path, after_path, output_path} =
+      prepare_runnable_test("accept_all_test.exs")
+
+    {output, exitcode} = run_tests(runnable_path)
+    assert exitcode == 0 # All tests pass
+
+    assert_value File.read!(runnable_path) == File.read!(after_path)
+    assert_value output == File.read!(output_path)
+  end
+
+  test "accept all with error (Y)" do
+    {runnable_path, after_path, output_path} =
+      prepare_runnable_test("accept_all_with_error_test.exs")
+
+    {output, exitcode} = run_tests(runnable_path)
+    assert exitcode == 1 # There were failed tests
+
+    assert_value File.read!(runnable_path) == File.read!(after_path)
+    assert_value output == File.read!(output_path)
+  end
+
+  test "decline all (N)" do
+    {runnable_path, after_path, output_path} =
+      prepare_runnable_test("decline_all_test.exs")
+
+    {output, exitcode} = run_tests(runnable_path)
+    assert exitcode == 1 # There were failed tests
+
+    assert_value File.read!(runnable_path) == File.read!(after_path)
+    assert_value output == File.read!(output_path)
+  end
+
 end
