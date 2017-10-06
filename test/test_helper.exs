@@ -101,10 +101,9 @@ defmodule AssertValue.IntegrationTest do
       |> String.replace(~r/\nRandomized with seed.*\n/m, "")
       # canonicalize ExUnit error formatting:
       # - remove fancy spacing
-      # - canonicalize lhs/rhs vs left/right
       |> String.replace(~r/\s{5}code:\s+actual/m,   "     code: actual")
-      |> String.replace(~r/\s{5}(lhs|left):\s+"/m,  "     left: \"")
-      |> String.replace(~r/\s{5}(rhs|right):\s+"/m, "     right: \"")
+      |> String.replace(~r/\s{5}(left):\s+"/m,  "     left: \"")
+      |> String.replace(~r/\s{5}(right):\s+"/m, "     right: \"")
       # canonicalize messages about raised AssertValue.ArgumentError exceptions
       # ExUnit in Elixir 1.5 has "code:" line in message:
       #
