@@ -5,13 +5,11 @@ diff_and_help_prompt_test.exs:9:"test promt help and accept" assert_value "foo" 
 +foo
 
 Accept new value [y/n/Y/N/d/?]?     
-    y - Accept and overwrite new expected value in test code. Test will pass
-    n - Do not accept new expected value. Test will fail
-    Y - Accept and overwrite all new expected values in this and next tests
-        All these tests will pass
-    N - Do not accept any new expected value in this and next tests. All these
-        tests will fail
-    d - Show diff between actual and expected value
+    y - Accept new value as correct. Will update expected value. Test will pass
+    n - Reject new value. Test will fail
+    Y - Accept all. Will accept this and all following new values in this run
+    N - Reject all. Will reject this and all following new values in this run
+    d - Show diff between actual and expected values
     ? - This help
 
 Accept new value [y/n/Y/N/d/?]? .
@@ -21,13 +19,11 @@ diff_and_help_prompt_test.exs:16:"test promt help then diff then fail" assert_va
 +foo
 
 Accept new value [y/n/Y/N/d/?]?     
-    y - Accept and overwrite new expected value in test code. Test will pass
-    n - Do not accept new expected value. Test will fail
-    Y - Accept and overwrite all new expected values in this and next tests
-        All these tests will pass
-    N - Do not accept any new expected value in this and next tests. All these
-        tests will fail
-    d - Show diff between actual and expected value
+    y - Accept new value as correct. Will update expected value. Test will pass
+    n - Reject new value. Test will fail
+    Y - Accept all. Will accept this and all following new values in this run
+    N - Reject all. Will reject this and all following new values in this run
+    d - Show diff between actual and expected values
     ? - This help
 
 Accept new value [y/n/Y/N/d/?]? 

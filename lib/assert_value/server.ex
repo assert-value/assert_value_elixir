@@ -140,13 +140,11 @@ defmodule AssertValue.Server do
   defp print_help do
     """
 
-    y - Accept and overwrite new expected value in test code. Test will pass
-    n - Do not accept new expected value. Test will fail
-    Y - Accept and overwrite all new expected values in this and next tests
-        All these tests will pass
-    N - Do not accept any new expected value in this and next tests. All these
-        tests will fail
-    d - Show diff between actual and expected value
+    y - Accept new value as correct. Will update expected value. Test will pass
+    n - Reject new value. Test will fail
+    Y - Accept all. Will accept this and all following new values in this run
+    N - Reject all. Will reject this and all following new values in this run
+    d - Show diff between actual and expected values
     ? - This help
     """
     |> String.replace(~r/^/m, "    ") # Indent all lines
