@@ -78,6 +78,29 @@ AssertValue is smart enough to recognize File.read! and will update file content
 instead of test source. If file does not exists it will be created and no error
 will be raised despite default File.read! behaviour.
 
+### Running Tests Non-interactively
+
+AssertValue will autodetect whether it is running interactively (in a
+terminal), or non-interactively (e.g. continuous integration).
+When running interactively it will ask about each diff. When running
+non-interactively it will reject all diffs by default, and will work
+like default ExUnit's assert.
+
+To override autodetection use ASSERT_VALUE_ACCEPT_DIFFS environment variable
+with one of three values: "ask", "y", "n"
+```
+# Ask about each diff. Useful to force interactive behavior despite
+# autodetection.
+ASSERT_VALUE_ACCEPT_DIFFS=ask mix test
+
+# Reject all diffs. Useful to force default non-interactive mode when running
+# in an interactive terminal.
+ASSERT_VALUE_ACCEPT_DIFFS=n mix test
+
+# Accept all diffs. Useful to update all expected values after a refactoring.
+ASSERT_VALUE_ACCEPT_DIFFS=y mix test
+```
+
 ## Notes and Known Issues
 
   * AssertValue requires left argument to be a string. However it will accept

@@ -1,0 +1,18 @@
+defmodule NonInteractiveRejectTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "fail" do
+    assert_value "foo" == """
+    bar<NOEOL>
+    """
+  end
+
+  test "fail again" do
+    assert_value "foo" == """
+    baz<NOEOL>
+    """
+  end
+
+end

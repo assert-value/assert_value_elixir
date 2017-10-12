@@ -7,10 +7,40 @@ defmodule AssertValue.Server do
   end
 
   def init(_) do
+    env_var_name = "ASSERT_VALUE_ACCEPT_DIFFS"
+    env_settings = System.get_env(env_var_name)
+    # Clear environment variable for child processes
+    System.delete_env(env_var_name)
+    recurring_answer = cond do
+      env_settings == "y" ->
+        "Y"
+      env_settings == "n" ->
+        "N"
+      env_settings == "ask" ->
+        nil
+      # ASSERT_VALUE_ACCEPT_DIFFS is set to unknown value
+      is_binary(env_settings) ->
+        raise """
+        Unknown ASSERT_VALUE_ACCEPT_DIFFS env variable value "#{env_settings}"
+        Should be one of [ask,y,n]
+        """
+      # Check that we are running in continuous integration environment
+      # TravisCI and CircleCI have this variable
+      System.get_env("CI") == "true" ->
+        "N"
+      # Elixir sets ansi_enabled env variable on start based on
+      # "/usr/bin/test -t 1 -a -t 2"
+      # This checks that STDOUT and STERR are terminals. If so we
+      # can prompt user for answers.
+      IO.ANSI.enabled? ->
+        nil
+      true ->
+        "N"
+    end
     state = %{
       captured_ex_unit_io_pid: nil,
       file_changes: %{},
-      recurring_answer: nil
+      recurring_answer: recurring_answer
     }
     {:ok, state}
   end

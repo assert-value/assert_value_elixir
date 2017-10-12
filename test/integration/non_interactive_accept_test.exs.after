@@ -1,0 +1,18 @@
+defmodule NonInteractiveAcceptTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "update" do
+    assert_value "foo" == """
+    foo<NOEOL>
+    """
+  end
+
+  test "update again" do
+    assert_value "foo" == """
+    foo<NOEOL>
+    """
+  end
+
+end

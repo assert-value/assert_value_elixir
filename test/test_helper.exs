@@ -1,6 +1,6 @@
 ExUnit.start([timeout: :infinity])
 
-defmodule AssertValue.Tempfile do
+defmodule AssertValue.Test.Support do
   def mktemp_dir(prefix \\ "", suffix \\ "") do
     name = Path.expand(generate_tmpname(prefix, suffix), System.tmp_dir!)
     File.mkdir_p!(name)
@@ -16,9 +16,7 @@ defmodule AssertValue.Tempfile do
       |> String.downcase
     "#{prefix}#{sec}#{micro}-#{pid}-#{random_string}#{suffix}"
   end
-end
 
-defmodule AssertValue.System do
   # This helper is used to start external process, feed it with input,
   # and collect output.
   #
@@ -33,12 +31,12 @@ defmodule AssertValue.System do
   # Run integration test session as external process, provide "yes" answers
   # for two prompts, and collect output and test results code:
   #
-  #   {output, exitcode} = AssertValue.System.exec("mix",
+  #   {output, exit_code} = AssertValue.System.exec("mix",
   #      ["test", "--seed", "0", "/tmp/intergration_test.exs"], input: "y\ny\n")
-  def exec(cmd, args, opts) do
+  def exec(cmd, args, env, opts) do
     cmd = cmd |> System.find_executable
     port = Port.open({:spawn_executable, cmd},
-      [{:args, args}, :binary, :exit_status])
+      [{:args, args}, {:env, env}, :binary, :exit_status])
     Port.command(port, opts[:input])
     handle_output(port, "")
   end
@@ -49,18 +47,16 @@ defmodule AssertValue.System do
     receive do
       {^port, {:data, data}} ->
         handle_output(port, output <> data)
-      {^port, {:exit_status, exitcode}} ->
-        {output, exitcode}
+      {^port, {:exit_status, exit_code}} ->
+        {output, exit_code}
     end
   end
 end
 
-defmodule AssertValue.IntegrationTest do
-
-  require AssertValue.Tempfile
+defmodule AssertValue.Test.IntegrationTest do
 
   @integration_test_dir Path.expand("integration", __DIR__)
-  @runnable_test_dir AssertValue.Tempfile.mktemp_dir("assert-value-")
+  @runnable_test_dir AssertValue.Test.Support.mktemp_dir("assert-value-")
 
   def integration_test_dir do
     @integration_test_dir
@@ -81,7 +77,7 @@ defmodule AssertValue.IntegrationTest do
     {runnable_path, after_path, output_path}
   end
 
-  def run_tests(filename) do
+  def run_tests(filename, env \\ []) do
     # extract expected assert_value prompt responses from the test.
     # We look for lines like '# prompt: y'
     prompt_responses =
@@ -90,8 +86,8 @@ defmodule AssertValue.IntegrationTest do
       |> Enum.join("\n")
       |> Kernel.<>("\n")
 
-    {output, exitcode} = AssertValue.System.exec("mix",
-      ["test", "--seed", "0", filename], input: prompt_responses)
+    {output, exit_code} = AssertValue.Test.Support.exec("mix",
+      ["test", "--seed", "0", filename], env, input: prompt_responses)
 
     # Canonicalize output
     output =
@@ -121,7 +117,7 @@ defmodule AssertValue.IntegrationTest do
       |> String.replace(
         ~r/(\(AssertValue.ArgumentError\).*?)\n\s{5}code:.*?\n/, "\\1\n")
 
-    {output, exitcode}
+    {output, exit_code}
   end
 
   # Integration tests flow:
@@ -131,24 +127,20 @@ defmodule AssertValue.IntegrationTest do
   # * compare test source file itself after the run with a reference copy
   # * compare test output with a reference copy
 
-  # integration_test "accept all (Y)", "accept_all_test.exs", exitcode: 1
+  # integration_test "accept all (Y)", "accept_all_test.exs", exit_code: 1
   defmacro integration_test(test_name, test_filename, opts \\ []) do
     quote do
       test unquote(test_name) do
         {runnable_path, after_path, output_path} =
           prepare_runnable_test(unquote(test_filename))
 
-        {output, exitcode} = run_tests(runnable_path)
-        assert exitcode == unquote(exitcode(opts))
+        {output, exit_code} = run_tests(runnable_path, unquote(opts[:env]))
+        assert exit_code == unquote(opts[:expected_exit_code] || 0)
 
         assert_value File.read!(runnable_path) == File.read!(after_path)
         assert_value output == File.read!(output_path)
       end
     end
-  end
-
-  defp exitcode(opts) do
-    opts[:exitcode] || 0
   end
 
 end
