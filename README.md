@@ -108,12 +108,12 @@ ASSERT_VALUE_ACCEPT_DIFFS=y mix test
 ## Notes and Known Issues
 
   * AssertValue requires left argument to be a string. However it will accept
-    everything with implemented String.Chars protocol (Atom, BitString, Char List,
-    Integer, Float). It will raise AssertValue.ArgumentError in all other cases.
+    everything with implemented String.Chars protocol (Atom, BitString,
+    Charlist, Integer, Float). It will raise AssertValue.ArgumentError in all
+    other cases.
   * Right argument should be in the form of string heredoc starting and ending
-    with """ or File.read!.
-  * Using plain strings as right argument will cause incorrect test source changes.
-  * Using other types as right argument will raise AssertValue.ArgumentError.
+    with """ or File.read!. Using other types as right argument will raise
+    AssertValue.ArgumentError.
 
 ## License
 
