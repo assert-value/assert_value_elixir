@@ -1,4 +1,6 @@
 # assert_value
+[![Build Status](https://travis-ci.org/assert-value/assert_value_elixir.svg?branch=master)](https://travis-ci.org/assert-value/assert_value_elixir)
+[![Hex Version](https://img.shields.io/hexpm/v/assert_value.svg)](https://hex.pm/packages/assert_value)
 
 Checks that two values are same and "magically" replaces expected value
 with the actual in case the new behavior (and new actual value) is correct.
@@ -20,7 +22,9 @@ Add AssertValue as a test env dependency to your Mix project
 
 ```elixir
 defp deps do
-  [{:assert_value, git: "git@github.com:assert-value/assert_value_elixir.git", only: :test}]
+  [
+    {:assert_value, "~> 0.7", only: :test}
+  ]
 end
 ```
 Add to config/test.exs to avoid timeouts
