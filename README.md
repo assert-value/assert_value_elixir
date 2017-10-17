@@ -114,6 +114,7 @@ ASSERT_VALUE_ACCEPT_DIFFS=y mix test
   * Right argument should be in the form of string heredoc starting and ending
     with """ or File.read!. Using other types as right argument will raise
     AssertValue.ArgumentError.
+  * AssertValue works only with default ExUnit formatter (ExUnit.CLIFormatter)
 
 ## License
 
