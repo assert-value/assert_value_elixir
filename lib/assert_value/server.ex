@@ -150,7 +150,7 @@ defmodule AssertValue.Server do
 
   defp get_answer(opts, state) do
     answer =
-      IO.gets("Accept new value [y/n/Y/N/d/?]? ")
+      IO.gets("Accept new value? [y,n,?] ")
       |> String.trim_trailing("\n")
     case answer do
       "?" ->

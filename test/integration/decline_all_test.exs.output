@@ -4,7 +4,7 @@ decline_all_test.exs:9:"test all fail" assert_value "foo" == "bar<NOEOL>\n" fail
 -bar
 +foo
 
-Accept new value [y/n/Y/N/d/?]? 
+Accept new value? [y,n,?] 
 
   1) test all fail (DeclineAllTest)
      decline_all_test.exs:8
