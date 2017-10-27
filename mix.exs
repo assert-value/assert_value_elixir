@@ -37,8 +37,7 @@ defmodule AssertValue.Mixfile do
   end
 
   defp description do
-    "Checks that two values are same and \"magically\" replaces expected value " <>
-    "with the actual in case the new behavior (and new actual value) is correct."
+    "ExUnit's assert on steroids that writes and updates tests for you"
   end
 
   defp package do
