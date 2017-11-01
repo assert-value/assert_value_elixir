@@ -15,6 +15,30 @@
 
 ![Screencast](https://github.com/assert-value/assert_value_screencasts/raw/master/elixir/screencast.gif)
 
+## Usage
+
+```elixir
+assert_value "foo\n"
+
+assert_value "foo\n" == """
+foo
+"""
+
+assert_value "foo\n" == File.read!("test/log/foo.log")
+```
+
+You can use `assert_value` instead of ExUnit's `assert`. When writing a new test
+you don't have to enter expected value. When you run it the first time `assert_value`
+will generate it, show it to you, and will automatically update test source if
+you accept it.
+
+When you run an existing test and the actual value does not match expected,
+`assert_value` will show the diff and ask you what to do. You then tell it
+if the new actual value is correct. If it is, `assert_value` will update the test
+source code with it. If not `assert_value` will fail the test just like builtin `assert`.
+
+`assert_value` also lets you store expected value in a separate file using File.read!
+This makes sense for longer values. `assert_value` will create and update file contents.
 
 ## Requirements
 
@@ -40,31 +64,6 @@ config :my_app, MyApp.Repo,
   timeout: :infinity,
   ownership_timeout: :infinity
 ```
-
-## Usage
-
-```elixir
-assert_value "foo\n"
-
-assert_value "foo\n" == """
-foo
-"""
-
-assert_value "foo\n" == File.read!("test/log/foo.log")
-```
-
-You can use `assert_value` instead of ExUnit's `assert`. When writing a new test
-you don't have to enter expected value. When you run it the first time `assert_value`
-will generate it, show it to you, and will automatically update test source if
-you accept it.
-
-When you run an existing test and the actual value does not match expected,
-`assert_value` will show the diff and ask you what to do. You then tell it
-if the new actual value is correct. If it is, `assert_value` will update the test
-source code with it. If not `assert_value` will fail the test just like builtin `assert`.
-
-`assert_value` also lets you store expected value in a separate file using File.read!
-This makes sense for longer values. `assert_value` will create and update file contents.
 
 ## HOWTO
 
@@ -469,13 +468,31 @@ assert_value is smart enough to recognize File.read! and will update file conten
 instead of test source. If file does not exists it will be created and no error
 will be raised despite default File.read! behaviour.
 
-### Running Tests Non-interactively
+### Running Tests Interactively
 
 assert_value will autodetect whether it is running interactively (in a
 terminal), or non-interactively (e.g. continuous integration).
-When running interactively it will ask about each diff. When running
-non-interactively it will reject all diffs by default, and will work
-like default ExUnit's assert.
+When running interactively it will ask about each diff.
+
+You can give one (global) answer for all diffs with ```Y``` and ```N``` (uppercase)
+answer.```?``` will show help with all available answer options.
+
+```
+Accept new value? [y,n,?] ?
+
+    y - Accept new value as correct. Will update expected value. Test will pass
+    n - Reject new value. Test will fail
+    Y - Accept all. Will accept this and all following new values in this run
+    N - Reject all. Will reject this and all following new values in this run
+    d - Show diff between actual and expected values
+    ? - This help
+
+```
+
+### Running Tests Non-interactively
+
+When running non-interactively assert_value will reject all diffs by default, and will
+work like default ExUnit's assert.
 
 To override autodetection use ASSERT_VALUE_ACCEPT_DIFFS environment variable
 with one of three values: "ask", "y", "n"
