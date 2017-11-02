@@ -474,9 +474,9 @@ assert_value will autodetect whether it is running interactively (in a
 terminal), or non-interactively (e.g. continuous integration).
 When running interactively it will ask about each diff.
 
-You can give one (global) answer for all diffs with ```Y``` and ```N``` (uppercase)
-answer.```?``` will show help with all available answer options.
-
+You can accept or reject new value with ```y``` or ```n```. If you use ```Y```
+and ```N``` (uppercase) assert_value will remember the answer and will not ask
+again during this test run. ```?``` will show help with all available actions.
 ```
 Accept new value? [y,n,?] ?
 
