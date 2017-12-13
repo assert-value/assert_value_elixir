@@ -551,6 +551,12 @@ To make a pull request:
   * Check TravisCI build on your repository
   * Open a pull request
 
+## Links
+
+  * [Changelog](CHANGELOG.md)
+  * [Issues tracker](https://github.com/assert-value/assert_value_elixir/issues)
+  * [Discussion on Elixir Forum](https://elixirforum.com/t/assert-value-exunits-assert-on-steroids-that-writes-and-updates-tests-for-you/9913)
+
 ## License
 
 This software is licensed under [the MIT license](LICENSE).
