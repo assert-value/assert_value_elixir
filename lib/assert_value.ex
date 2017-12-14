@@ -1,7 +1,7 @@
 defmodule AssertValue do
 
   defmodule ArgumentError do
-    defexception [message: ~S{Expected should be in the form of string heredoc (""") or File.read!}]
+    defexception [message: ~S{Expected should be in the form of string, heredoc ("""), or File.read!}]
   end
 
   # Assertions with right argument like "assert_value actual == expected"

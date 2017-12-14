@@ -21,10 +21,13 @@ defmodule AcceptAllWithErrorTest do
     assert_value "foo" == """
     foo<NOEOL>
     """
-    assert_value "foo" == "bar"
     assert_value "foo" == """
-    baz<NOEOL>
+    foo<NOEOL>
     """
+    assert_value "foo" == """
+    foo<NOEOL>
+    """
+    assert_value "foo" == 4
   end
 
   test "all pass again" do

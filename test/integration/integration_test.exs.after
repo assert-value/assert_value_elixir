@@ -136,7 +136,9 @@ defmodule IntegrationTest do
 
   test "bad expected in the form of string" do
     # prompt: y
-    assert_value "foo" == "bar"
+    assert_value "foo" == """
+    foo<NOEOL>
+    """
   end
 
   defp hello(arg) do

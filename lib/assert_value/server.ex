@@ -186,50 +186,55 @@ defmodule AssertValue.Server do
     line_number = current_line_number(
       file_changes, source_filename, original_line_number)
     {prefix, rest} = Enum.split(source, line_number - 1)
-    [code_line | suffix] = rest
-    [[indentation]] = Regex.scan(~r/^\s*/, code_line)
+    [statement | suffix] = rest
+    [[indentation]] = Regex.scan(~r/^\s*/, statement)
+    prefix =
+      (prefix ++ [statement <> " == "])
+      |> Enum.join("\n")
+    suffix = suffix |> Enum.join("\n")
     new_expected = new_expected_from_actual(actual, indentation)
     File.open!(source_filename, [:write], fn(file) ->
-      IO.puts(file, Enum.join(prefix, "\n"))
-      IO.puts(file, code_line <> ~S{ == """})
+      IO.write(file, prefix)
       IO.puts(file, Enum.join(new_expected, "\n"))
-      IO.puts(file, indentation <> ~S{"""})
-      IO.write(file, Enum.join(suffix, "\n"))
+      IO.write(file, suffix)
     end)
     {:ok, update_lines_count(file_changes, source_filename,
-      original_line_number, length(new_expected) + 1)}
+      original_line_number, length(new_expected) - 1)}
   end
 
-  # Update expected when expected is heredoc
+  # Update expected when expected is string or heredoc
   # return {:error, :unsupported_value} if not
   def update_expected(file_changes, :source, source_filename, original_line_number,
                       actual, expected, _) do
-    expected = to_lines(expected)
     source = read_source(source_filename)
     line_number = current_line_number(
       file_changes, source_filename, original_line_number)
-    line = Enum.at(source, line_number - 1)
-    heredoc_open = Regex.named_captures(
-      ~r/assert_value.*==\s*(?<heredoc>\"{3}).*/, line)["heredoc"]
-    if heredoc_open do
-      {prefix, rest} = Enum.split(source, line_number)
-      heredoc_close_line_number = Enum.find_index(rest, fn(s) ->
-        s =~ ~r/^\s*#{Regex.escape(heredoc_open)}/
-      end)
-      {_, suffix} = Enum.split(rest, heredoc_close_line_number)
-      [heredoc_close_line | _] = suffix
-      [[indentation]] = Regex.scan(~r/^\s*/, heredoc_close_line)
-      new_expected = new_expected_from_actual(actual, indentation)
-      File.open!(source_filename, [:write], fn(file) ->
-        IO.puts(file, Enum.join(prefix, "\n"))
-        IO.puts(file, Enum.join(new_expected, "\n"))
-        IO.write(file, Enum.join(suffix, "\n"))
-      end)
-      {:ok, update_lines_count(file_changes, source_filename,
-        original_line_number, length(new_expected) - length(expected))}
-    # If heredoc closing line is not found then right argument is a string
-    else
-      {:error, :unsupported_value}
+
+    {prefix, suffix} = Enum.split(source, line_number - 1)
+    {[line], suffix} = Enum.split(suffix, 1)
+    prefix = prefix |> Enum.join("\n")
+    suffix = suffix |> Enum.join("\n")
+    [_, indentation, statement, rest] =
+        Regex.run(~r/(^\s*)(assert_value.*?==\s*?)(\S.*)/, line)
+    prefix = prefix <> "\n" <> indentation <> statement
+    suffix = rest <> "\n" <> suffix
+    case parse_expected(suffix, expected, "") do
+      {:error, :unable_to_parse} ->
+        {:error, :unsupported_value}
+      {formatted_expected, suffix} ->
+        new_expected = new_expected_from_actual(actual, indentation)
+        File.open!(source_filename, [:write], fn(file) ->
+          IO.write(file, prefix)
+          # TODO Standartize write/puts with create_expected
+          IO.write(file, Enum.join(new_expected, "\n"))
+          IO.write(file, suffix)
+        end)
+        {:ok, update_lines_count(
+            file_changes,
+            source_filename,
+            original_line_number,
+            length(new_expected) - length(to_lines(formatted_expected))
+        )}
     end
   end
 
@@ -281,11 +286,11 @@ defmodule AssertValue.Server do
     else
       actual <> "<NOEOL>\n"
     end
-
-    actual
     |> to_lines
     |> Enum.map(&(indentation <> &1))
     |> Enum.map(&escape_string/1)
+
+    ["\"\"\""] ++ actual ++ [indentation <> "\"\"\""]
   end
 
   # Inspect protocol for String has the best implementation
@@ -304,6 +309,24 @@ defmodule AssertValue.Server do
       s
       |> String.slice(0..length - 1)
       |> Kernel.<>("...")
+    end
+  end
+
+  defp parse_expected(code, expected, formatted_expected) do
+    if code == "" do
+      {:error, :unable_to_parse}
+    end
+    {_, value} = Code.string_to_quoted(formatted_expected)
+    value = if is_binary(value) && String.match?(value, ~r/<NOEOL>/) do
+      String.replace(value, "<NOEOL>\n", "")
+    else
+      value
+    end
+    if value == expected do
+      {formatted_expected, code}
+    else
+      {char, rest} = String.next_grapheme(code)
+      parse_expected(rest, expected, formatted_expected <> char)
     end
   end
 
