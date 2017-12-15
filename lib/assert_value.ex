@@ -68,8 +68,8 @@ defmodule AssertValue do
         case decision do
           {:ok, value} ->
             value
-          {:error, :unsupported_value} ->
-            raise AssertValue.ExpectedArgumentError
+          {:error, :parse_error} ->
+            raise "Unable to parse expected value"
           {:error, :ex_unit_assertion_error, error} ->
             raise ExUnit.AssertionError, error
         end

@@ -90,8 +90,8 @@ defmodule AssertValue.Server do
         {:ok, file_changes} ->
           {:reply, {:ok, opts[:actual_value]},
             %{state | file_changes: file_changes}}
-        {:error, :unsupported_value} ->
-          {:reply, {:error, :unsupported_value}, state}
+        {:error, :parse_error} ->
+          {:reply, {:error, :parse_error}, state}
       end
     else
       # Fail test. Pass exception up to the caller and throw it there
@@ -202,8 +202,6 @@ defmodule AssertValue.Server do
       original_line_number, length(new_expected) - 1)}
   end
 
-  # Update expected when expected is string or heredoc
-  # return {:error, :unsupported_value} if not
   def update_expected(file_changes, :source, source_filename, original_line_number,
                       actual, expected, _) do
     source = read_source(source_filename)
@@ -219,8 +217,8 @@ defmodule AssertValue.Server do
     prefix = prefix <> "\n" <> indentation <> statement
     suffix = rest <> "\n" <> suffix
     case parse_expected(suffix, expected, "") do
-      {:error, :unable_to_parse} ->
-        {:error, :unsupported_value}
+      :parse_error ->
+        {:error, :parse_error}
       {formatted_expected, suffix} ->
         new_expected = new_expected_from_actual(actual, indentation)
         File.open!(source_filename, [:write], fn(file) ->
@@ -319,9 +317,6 @@ defmodule AssertValue.Server do
   end
 
   defp parse_expected(code, expected, formatted_expected) do
-    if code == "" do
-      {:error, :unable_to_parse}
-    end
     {_, value} = Code.string_to_quoted(formatted_expected)
     value = if is_binary(value) && String.match?(value, ~r/<NOEOL>/) do
       String.replace(value, "<NOEOL>\n", "")
@@ -331,8 +326,12 @@ defmodule AssertValue.Server do
     if value == expected do
       {formatted_expected, code}
     else
-      {char, rest} = String.next_grapheme(code)
-      parse_expected(rest, expected, formatted_expected <> char)
+      case String.next_grapheme(code) do
+        {char, rest} ->
+          parse_expected(rest, expected, formatted_expected <> char)
+        nil ->
+          :parse_error
+      end
     end
   end
 
