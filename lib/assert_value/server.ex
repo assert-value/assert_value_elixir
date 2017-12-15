@@ -182,38 +182,35 @@ defmodule AssertValue.Server do
   end
 
   def create_expected(file_changes, source_filename, original_line_number, actual) do
-    source = read_source(source_filename)
-    line_number = current_line_number(
-      file_changes, source_filename, original_line_number)
-    {prefix, rest} = Enum.split(source, line_number - 1)
-    [statement | suffix] = rest
-    [[indentation]] = Regex.scan(~r/^\s*/, statement)
+    {prefix, line, suffix} =
+      split_code(file_changes, source_filename, original_line_number)
+
+    [[indentation]] = Regex.scan(~r/^\s*/, line)
     prefix =
-      (prefix ++ [statement <> " == "])
+      (prefix ++ [line <> " == "])
       |> Enum.join("\n")
     suffix = suffix |> Enum.join("\n")
     suffix = "\n" <> suffix
     {new_expected, new_expected_length} =
       new_expected_from_actual(actual, indentation)
     File.write!(source_filename, prefix <> new_expected <> suffix)
+
     {:ok, update_lines_count(file_changes, source_filename,
       original_line_number, new_expected_length - 1)}
   end
 
   def update_expected(file_changes, :source, source_filename, original_line_number,
                       actual, expected, _) do
-    source = read_source(source_filename)
-    line_number = current_line_number(
-      file_changes, source_filename, original_line_number)
+    {prefix, line, suffix} =
+      split_code(file_changes, source_filename, original_line_number)
 
-    {prefix, suffix} = Enum.split(source, line_number - 1)
-    {[line], suffix} = Enum.split(suffix, 1)
     prefix = prefix |> Enum.join("\n")
     suffix = suffix |> Enum.join("\n")
     [_, indentation, statement, rest] =
         Regex.run(~r/(^\s*)(assert_value.*?==\s*?)(\S.*)/, line)
     prefix = prefix <> "\n" <> indentation <> statement
     suffix = rest <> "\n" <> suffix
+
     case parse_expected(suffix, expected, "") do
       :parse_error ->
         {:error, :parse_error}
@@ -266,6 +263,15 @@ defmodule AssertValue.Server do
     # empty line at the end
     |> String.replace(~r/\n\Z/, "", global: false)
     |> String.split("\n")
+  end
+
+  defp split_code(file_changes, source_filename, original_line_number) do
+    source = read_source(source_filename)
+    line_number = current_line_number(
+      file_changes, source_filename, original_line_number)
+    {prefix, rest} = Enum.split(source, line_number - 1)
+    [line | suffix] = rest
+    {prefix, line, suffix}
   end
 
   defp new_expected_from_actual(actual, indentation) do
