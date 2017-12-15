@@ -94,9 +94,13 @@ defmodule IntegrationTest do
     assert_value actual
   end
 
-  test "bad expected in the form of string" do
+  test "expected in the form of string" do
     # prompt: y
     assert_value "foo" == "bar"
+  end
+
+  test "bad actual" do
+    assert_value 42
   end
 
   defp hello(arg) do

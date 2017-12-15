@@ -277,20 +277,26 @@ defmodule AssertValue.Server do
   end
 
   defp new_expected_from_actual(actual, indentation) do
-    # to work as a heredoc a string must end with a newline.  For
-    # strings that don't we append a special token and a newline when
-    # writing them to source file.  This way we can look for this
-    # special token when we read it back and strip it at that time.
-    actual = if actual =~ ~r/\n\Z/ do
+    actual =
       actual
-    else
-      actual <> "<NOEOL>\n"
-    end
-    |> to_lines
-    |> Enum.map(&(indentation <> &1))
-    |> Enum.map(&escape_string/1)
+      |> add_noeol_if_needed
+      |> to_lines
+      |> Enum.map(&(indentation <> &1))
+      |> Enum.map(&escape_string/1)
 
     ["\"\"\""] ++ actual ++ [indentation <> "\"\"\""]
+  end
+
+  # to work as a heredoc a string must end with a newline.  For
+  # strings that don't we append a special token and a newline when
+  # writing them to source file.  This way we can look for this
+  # special token when we read it back and strip it at that time.
+  defp add_noeol_if_needed(arg) do
+    if arg =~ ~r/\n\Z/ do
+      arg
+    else
+      arg <> "<NOEOL>\n"
+    end
   end
 
   # Inspect protocol for String has the best implementation

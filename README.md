@@ -437,9 +437,8 @@ assert_value "foo"
 When you run it the first time `assert_value` will generate it, show it to us,
 and will automatically update test source if we accept it.
 
-assert_value requires left argument to implement String.Chars protocol.
-String, Atom, BitString, Charlist, Integer, Float. Otherwise It will raise
-AssertValue.ArgumentError.
+assert_value requires left argument to be a string.
+Otherwise it will raise AssertValue.ActualArgumentError.
 
 ### Expected Value in the Source Code
 
@@ -448,8 +447,8 @@ assert_value "foo" == """
 foo<NOEOL>
 """
 ```
-Note, `assert_value` needs expected to be in the form of string heredoc starting
-and ending with """. Otherwise it will raise AssertValue.ArgumentError.
+Note, `assert_value` needs expected to be in the form of string or string heredoc starting
+and ending with """. Otherwise it will raise AssertValue.ExpectedArgumentError.
 Heredocs in Elixir always end with a new line character. When actual value does not
 end with a new line character this is indicated with ```<NOEOL>``` string.
 

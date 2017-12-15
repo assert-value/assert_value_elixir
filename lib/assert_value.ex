@@ -1,7 +1,11 @@
 defmodule AssertValue do
 
-  defmodule ArgumentError do
-    defexception [message: ~S{Expected should be in the form of string, heredoc ("""), or File.read!}]
+  defmodule ActualArgumentError do
+    defexception [message: ~S{Actual (left) argument should be a string}]
+  end
+
+  defmodule ExpectedArgumentError do
+    defexception [message: ~S{Expected (right) argument should be string, heredoc ("""), or File.read!}]
   end
 
   # Assertions with right argument like "assert_value actual == expected"
@@ -15,13 +19,20 @@ defmodule AssertValue do
       # any other expression, we don't support.  But we want to wait
       # till runtime to report it, otherwise it's confusing.  TODO: or
       # maybe not confusing, may want to just put here:
-      # _ -> raise AssertValue.ArgumentError
+      # _ -> raise AssertValue.ExpectedArgumentError
       _ -> {:unsupported_value, nil}
     end
 
     quote do
       assertion_code = unquote(Macro.to_string(assertion))
       actual_value = unquote(left)
+      # We cannot use "if" in macro.
+      # See my discussion with Jose Valim
+      # https://groups.google.com/forum/#!topic/elixir-lang-talk/gOHu0O4x71g
+      case is_binary(actual_value) do
+        true -> :ok
+        _ -> raise AssertValue.ActualArgumentError
+      end
       expected_type = unquote(expected_type)
       expected_file = unquote(expected_file)
       expected_value =
@@ -33,7 +44,7 @@ defmodule AssertValue do
           :file -> File.exists?(expected_file)
             && File.read!(expected_file)
             || ""
-          :unsupported_value -> raise AssertValue.ArgumentError
+          :unsupported_value -> raise AssertValue.ExpectedArgumentError
         end
 
       assertion_result = (actual_value == expected_value)
@@ -58,7 +69,7 @@ defmodule AssertValue do
           {:ok, value} ->
             value
           {:error, :unsupported_value} ->
-            raise AssertValue.ArgumentError
+            raise AssertValue.ExpectedArgumentError
           {:error, :ex_unit_assertion_error, error} ->
             raise ExUnit.AssertionError, error
         end
@@ -71,7 +82,14 @@ defmodule AssertValue do
   defmacro assert_value(assertion) do
     quote do
       assertion_code = unquote(Macro.to_string(assertion))
-      actual_value = unquote(assertion) # in this case
+      actual_value = unquote(assertion)
+      # We cannot use "if" in macro.
+      # See my discussion with Jose Valim
+      # https://groups.google.com/forum/#!topic/elixir-lang-talk/gOHu0O4x71g
+      case is_binary(actual_value) do
+        true -> :ok
+        _ -> raise AssertValue.ActualArgumentError
+      end
       decision = AssertValue.Server.ask_user_about_diff(
         caller: [
           file: unquote(__CALLER__.file),
