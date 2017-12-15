@@ -192,14 +192,12 @@ defmodule AssertValue.Server do
       (prefix ++ [statement <> " == "])
       |> Enum.join("\n")
     suffix = suffix |> Enum.join("\n")
-    new_expected = new_expected_from_actual(actual, indentation)
-    File.open!(source_filename, [:write], fn(file) ->
-      IO.write(file, prefix)
-      IO.puts(file, Enum.join(new_expected, "\n"))
-      IO.write(file, suffix)
-    end)
+    suffix = "\n" <> suffix
+    {new_expected, new_expected_length} =
+      new_expected_from_actual(actual, indentation)
+    File.write!(source_filename, prefix <> new_expected <> suffix)
     {:ok, update_lines_count(file_changes, source_filename,
-      original_line_number, length(new_expected) - 1)}
+      original_line_number, new_expected_length - 1)}
   end
 
   def update_expected(file_changes, :source, source_filename, original_line_number,
@@ -220,18 +218,14 @@ defmodule AssertValue.Server do
       :parse_error ->
         {:error, :parse_error}
       {formatted_expected, suffix} ->
-        new_expected = new_expected_from_actual(actual, indentation)
-        File.open!(source_filename, [:write], fn(file) ->
-          IO.write(file, prefix)
-          # TODO Standartize write/puts with create_expected
-          IO.write(file, Enum.join(new_expected, "\n"))
-          IO.write(file, suffix)
-        end)
+        {new_expected, new_expected_length} =
+          new_expected_from_actual(actual, indentation)
+        File.write!(source_filename, prefix <> new_expected <> suffix)
         {:ok, update_lines_count(
             file_changes,
             source_filename,
             original_line_number,
-            length(new_expected) - length(to_lines(formatted_expected))
+            new_expected_length - length(to_lines(formatted_expected))
         )}
     end
   end
@@ -281,8 +275,8 @@ defmodule AssertValue.Server do
       |> to_lines
       |> Enum.map(&(indentation <> &1))
       |> Enum.map(&escape_string/1)
-
-    ["\"\"\""] ++ actual ++ [indentation <> "\"\"\""]
+    new_expected = ["\"\"\""] ++ actual ++ [indentation <> "\"\"\""]
+    {Enum.join(new_expected, "\n"), length(new_expected)}
   end
 
   # to work as a heredoc a string must end with a newline.  For
