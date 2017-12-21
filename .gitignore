@@ -5,3 +5,4 @@ mix.lock
 erl_crash.dump
 *.ez
 *.swp
+.tool-versions
