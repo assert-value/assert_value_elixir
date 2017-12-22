@@ -1,5 +1,5 @@
 .
-integration_test.exs:24:"test create expected" assert_value value failed
+integration_test.exs:28:"test create expected" assert_value value failed
 
 -
 +aaa
@@ -7,13 +7,13 @@ integration_test.exs:24:"test create expected" assert_value value failed
 +  ccc
 
 Accept new value? [y,n,?] 
-integration_test.exs:27:"test create expected" assert_value "foo" failed
+integration_test.exs:31:"test create expected" assert_value "foo" failed
 
 -
 +foo
 
 Accept new value? [y,n,?] .
-integration_test.exs:37:"test update expected" assert_value actual == "-1\n  0\n   1\n  2\n 3\n 4\n ... failed
+integration_test.exs:41:"test update expected" assert_value actual == "-1\n  0\n   1\n  2\n 3\n 4\n ... failed
 
 --1
 -  0
@@ -30,14 +30,14 @@ integration_test.exs:37:"test update expected" assert_value actual == "-1\n  0\n
 -   1
 
 Accept new value? [y,n,?] .
-integration_test.exs:56:"test create expected from string" assert_value "foo\nbar" failed
+integration_test.exs:60:"test create expected from string" assert_value "foo\nbar" failed
 
 -
 +foo
 +bar
 
 Accept new value? [y,n,?] .
-integration_test.exs:66:"test create file" assert_value actual == File.read!(Path.expand("file_t... failed
+integration_test.exs:70:"test create file" assert_value actual == File.read!(Path.expand("file_t... failed
 
 -
 +aaa
@@ -45,7 +45,7 @@ integration_test.exs:66:"test create file" assert_value actual == File.read!(Pat
 +ccc
 
 Accept new value? [y,n,?] .
-integration_test.exs:76:"test update file" assert_value actual == File.read!(Path.expand("file_t... failed
+integration_test.exs:80:"test update file" assert_value actual == File.read!(Path.expand("file_t... failed
 
  aaa
 -bBb
@@ -53,19 +53,19 @@ integration_test.exs:76:"test update file" assert_value actual == File.read!(Pat
  ccc
 
 Accept new value? [y,n,?] .
-integration_test.exs:81:"test create expected from function" assert_value hello("World") failed
+integration_test.exs:85:"test create expected from function" assert_value hello("World") failed
 
 -
 +Hello World!
 
 Accept new value? [y,n,?] .
-integration_test.exs:86:"test update expected from function" assert_value hello("Elixir") == "Hello World!\n" failed
+integration_test.exs:90:"test update expected from function" assert_value hello("Elixir") == "Hello World!\n" failed
 
 -Hello World!
 +Hello Elixir!
 
 Accept new value? [y,n,?] .
-integration_test.exs:94:"test reprompt context" assert_value actual failed
+integration_test.exs:98:"test reprompt context" assert_value actual failed
 
 -
 +line
@@ -107,29 +107,93 @@ integration_test.exs:94:"test reprompt context" assert_value actual failed
 +line
 +line
 
-integration_test.exs:94:"test reprompt context" assert_value actual failed
+integration_test.exs:98:"test reprompt context" assert_value actual failed
 Accept new value? [y,n,?] .
-integration_test.exs:99:"test expected in the form of string" assert_value "foo" == "bar" failed
+integration_test.exs:103:"test expected in the form of string" assert_value "foo" == "bar" failed
 
 -bar
 +foo
 
 Accept new value? [y,n,?] .
-integration_test.exs:104:"test string escaping" assert_value "foo\\nbar\" \" %{}" == "bar" failed
+integration_test.exs:108:"test string escaping" assert_value "foo\\nbar\" \" %{}" == "bar" failed
 
 -bar
 +foo\nbar" " %{}
 
 Accept new value? [y,n,?] .
+integration_test.exs:113:"test create integer" assert_value 42 failed
 
-  1) test bad actual (IntegrationTest)
-     integration_test.exs:107
-     ** (AssertValue.ActualArgumentError) Actual (left) argument should be a string
+-
++42
+
+Accept new value? [y,n,?] .
+integration_test.exs:118:"test update integer" assert_value 42 == 43 failed
+
+-43
++42
+
+Accept new value? [y,n,?] .
+integration_test.exs:123:"test string and integer" assert_value 42 == "42" failed
+
+-"42"
++42
+
+Accept new value? [y,n,?] .
+integration_test.exs:128:"test create list" assert_value [1, 2, 3] failed
+
+-
++[1, 2, 3]
+
+Accept new value? [y,n,?] .
+integration_test.exs:133:"test update list" assert_value [1, 2, 3] == [1, 2, 2] failed
+
+-[1, 2, 2]
++[1, 2, 3]
+
+Accept new value? [y,n,?] .
+integration_test.exs:139:"test create complex value" assert_value foo failed
+
+-
++[%{a: 1, b: {:left, :light}, c: <<1, 2, 3>>}, nil]
+
+Accept new value? [y,n,?] .
+integration_test.exs:145:"test update complex value" assert_value foo == [%{a: 1, b: {:left, :light}, c: <... failed
+
+-[%{a: 1, b: {:left, :light}, c: <<1, 2, 3>>}, true]
++[%{a: 1, b: {:left, :light}, c: <<1, 2, 3>>}, nil]
+
+Accept new value? [y,n,?] 
+
+  1) test update complex value (IntegrationTest)
+     integration_test.exs:142
+     ** (RuntimeError) Unable to parse expected value
+     code: test "create integer" do
      stacktrace:
-       integration_test.exs:108: (test)
+       integration_test.exs:145: (test)
 
 
-integration_test.exs:124:"test simple fail" assert_value actual == "aaa\nbBb\nccc\n" failed
+integration_test.exs:151:"test create struct" assert_value foo failed
+
+-
++%IntegrationTest.User{age: 27, name: "John"}
+
+Accept new value? [y,n,?] .
+integration_test.exs:157:"test update struct" assert_value foo == %IntegrationTest.User{age: 27, na... failed
+
+-%IntegrationTest.User{age: 27, name: "Peter"}
++%IntegrationTest.User{age: 27, name: "John"}
+
+Accept new value? [y,n,?] 
+
+  2) test update struct (IntegrationTest)
+     integration_test.exs:154
+     ** (RuntimeError) Unable to parse expected value
+     code: assert_value 42 == 42
+     stacktrace:
+       integration_test.exs:157: (test)
+
+
+integration_test.exs:173:"test simple fail" assert_value actual == "aaa\nbBb\nccc\n" failed
 
  aaa
 -bBb
@@ -138,14 +202,14 @@ integration_test.exs:124:"test simple fail" assert_value actual == "aaa\nbBb\ncc
 
 Accept new value? [y,n,?] 
 
-  2) test simple fail (IntegrationTest)
-     integration_test.exs:117
+  3) test simple fail (IntegrationTest)
+     integration_test.exs:166
      AssertValue assertion failed
      code: actual == "aaa\nbBb\nccc\n"
      left: "aaa\nbbb\nccc\n"
      right: "aaa\nbBb\nccc\n"
      stacktrace:
-       integration_test.exs:124: (test)
+       integration_test.exs:173: (test)
 
 
-13 tests, 2 failures
+21 tests, 3 failures

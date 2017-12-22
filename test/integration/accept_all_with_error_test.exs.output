@@ -8,7 +8,8 @@ Accept new value? [y,n,?] .
 
   1) test one fail with error (AcceptAllWithErrorTest)
      accept_all_with_error_test.exs:18
-     ** (AssertValue.ExpectedArgumentError) Expected (right) argument should be string, heredoc ("""), or File.read!
+     ** (RuntimeError) Error!
+     code: foo
      stacktrace:
        accept_all_with_error_test.exs:24: (test)
 

@@ -24,7 +24,7 @@ defmodule AcceptAllWithErrorTest do
     foo
     baz<NOEOL>
     """
-    assert_value "foo" == 4
+    raise "Error!"
   end
 
   test "all pass again" do

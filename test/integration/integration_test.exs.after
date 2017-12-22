@@ -1,6 +1,10 @@
 defmodule IntegrationTest do
   use ExUnit.Case
 
+  defmodule User do
+    defstruct name: "John", age: 27
+  end
+
   import AssertValue
 
   test "simple pass" do
@@ -138,8 +142,53 @@ defmodule IntegrationTest do
     assert_value "foo\\nbar\" \" %{}" == "foo\\nbar\" \" %{}"
   end
 
-  test "bad actual" do
-    assert_value 42
+  test "create integer" do
+    # prompt: y
+    assert_value 42 == 42
+  end
+
+  test "update integer" do
+    # prompt: y
+    assert_value 42 == 42
+  end
+
+  test "string and integer" do
+    # prompt: y
+    assert_value 42 == 42
+  end
+
+  test "create list" do
+    # prompt: y
+    assert_value [1,2,3] == [1, 2, 3]
+  end
+
+  test "update list" do
+    # prompt: y
+    assert_value [1,2,3] == [1, 2, 3]
+  end
+
+  test "create complex value" do
+    # prompt: y
+    foo = [%{a: 1, b: {:left, :light}, c: <<1,2,3>>}, nil]
+    assert_value foo == [%{a: 1, b: {:left, :light}, c: <<1, 2, 3>>}, nil]
+  end
+
+  test "update complex value" do
+    # prompt: y
+    foo = [%{a: 1, b: {:left, :light}, c: <<1,2,3>>}, nil]
+    assert_value foo == [%{a: 1, b: {:left, :light}, c: <<1, 2, 3>>}, true]
+  end
+
+  test "create struct" do
+    # prompt: y
+    foo = %User{}
+    assert_value foo == %IntegrationTest.User{age: 27, name: "John"}
+  end
+
+  test "update struct" do
+    # prompt: y
+    foo = %User{}
+    assert_value foo == %IntegrationTest.User{age: 27, name: "Peter"}
   end
 
   defp hello(arg) do

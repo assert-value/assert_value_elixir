@@ -199,7 +199,13 @@ defmodule AssertValue.Server do
       original_line_number, new_expected_length - 1)}
   end
 
-  def update_expected(file_changes, :source, source_filename, original_line_number,
+  # Update expected when expected is File.read!
+  def update_expected(file_changes, :file, _, _, actual, _, expected_filename) do
+    File.write!(expected_filename, actual)
+    {:ok, file_changes}
+  end
+
+  def update_expected(file_changes, _any, source_filename, original_line_number,
                       actual, expected, _) do
     {prefix, line, suffix} =
       split_code(file_changes, source_filename, original_line_number)
@@ -225,12 +231,6 @@ defmodule AssertValue.Server do
             new_expected_length - length(to_lines(formatted_expected))
         )}
     end
-  end
-
-  # Update expected when expected is File.read!
-  def update_expected(file_changes, :file, _, _, actual, _, expected_filename) do
-    File.write!(expected_filename, actual)
-    {:ok, file_changes}
   end
 
   # File tracking
@@ -319,6 +319,10 @@ defmodule AssertValue.Server do
     else
       new_heredoc_expected(actual, indentation)
     end
+  end
+
+  defp new_expected_from_actual(actual, _indentation) do
+    {Macro.to_string(actual), 1}
   end
 
   defp new_string_expected(actual) do
