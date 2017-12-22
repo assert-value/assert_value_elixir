@@ -3,8 +3,8 @@
   1) test fail (NonInteractiveRejectTest)
      non_interactive_reject_test.exs:6
      AssertValue assertion failed
-     code:  "foo" == "bar<NOEOL>\n"
-     left: "foo"
+     code:  "foo\nbar" == "bar<NOEOL>\n"
+     left: "foo\nbar"
      right: "bar"
      stacktrace:
        non_interactive_reject_test.exs:7: (test)
@@ -14,8 +14,8 @@
   2) test fail again (NonInteractiveRejectTest)
      non_interactive_reject_test.exs:12
      AssertValue assertion failed
-     code:  "foo" == "baz<NOEOL>\n"
-     left: "foo"
+     code:  "foo\nbaz" == "baz<NOEOL>\n"
+     left: "foo\nbaz"
      right: "baz"
      stacktrace:
        non_interactive_reject_test.exs:13: (test)

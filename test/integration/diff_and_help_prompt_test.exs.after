@@ -6,9 +6,7 @@ defmodule DiffAndHelpPromptTest do
   test "promt help and accept" do
     # prompt: ?
     # prompt: y
-    assert_value "foo" == """
-    foo<NOEOL>
-    """
+    assert_value "foo" == "foo"
   end
 
   test "promt help then diff then fail" do

@@ -28,9 +28,7 @@ defmodule IntegrationTest do
     """
 
     # prompt: y
-    assert_value "foo" == """
-    foo<NOEOL>
-    """
+    assert_value "foo" == "foo"
   end
 
   test "update expected" do
@@ -77,16 +75,12 @@ defmodule IntegrationTest do
 
   test "create expected from function" do
     # prompt: y
-    assert_value hello("World") == """
-    Hello World!<NOEOL>
-    """
+    assert_value hello("World") == "Hello World!"
   end
 
   test "update expected from function" do
     # prompt: y
-    assert_value hello("Elixir") == """
-    Hello Elixir!<NOEOL>
-    """
+    assert_value hello("Elixir") == "Hello Elixir!"
   end
 
   test "reprompt context" do
@@ -136,9 +130,7 @@ defmodule IntegrationTest do
 
   test "expected in the form of string" do
     # prompt: y
-    assert_value "foo" == """
-    foo<NOEOL>
-    """
+    assert_value "foo" == "foo"
   end
 
   test "bad actual" do

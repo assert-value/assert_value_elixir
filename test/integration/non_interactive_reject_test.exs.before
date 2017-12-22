@@ -4,13 +4,13 @@ defmodule NonInteractiveRejectTest do
   import AssertValue
 
   test "fail" do
-    assert_value "foo" == """
+    assert_value "foo\nbar" == """
     bar<NOEOL>
     """
   end
 
   test "fail again" do
-    assert_value "foo" == """
+    assert_value "foo\nbaz" == """
     baz<NOEOL>
     """
   end
