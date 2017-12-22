@@ -38,7 +38,9 @@
           max_length: 80, exit_status: 2},
         # Do not suggest to write large numbers with underscore
         # We have GitHub data maps in tests with big ids and bytes sizes
-        {Credo.Check.Readability.LargeNumbers, false}
+        {Credo.Check.Readability.LargeNumbers, false},
+        # We have a lot of assert_value "foo" == "foo" in tests
+        {Credo.Check.Warning.OperationOnSameValues, false}
       ]
     }
   ]
