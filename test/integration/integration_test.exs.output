@@ -115,15 +115,21 @@ integration_test.exs:99:"test expected in the form of string" assert_value "foo"
 +foo
 
 Accept new value? [y,n,?] .
+integration_test.exs:104:"test string escaping" assert_value "foo\\nbar\" \" %{}" == "bar" failed
+
+-bar
++foo\nbar" " %{}
+
+Accept new value? [y,n,?] .
 
   1) test bad actual (IntegrationTest)
-     integration_test.exs:102
+     integration_test.exs:107
      ** (AssertValue.ActualArgumentError) Actual (left) argument should be a string
      stacktrace:
-       integration_test.exs:103: (test)
+       integration_test.exs:108: (test)
 
 
-integration_test.exs:119:"test simple fail" assert_value actual == "aaa\nbBb\nccc\n" failed
+integration_test.exs:124:"test simple fail" assert_value actual == "aaa\nbBb\nccc\n" failed
 
  aaa
 -bBb
@@ -133,13 +139,13 @@ integration_test.exs:119:"test simple fail" assert_value actual == "aaa\nbBb\ncc
 Accept new value? [y,n,?] 
 
   2) test simple fail (IntegrationTest)
-     integration_test.exs:112
+     integration_test.exs:117
      AssertValue assertion failed
      code: actual == "aaa\nbBb\nccc\n"
      left: "aaa\nbbb\nccc\n"
      right: "aaa\nbBb\nccc\n"
      stacktrace:
-       integration_test.exs:119: (test)
+       integration_test.exs:124: (test)
 
 
-12 tests, 2 failures
+13 tests, 2 failures

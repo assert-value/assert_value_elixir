@@ -133,6 +133,11 @@ defmodule IntegrationTest do
     assert_value "foo" == "foo"
   end
 
+  test "string escaping" do
+    # prompt: y
+    assert_value "foo\\nbar\" \" %{}" == "foo\\nbar\" \" %{}"
+  end
+
   test "bad actual" do
     assert_value 42
   end
