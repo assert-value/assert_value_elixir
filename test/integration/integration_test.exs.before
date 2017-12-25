@@ -157,6 +157,36 @@ defmodule IntegrationTest do
     assert_value foo == %IntegrationTest.User{age: 27, name: "Peter"}
   end
 
+  test "pass with expected expression 1" do
+    assert_value "foobar\nbaz" == "foo"
+      <> """
+      bar
+      """
+      <>"baz"
+  end
+
+  test "pass with expression 2" do
+    assert_value [1, 2, 3] == [1] ++
+      [2]
+      ++ [3]
+  end
+
+  test "update expression 1" do
+    # prompt: y
+    assert_value "foobar\nbaz" == "foo"
+      <> """
+      bar
+      """
+      <>"bar"
+  end
+
+  test "update expression 2" do
+    # prompt: y
+    assert_value [1, 2, 3] == [1] ++
+      [2]
+      ++ [2]
+  end
+
   defp hello(arg) do
     "Hello #{arg}!"
   end

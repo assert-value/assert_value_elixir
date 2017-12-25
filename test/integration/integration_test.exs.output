@@ -162,15 +162,7 @@ integration_test.exs:145:"test update complex value" assert_value foo == [%{a: 1
 -[%{a: 1, b: {:left, :light}, c: <<1, 2, 3>>}, true]
 +[%{a: 1, b: {:left, :light}, c: <<1, 2, 3>>}, nil]
 
-Accept new value? [y,n,?] 
-
-  1) test update complex value (IntegrationTest)
-     integration_test.exs:142
-     ** (RuntimeError) Unable to parse expected value
-     stacktrace:
-       integration_test.exs:145: (test)
-
-
+Accept new value? [y,n,?] .
 integration_test.exs:151:"test create struct" assert_value foo failed
 
 -
@@ -182,16 +174,21 @@ integration_test.exs:157:"test update struct" assert_value foo == %IntegrationTe
 -%IntegrationTest.User{age: 27, name: "Peter"}
 +%IntegrationTest.User{age: 27, name: "John"}
 
-Accept new value? [y,n,?] 
+Accept new value? [y,n,?] ...
+integration_test.exs:176:"test update expression 1" assert_value "foobar\nbaz" == "foo" <> "bar\n" <> "ba... failed
 
-  2) test update struct (IntegrationTest)
-     integration_test.exs:154
-     ** (RuntimeError) Unable to parse expected value
-     stacktrace:
-       integration_test.exs:157: (test)
+ foobar
+-bar
++baz
 
+Accept new value? [y,n,?] .
+integration_test.exs:185:"test update expression 2" assert_value [1, 2, 3] == [1] ++ [2] ++ [2] failed
 
-integration_test.exs:173:"test simple fail" assert_value actual == "aaa\nbBb\nccc\n" failed
+-[1, 2, 2]
++[1, 2, 3]
+
+Accept new value? [y,n,?] .
+integration_test.exs:203:"test simple fail" assert_value actual == "aaa\nbBb\nccc\n" failed
 
  aaa
 -bBb
@@ -200,14 +197,14 @@ integration_test.exs:173:"test simple fail" assert_value actual == "aaa\nbBb\ncc
 
 Accept new value? [y,n,?] 
 
-  3) test simple fail (IntegrationTest)
-     integration_test.exs:166
+  1) test simple fail (IntegrationTest)
+     integration_test.exs:196
      AssertValue assertion failed
      code: actual == "aaa\nbBb\nccc\n"
      left: "aaa\nbbb\nccc\n"
      right: "aaa\nbBb\nccc\n"
      stacktrace:
-       integration_test.exs:173: (test)
+       integration_test.exs:203: (test)
 
 
-21 tests, 3 failures
+25 tests, 1 failure

@@ -176,7 +176,7 @@ defmodule IntegrationTest do
   test "update complex value" do
     # prompt: y
     foo = [%{a: 1, b: {:left, :light}, c: <<1,2,3>>}, nil]
-    assert_value foo == [%{a: 1, b: {:left, :light}, c: <<1, 2, 3>>}, true]
+    assert_value foo == [%{a: 1, b: {:left, :light}, c: <<1, 2, 3>>}, nil]
   end
 
   test "create struct" do
@@ -188,7 +188,34 @@ defmodule IntegrationTest do
   test "update struct" do
     # prompt: y
     foo = %User{}
-    assert_value foo == %IntegrationTest.User{age: 27, name: "Peter"}
+    assert_value foo == %IntegrationTest.User{age: 27, name: "John"}
+  end
+
+  test "pass with expected expression 1" do
+    assert_value "foobar\nbaz" == "foo"
+      <> """
+      bar
+      """
+      <>"baz"
+  end
+
+  test "pass with expression 2" do
+    assert_value [1, 2, 3] == [1] ++
+      [2]
+      ++ [3]
+  end
+
+  test "update expression 1" do
+    # prompt: y
+    assert_value "foobar\nbaz" == """
+    foobar
+    baz<NOEOL>
+    """
+  end
+
+  test "update expression 2" do
+    # prompt: y
+    assert_value [1, 2, 3] == [1, 2, 3]
   end
 
   defp hello(arg) do

@@ -9,6 +9,7 @@ defmodule AssertValue do
       actual_value = unquote(left)
       expected_type = unquote(expected_type)
       expected_file = unquote(expected_file)
+      expected_code = unquote(Macro.to_string(right))
       expected_value =
         case expected_type do
           :string ->
@@ -36,6 +37,7 @@ defmodule AssertValue do
             actual_value: actual_value,
             expected_type: expected_type,
             expected_action: :update,
+            expected_code: expected_code,
             expected_value: expected_value,
             expected_file: expected_file)
           case decision do
@@ -65,6 +67,7 @@ defmodule AssertValue do
         assertion_code: assertion_code,
         expected_type: :source,
         expected_action: :create,
+        expected_code: nil,
         expected_value: nil)
 
       case decision do

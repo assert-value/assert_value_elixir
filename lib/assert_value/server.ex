@@ -75,7 +75,7 @@ defmodule AssertValue.Server do
             opts[:caller][:file],
             opts[:caller][:line],
             opts[:actual_value],
-            opts[:expected_value],
+            opts[:expected_code],
             opts[:expected_file] # TODO: expected_filename
           )
         :create ->
@@ -206,7 +206,7 @@ defmodule AssertValue.Server do
   end
 
   def update_expected(file_changes, _any, source_filename, original_line_number,
-                      actual, expected, _) do
+                      actual, expected_code, _) do
     {prefix, line, suffix} =
       split_code(file_changes, source_filename, original_line_number)
 
@@ -217,7 +217,7 @@ defmodule AssertValue.Server do
     prefix = prefix <> "\n" <> indentation <> statement
     suffix = rest <> "\n" <> suffix
 
-    case parse_expected(suffix, expected, "") do
+    case parse_expected(suffix, expected_code, "") do
       :parse_error ->
         {:error, :parse_error}
       {formatted_expected, suffix} ->
@@ -293,19 +293,34 @@ defmodule AssertValue.Server do
     end
   end
 
-  defp parse_expected(code, expected, formatted_expected) do
+  defp parse_expected(code, expected_code, formatted_expected) do
     {_, value} = Code.string_to_quoted(formatted_expected)
     value = if is_binary(value) && String.match?(value, ~r/<NOEOL>/) do
-      String.replace(value, "<NOEOL>\n", "")
+      # In quoted code newlines are quoted
+      String.replace(value, "<NOEOL>\\n", "")
     else
       value
     end
-    if value == expected do
+    # There may be differences between AST evaluated from string and the one
+    # from compiler for complex values because of line numbers, etc...
+    #
+    #   iex(1)> a = [c: {:<<>>, [line: 1], [1, 2, 2]}]
+    #   iex(2)> b = [c: <<1, 2, 2>>]
+    #
+    #   iex(3)> a == b
+    #   false
+    #
+    # To deal with it compare formatted ASTs
+    #
+    #   iex(4)> Macro.to_string(a) == Macro.to_string(b)
+    #   true
+    #
+    if Macro.to_string(value) == expected_code do
       {formatted_expected, code}
     else
       case String.next_grapheme(code) do
         {char, rest} ->
-          parse_expected(rest, expected, formatted_expected <> char)
+          parse_expected(rest, expected_code, formatted_expected <> char)
         nil ->
           :parse_error
       end
