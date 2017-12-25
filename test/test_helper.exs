@@ -100,23 +100,22 @@ defmodule AssertValue.Test.IntegrationTest do
       |> String.replace(~r/\s{5}code:\s+actual/m,   "     code: actual")
       |> String.replace(~r/\s{5}(left):\s+"/m,  "     left: \"")
       |> String.replace(~r/\s{5}(right):\s+"/m, "     right: \"")
-      # canonicalize messages about raised AssertValue.ExpectedArgumentError
-      # and AssertValue.ActualArgumentError exceptions
+      # canonicalize messages about raised exceptions
       # ExUnit in Elixir 1.5 has "code:" line in message:
       #
-      #   ** (AssertValue.ExpectedArgumentError) ...
-      #   code: assert_value "foo" = "bar"
+      #   ** (RuntimeError) Error!
+      #   code: raise "Error!"
       #   stacktrace:
       #     integration_test.exs:82: (test)
       #
       # ExUnit in Elixir 1.4 does not
       #
-      #   ** (AssertValue.ExpectedArgumentError) ...
+      #   ** (RuntimeError) Error!
       #   stacktrace:
       #     integration_test.exs:82: (test)
       #
       |> String.replace(
-        ~r/(\(AssertValue.*?ArgumentError\).*?)\n\s{5}code:.*?\n/,
+        ~r/(\*\* \(.*?Error\).*?)\n\s{5}code:.*?\n/,
         "\\1\n"
       )
 

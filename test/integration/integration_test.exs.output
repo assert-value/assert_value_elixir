@@ -167,7 +167,6 @@ Accept new value? [y,n,?]
   1) test update complex value (IntegrationTest)
      integration_test.exs:142
      ** (RuntimeError) Unable to parse expected value
-     code: test "create integer" do
      stacktrace:
        integration_test.exs:145: (test)
 
@@ -188,7 +187,6 @@ Accept new value? [y,n,?]
   2) test update struct (IntegrationTest)
      integration_test.exs:154
      ** (RuntimeError) Unable to parse expected value
-     code: assert_value 42 == 42
      stacktrace:
        integration_test.exs:157: (test)
 
