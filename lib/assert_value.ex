@@ -1,11 +1,16 @@
 defmodule AssertValue do
 
+  defmodule ParseError do
+    defexception [message: ~S{Unable to parse expected value}]
+  end
+
   # Assertions with right argument like "assert_value actual == expected"
   defmacro assert_value({:==, _, [left, right]} = assertion) do
     # This should be performed on AST outside "quote do"
     {expected_type, expected_file} = get_expected_type(right)
     quote do
       assertion_code = unquote(Macro.to_string(assertion))
+      actual_code = unquote(Macro.to_string(left))
       actual_value = unquote(left)
       expected_type = unquote(expected_type)
       expected_file = unquote(expected_file)
@@ -34,6 +39,7 @@ defmodule AssertValue do
               function: unquote(__CALLER__.function),
             ],
             assertion_code: assertion_code,
+            actual_code: actual_code,
             actual_value: actual_value,
             expected_type: expected_type,
             expected_action: :update,

@@ -74,6 +74,7 @@ defmodule AssertValue.Server do
             opts[:expected_type],
             opts[:caller][:file],
             opts[:caller][:line],
+            opts[:actual_code],
             opts[:actual_value],
             opts[:expected_code],
             opts[:expected_file] # TODO: expected_filename
@@ -200,36 +201,35 @@ defmodule AssertValue.Server do
   end
 
   # Update expected when expected is File.read!
-  def update_expected(file_changes, :file, _, _, actual, _, expected_filename) do
+  def update_expected(file_changes, :file, _, _, _, actual, _, expected_filename) do
     File.write!(expected_filename, actual)
     {:ok, file_changes}
   end
 
   def update_expected(file_changes, _any, source_filename, original_line_number,
-                      actual, expected_code, _) do
+                      actual_code, actual, expected_code, _) do
     {prefix, line, suffix} =
       split_code(file_changes, source_filename, original_line_number)
 
     prefix = prefix |> Enum.join("\n")
     suffix = suffix |> Enum.join("\n")
-    [_, indentation, statement, rest] =
-        Regex.run(~r/(^\s*)(assert_value.*?==\s*?)(\S.*)/, line)
-    prefix = prefix <> "\n" <> indentation <> statement
-    suffix = rest <> "\n" <> suffix
 
-    case parse_expected(suffix, expected_code, "") do
-      :parse_error ->
+    try do
+      {indentation, statement, old_expected, suffix} =
+        parse_statement(line, suffix, actual_code, expected_code)
+      prefix = prefix <> "\n" <> indentation <> statement
+      {new_expected, new_expected_length} =
+        new_expected_from_actual(actual, indentation)
+      File.write!(source_filename, prefix <> new_expected <> suffix)
+      {:ok, update_lines_count(
+          file_changes,
+          source_filename,
+          original_line_number,
+          new_expected_length - length(to_lines(old_expected))
+      )}
+    rescue
+      AssertValue.ParseError ->
         {:error, :parse_error}
-      {formatted_expected, suffix} ->
-        {new_expected, new_expected_length} =
-          new_expected_from_actual(actual, indentation)
-        File.write!(source_filename, prefix <> new_expected <> suffix)
-        {:ok, update_lines_count(
-            file_changes,
-            source_filename,
-            original_line_number,
-            new_expected_length - length(to_lines(formatted_expected))
-        )}
     end
   end
 
@@ -293,8 +293,21 @@ defmodule AssertValue.Server do
     end
   end
 
-  defp parse_expected(code, expected_code, formatted_expected) do
-    {_, value} = Code.string_to_quoted(formatted_expected)
+  def parse_statement(line, suffix, actual_code, expected_code) do
+    code = line <> "\n" <> suffix
+    [_, indentation, statement, _, rest] =
+      Regex.run(~r/(^\s*)(assert_value(\s|\()*)(.*)/s, code)
+    {formatted_actual, rest} = parse_argument(rest, actual_code, "")
+    statement = statement <> formatted_actual
+    [_, operator, rest] =
+      Regex.run(~r/(\s+==\s*)(.*)/s, rest)
+    statement = statement <> operator
+    {formatted_expected, rest} = parse_argument(rest, expected_code, "")
+    {indentation, statement, formatted_expected, rest}
+  end
+
+  defp parse_argument(code, formatted_value, parsed_value) do
+    {_, value} = Code.string_to_quoted(parsed_value)
     value = if is_binary(value) && String.match?(value, ~r/<NOEOL>/) do
       # In quoted code newlines are quoted
       String.replace(value, "<NOEOL>\\n", "")
@@ -315,14 +328,14 @@ defmodule AssertValue.Server do
     #   iex(4)> Macro.to_string(a) == Macro.to_string(b)
     #   true
     #
-    if Macro.to_string(value) == expected_code do
-      {formatted_expected, code}
+    if Macro.to_string(value) == formatted_value do
+      {parsed_value, code}
     else
       case String.next_grapheme(code) do
         {char, rest} ->
-          parse_expected(rest, expected_code, formatted_expected <> char)
+          parse_argument(rest, formatted_value, parsed_value <> char)
         nil ->
-          :parse_error
+          raise AssertValue.ParseError
       end
     end
   end

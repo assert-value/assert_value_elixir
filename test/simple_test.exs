@@ -10,7 +10,11 @@ defmodule SimpleTest do
   end
 
   test "bar" do
-    assert_value "bar" == "bar"
+    assert_value (
+      "bar=="
+      <> "baz" ==
+      "bar==baz"
+    )
   end
 
 end
