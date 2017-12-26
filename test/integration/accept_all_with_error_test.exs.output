@@ -1,5 +1,5 @@
 
-accept_all_with_error_test.exs:9:"test all pass" assert_value "foo" failed
+accept_all_with_error_test.exs:##:"test all pass" assert_value "foo" failed
 
 -
 +foo
@@ -7,10 +7,10 @@ accept_all_with_error_test.exs:9:"test all pass" assert_value "foo" failed
 Accept new value? [y,n,?] .
 
   1) test one fail with error (AcceptAllWithErrorTest)
-     accept_all_with_error_test.exs:18
+     accept_all_with_error_test.exs:##
      ** (RuntimeError) Error!
      stacktrace:
-       accept_all_with_error_test.exs:24: (test)
+       accept_all_with_error_test.exs:##: (test)
 
 .
 3 tests, 1 failure

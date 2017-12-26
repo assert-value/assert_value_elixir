@@ -1,5 +1,5 @@
 
-accept_all_test.exs:9:"test all pass" assert_value "foo\nbar" == "bar<NOEOL>\n" failed
+accept_all_test.exs:##:"test all pass" assert_value "foo\nbar" == "bar<NOEOL>\n" failed
 
 +foo
  bar

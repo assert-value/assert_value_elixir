@@ -95,6 +95,8 @@ defmodule AssertValue.Test.IntegrationTest do
       |> String.replace(~r{\/tmp\/assert-value-\d+-\d+-\w+/}, "")
       |> String.replace(~r/\nFinished in.*\n/m, "")
       |> String.replace(~r/\nRandomized with seed.*\n/m, "")
+      # mask line numbers
+      |> String.replace(~r/(_test.exs:)\d+/, "\\1##")
       # canonicalize ExUnit error formatting:
       # - remove fancy spacing
       |> String.replace(~r/\s{5}code:\s+actual/m,   "     code: actual")

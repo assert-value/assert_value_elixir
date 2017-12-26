@@ -1,5 +1,5 @@
 .
-integration_test.exs:28:"test create expected" assert_value value failed
+integration_test.exs:##:"test create expected" assert_value value failed
 
 -
 +aaa
@@ -7,13 +7,13 @@ integration_test.exs:28:"test create expected" assert_value value failed
 +  ccc
 
 Accept new value? [y,n,?] 
-integration_test.exs:31:"test create expected" assert_value "foo" failed
+integration_test.exs:##:"test create expected" assert_value "foo" failed
 
 -
 +foo
 
 Accept new value? [y,n,?] .
-integration_test.exs:41:"test update expected" assert_value actual == "-1\n  0\n   1\n  2\n 3\n 4\n ... failed
+integration_test.exs:##:"test update expected" assert_value actual == "-1\n  0\n   1\n  2\n 3\n 4\n ... failed
 
 --1
 -  0
@@ -30,14 +30,14 @@ integration_test.exs:41:"test update expected" assert_value actual == "-1\n  0\n
 -   1
 
 Accept new value? [y,n,?] .
-integration_test.exs:60:"test create expected from string" assert_value "foo\nbar" failed
+integration_test.exs:##:"test create expected from string" assert_value "foo\nbar" failed
 
 -
 +foo
 +bar
 
 Accept new value? [y,n,?] .
-integration_test.exs:70:"test create file" assert_value actual == File.read!(Path.expand("file_t... failed
+integration_test.exs:##:"test create file" assert_value actual == File.read!(Path.expand("file_t... failed
 
 -
 +aaa
@@ -45,7 +45,7 @@ integration_test.exs:70:"test create file" assert_value actual == File.read!(Pat
 +ccc
 
 Accept new value? [y,n,?] .
-integration_test.exs:80:"test update file" assert_value actual == File.read!(Path.expand("file_t... failed
+integration_test.exs:##:"test update file" assert_value actual == File.read!(Path.expand("file_t... failed
 
  aaa
 -bBb
@@ -53,19 +53,19 @@ integration_test.exs:80:"test update file" assert_value actual == File.read!(Pat
  ccc
 
 Accept new value? [y,n,?] .
-integration_test.exs:85:"test create expected from function" assert_value hello("World") failed
+integration_test.exs:##:"test create expected from function" assert_value hello("World") failed
 
 -
 +Hello World!
 
 Accept new value? [y,n,?] .
-integration_test.exs:90:"test update expected from function" assert_value hello("Elixir") == "Hello World!\n" failed
+integration_test.exs:##:"test update expected from function" assert_value hello("Elixir") == "Hello World!\n" failed
 
 -Hello World!
 +Hello Elixir!
 
 Accept new value? [y,n,?] .
-integration_test.exs:98:"test reprompt context" assert_value actual failed
+integration_test.exs:##:"test reprompt context" assert_value actual failed
 
 -
 +line
@@ -107,88 +107,88 @@ integration_test.exs:98:"test reprompt context" assert_value actual failed
 +line
 +line
 
-integration_test.exs:98:"test reprompt context" assert_value actual failed
+integration_test.exs:##:"test reprompt context" assert_value actual failed
 Accept new value? [y,n,?] .
-integration_test.exs:103:"test expected in the form of string" assert_value "foo" == "bar" failed
+integration_test.exs:##:"test expected in the form of string" assert_value "foo" == "bar" failed
 
 -bar
 +foo
 
 Accept new value? [y,n,?] .
-integration_test.exs:108:"test string escaping" assert_value "foo\\nbar\" \" %{}" == "bar" failed
+integration_test.exs:##:"test string escaping" assert_value "foo\\nbar\" \" %{}" == "bar" failed
 
 -bar
 +foo\nbar" " %{}
 
 Accept new value? [y,n,?] .
-integration_test.exs:113:"test create integer" assert_value 42 failed
+integration_test.exs:##:"test create integer" assert_value 42 failed
 
 -
 +42
 
 Accept new value? [y,n,?] .
-integration_test.exs:118:"test update integer" assert_value 42 == 43 failed
+integration_test.exs:##:"test update integer" assert_value 42 == 43 failed
 
 -43
 +42
 
 Accept new value? [y,n,?] .
-integration_test.exs:123:"test string and integer" assert_value 42 == "42" failed
+integration_test.exs:##:"test string and integer" assert_value 42 == "42" failed
 
 -"42"
 +42
 
 Accept new value? [y,n,?] .
-integration_test.exs:128:"test create list" assert_value [1, 2, 3] failed
+integration_test.exs:##:"test create list" assert_value [1, 2, 3] failed
 
 -
 +[1, 2, 3]
 
 Accept new value? [y,n,?] .
-integration_test.exs:133:"test update list" assert_value [1, 2, 3] == [1, 2, 2] failed
+integration_test.exs:##:"test update list" assert_value [1, 2, 3] == [1, 2, 2] failed
 
 -[1, 2, 2]
 +[1, 2, 3]
 
 Accept new value? [y,n,?] .
-integration_test.exs:139:"test create complex value" assert_value foo failed
+integration_test.exs:##:"test create complex value" assert_value foo failed
 
 -
 +[%{a: 1, b: {:left, :light}, c: <<1, 2, 3>>}, nil]
 
 Accept new value? [y,n,?] .
-integration_test.exs:145:"test update complex value" assert_value foo == [%{a: 1, b: {:left, :light}, c: <... failed
+integration_test.exs:##:"test update complex value" assert_value foo == [%{a: 1, b: {:left, :light}, c: <... failed
 
 -[%{a: 1, b: {:left, :light}, c: <<1, 2, 3>>}, true]
 +[%{a: 1, b: {:left, :light}, c: <<1, 2, 3>>}, nil]
 
 Accept new value? [y,n,?] .
-integration_test.exs:151:"test create struct" assert_value foo failed
+integration_test.exs:##:"test create struct" assert_value foo failed
 
 -
 +%IntegrationTest.User{age: 27, name: "John"}
 
 Accept new value? [y,n,?] .
-integration_test.exs:157:"test update struct" assert_value foo == %IntegrationTest.User{age: 27, na... failed
+integration_test.exs:##:"test update struct" assert_value foo == %IntegrationTest.User{age: 27, na... failed
 
 -%IntegrationTest.User{age: 27, name: "Peter"}
 +%IntegrationTest.User{age: 27, name: "John"}
 
 Accept new value? [y,n,?] ...
-integration_test.exs:176:"test update expression 1" assert_value "foobar\nbaz" == "foo" <> "bar\n" <> "ba... failed
+integration_test.exs:##:"test update expression 1" assert_value "foobar\nbaz" == "foo" <> "bar\n" <> "ba... failed
 
  foobar
 -bar
 +baz
 
 Accept new value? [y,n,?] .
-integration_test.exs:185:"test update expression 2" assert_value [1, 2, 3] == [1] ++ [2] ++ [2] failed
+integration_test.exs:##:"test update expression 2" assert_value [1, 2, 3] == [1] ++ [2] ++ [2] failed
 
 -[1, 2, 2]
 +[1, 2, 3]
 
 Accept new value? [y,n,?] .
-integration_test.exs:203:"test simple fail" assert_value actual == "aaa\nbBb\nccc\n" failed
+integration_test.exs:##:"test simple fail" assert_value actual == "aaa\nbBb\nccc\n" failed
 
  aaa
 -bBb
@@ -198,13 +198,13 @@ integration_test.exs:203:"test simple fail" assert_value actual == "aaa\nbBb\ncc
 Accept new value? [y,n,?] 
 
   1) test simple fail (IntegrationTest)
-     integration_test.exs:196
+     integration_test.exs:##
      AssertValue assertion failed
      code: actual == "aaa\nbBb\nccc\n"
      left: "aaa\nbbb\nccc\n"
      right: "aaa\nbBb\nccc\n"
      stacktrace:
-       integration_test.exs:203: (test)
+       integration_test.exs:##: (test)
 
 
 25 tests, 1 failure

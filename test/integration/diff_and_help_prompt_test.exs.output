@@ -1,5 +1,5 @@
 
-diff_and_help_prompt_test.exs:9:"test promt help and accept" assert_value "foo" failed
+diff_and_help_prompt_test.exs:##:"test promt help and accept" assert_value "foo" failed
 
 -
 +foo
@@ -13,7 +13,7 @@ Accept new value? [y,n,?]
     ? - This help
 
 Accept new value? [y,n,?] .
-diff_and_help_prompt_test.exs:16:"test promt help then diff then fail" assert_value "foo" failed
+diff_and_help_prompt_test.exs:##:"test promt help then diff then fail" assert_value "foo" failed
 
 -
 +foo
@@ -27,7 +27,7 @@ Accept new value? [y,n,?]
     ? - This help
 
 Accept new value? [y,n,?] 
-diff_and_help_prompt_test.exs:16:"test promt help then diff then fail" assert_value "foo" failed
+diff_and_help_prompt_test.exs:##:"test promt help then diff then fail" assert_value "foo" failed
 
 -
 +foo
@@ -35,13 +35,13 @@ diff_and_help_prompt_test.exs:16:"test promt help then diff then fail" assert_va
 Accept new value? [y,n,?] 
 
   1) test promt help then diff then fail (DiffAndHelpPromptTest)
-     diff_and_help_prompt_test.exs:12
+     diff_and_help_prompt_test.exs:##
      AssertValue assertion failed
      code:  "foo"
      left: "foo"
      right: nil
      stacktrace:
-       diff_and_help_prompt_test.exs:16: (test)
+       diff_and_help_prompt_test.exs:##: (test)
 
 
 2 tests, 1 failure
