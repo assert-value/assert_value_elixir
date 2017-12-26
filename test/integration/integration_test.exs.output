@@ -188,12 +188,6 @@ integration_test.exs:##:"test update expression 2" assert_value [1, 2, 3] == [1]
 +[1, 2, 3]
 
 Accept new value? [y,n,?] .
-integration_test.exs:##:"test formatting, expression, and ==" assert_value "bar==" <> "baz" == "baz==" <> "foo" failed
-
--baz==foo
-+bar==baz
-
-Accept new value? [y,n,?] .
 integration_test.exs:##:"test simple fail" assert_value actual == "aaa\nbBb\nccc\n" failed
 
  aaa
@@ -213,4 +207,4 @@ Accept new value? [y,n,?]
        integration_test.exs:##: (test)
 
 
-26 tests, 1 failure
+25 tests, 1 failure

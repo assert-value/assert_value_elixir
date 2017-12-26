@@ -187,16 +187,6 @@ defmodule IntegrationTest do
       ++ [2]
   end
 
-  test "formatting, expression, and ==" do
-    # prompt: y
-    assert_value (
-      "bar=="
-      <> "baz" ==
-      "baz=="
-      <> "foo"
-    )
-  end
-
   defp hello(arg) do
     "Hello #{arg}!"
   end

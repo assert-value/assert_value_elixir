@@ -1,0 +1,72 @@
+defmodule ParserTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "newlines" do
+    assert_value "foo" ==
+    "foo"
+    # prompt: y
+    assert_value "foo" ==
+    "foo"
+
+    assert_value "foo"
+    == "foo"
+    # prompt: y
+    assert_value "foo"
+    == "foo"
+  end
+
+  test "parentheses" do
+    assert_value("foo" == "foo")
+    # prompt: y
+    assert_value("foo" == "foo")
+
+    assert_value(
+    "foo" == "foo"
+    )
+    # prompt: y
+    assert_value(
+    "foo" == "foo"
+    )
+
+    assert_value(
+    "foo"
+    ==
+    "foo"
+    )
+    # prompt: y
+    assert_value(
+    "foo"
+    ==
+    "foo"
+    )
+  end
+
+  test "elixir 1.6 formatter" do
+    assert_value(
+      "foo\nbar" == """
+      foo
+      bar<NOEOL>
+      """
+    )
+
+    # prompt: y
+    assert_value(
+      "foo\nbar" == """
+    foo
+    bar<NOEOL>
+    """
+    )
+  end
+
+  test "expressions" do
+    # prompt: y
+    assert_value (
+      "bar=="
+      <> "baz" ==
+      "bar==baz"
+    )
+  end
+
+end

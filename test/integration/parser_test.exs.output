@@ -1,0 +1,45 @@
+
+parser_test.exs:##:"test newlines" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test newlines" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test parentheses" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test parentheses" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test parentheses" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test elixir 1.6 formatter" assert_value "foo\nbar" == "foo\nbaz\n" failed
+
+ foo
+-baz
++bar
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test expressions" assert_value "bar==" <> "baz" == "baz==" <> "foo" failed
+
+-baz==foo
++bar==baz
+
+Accept new value? [y,n,?] .
+4 tests, 0 failures
