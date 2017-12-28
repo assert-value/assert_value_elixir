@@ -70,4 +70,29 @@ defmodule ParserTest do
     )
   end
 
+  test "more parentheses" do
+    # prompt: y
+    assert_value (1 + 2) == 4
+
+    # prompt: y
+    assert_value ((((1 + 2)) == 4))
+
+    # prompt: y
+    assert_value(
+      ("foo" <> "bar"
+      <> "baz")
+      ==
+      "foo"
+    )
+
+    # prompt: y
+    assert_value(
+      (("foo" <> "\nbar")
+      <> "\n"
+      <> "baz")
+      ==
+      "foo"
+    )
+  end
+
 end

@@ -293,17 +293,44 @@ defmodule AssertValue.Server do
     end
   end
 
-  def parse_statement(line, suffix, actual_code, expected_code) do
+  defp parse_statement(line, suffix, actual_code, expected_code) do
     code = line <> "\n" <> suffix
-    [_, indentation, statement, _, rest] =
-      Regex.run(~r/(^\s*)(assert_value(\s|\()*)(.*)/s, code)
-    {formatted_actual, rest} = parse_argument(rest, actual_code, "")
+    [_, indentation, statement, rest] =
+      Regex.run(~r/(^\s*)(assert_value\s*)(.*)/s, code)
+    {result, formatted_actual, rest} =
+      parse_actual(rest, actual_code)
+    if result == :error do
+      raise AssertValue.ParseError, message: "Unable to parse actual value"
+    end
     statement = statement <> formatted_actual
-    [_, operator, rest] =
-      Regex.run(~r/(\s+==\s*)(.*)/s, rest)
+    [_, operator, _, rest] =
+      Regex.run(~r/((\)|\s)+==\s*)(.*)/s, rest)
     statement = statement <> operator
-    {formatted_expected, rest} = parse_argument(rest, expected_code, "")
+    {result, formatted_expected, rest} =
+      parse_argument(rest, expected_code, "")
+    if result == :error do
+      raise AssertValue.ParseError, message: "Unable to parse expected value"
+    end
     {indentation, statement, formatted_expected, rest}
+  end
+
+  # Recursively parse actual value
+  # Try to parse actual value staring from first character after assert_value
+  # If we failed and code is started with parenthesis - cut first parenthesis
+  # and try again. Repeat until we parse actual
+  defp parse_actual(code, formatted_value) do
+    {result, formatted_actual, rest} =
+      parse_argument(code, formatted_value, "")
+    cond do
+      result == :ok ->
+        {result, formatted_actual, rest}
+      result == :error && code =~ ~r/^\s*\(/s ->
+        [_, parenthesis, rest] = Regex.run(~r/(^\s*\()(.*)/s, code)
+        {result, formatted_actual, rest} = parse_actual(rest, formatted_value)
+        {result, parenthesis <> formatted_actual, rest}
+      true ->
+        {:error, nil, nil}
+    end
   end
 
   defp parse_argument(code, formatted_value, parsed_value) do
@@ -329,13 +356,13 @@ defmodule AssertValue.Server do
     #   true
     #
     if Macro.to_string(value) == formatted_value do
-      {parsed_value, code}
+      {:ok, parsed_value, code}
     else
       case String.next_grapheme(code) do
         {char, rest} ->
           parse_argument(rest, formatted_value, parsed_value <> char)
         nil ->
-          raise AssertValue.ParseError
+          {:error, nil, nil}
       end
     end
   end

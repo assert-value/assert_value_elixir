@@ -42,4 +42,29 @@ parser_test.exs:##:"test expressions" assert_value "bar==" <> "baz" == "baz==" <
 +bar==baz
 
 Accept new value? [y,n,?] .
-4 tests, 0 failures
+parser_test.exs:##:"test more parentheses" assert_value 1 + 2 == 4 failed
+
+-4
++3
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test more parentheses" assert_value 1 + 2 == 4 failed
+
+-4
++3
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test more parentheses" assert_value "foo" <> "bar" <> "baz" == "foo" failed
+
+-foo
++foobarbaz
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test more parentheses" assert_value ("foo" <> "\nbar") <> "\n" <> "baz" == "... failed
+
+ foo
++bar
++baz
+
+Accept new value? [y,n,?] .
+5 tests, 0 failures

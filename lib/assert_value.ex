@@ -1,7 +1,7 @@
 defmodule AssertValue do
 
   defmodule ParseError do
-    defexception [message: ~S{Unable to parse expected value}]
+    defexception [:message]
   end
 
   # Assertions with right argument like "assert_value actual == expected"
