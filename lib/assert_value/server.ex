@@ -1,6 +1,7 @@
 defmodule AssertValue.Server do
 
   use GenServer
+  import AssertValue.StringTools
 
   def start_link do
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)
@@ -118,7 +119,7 @@ defmodule AssertValue.Server do
     # * not be unreasonably long, so the user sees it on the screen
     #   grouped with the diff
     {function, _} = opts[:caller][:function]
-    code = opts[:assertion_code] |> smart_truncate_string(40)
+    code = opts[:assertion_code] |> smart_truncate(40)
     diff_context = "#{file}:#{line}:\"#{Atom.to_string function}\" assert_value #{code} failed"
     diff = AssertValue.Diff.diff(opts[:expected_value], opts[:actual_value])
     diff_lines_count = String.split(diff, "\n") |> Enum.count()
@@ -169,25 +170,22 @@ defmodule AssertValue.Server do
   end
 
   def update_expected(file_changes, _any, opts) do
-    source_filename = opts[:caller][:file]
-    original_line_number = opts[:caller][:line]
-    {prefix, line, suffix} =
-      split_code(file_changes, source_filename, original_line_number)
+    current_line_number = current_line_number(
+      file_changes,
+      opts[:caller][:file],
+      opts[:caller][:line]
+    )
     try do
-      {indentation, statement, old_expected, suffix} =
-        parse_statement(line, suffix, opts)
-      prefix =
-        prefix <> "\n"
-        <> indentation
-        <> statement
-        <> (if opts[:expected_action] == :create, do: " == ", else: "")
+      {prefix, old_expected, suffix, indentation} =
+        AssertValue.Parser.parse_expected(opts, current_line_number)
       {new_expected, new_expected_length} =
-        new_expected_from_actual(opts[:actual_value], indentation)
-      File.write!(source_filename, prefix <> new_expected <> suffix)
+        AssertValue.Formatter.new_expected_from_actual(
+          opts[:actual_value], indentation)
+      File.write!(opts[:caller][:file], prefix <> new_expected <> suffix)
       {:ok, update_lines_count(
           file_changes,
-          source_filename,
-          original_line_number,
+          opts[:caller][:file],
+          opts[:caller][:line],
           new_expected_length - length(to_lines(old_expected))
       )}
     rescue
@@ -212,173 +210,6 @@ defmodule AssertValue.Server do
       (file_changes[filename] || %{})
       |> Map.put(original_line_number, diff)
     Map.put(file_changes, filename, current_file_changes)
-  end
-
-  # Private
-
-  defp read_source(filename) do
-    File.read!(filename) |> String.split("\n")
-  end
-
-  defp to_lines(arg) do
-    arg
-    # remove trailing newline otherwise String.split will give us an
-    # empty line at the end
-    |> String.replace(~r/\n\Z/, "", global: false)
-    |> String.split("\n")
-  end
-
-  defp split_code(file_changes, source_filename, original_line_number) do
-    source = read_source(source_filename)
-    line_number = current_line_number(
-      file_changes, source_filename, original_line_number)
-    {prefix, rest} = Enum.split(source, line_number - 1)
-    [line | suffix] = rest
-    prefix = prefix |> Enum.join("\n")
-    suffix = suffix |> Enum.join("\n")
-    {prefix, line, suffix}
-  end
-
-  # Inspect protocol for String has the best implementation
-  # of string escaping. Use it, but remove leading and trailing ?"
-  # https://github.com/elixir-lang/elixir/blob/master/lib/elixir/lib/inspect.ex
-  defp escape_string(s) do
-    s
-    |> inspect
-    |> String.replace(~r/(\A")|("\Z)/, "")
-  end
-
-  defp smart_truncate_string(s, length) when is_binary(s) and length > 0 do
-    if String.length(s) <= length do
-      s
-    else
-      s
-      |> String.slice(0..length - 1)
-      |> Kernel.<>("...")
-    end
-  end
-
-  defp parse_statement(line, suffix, opts) do
-    code = line <> "\n" <> suffix
-    [_, indentation, statement, rest] =
-      Regex.run(~r/(^\s*)(assert_value\s*)(.*)/s, code)
-
-    {formatted_assertion, suffix} =
-      parse_argument(rest, opts[:assertion_code])
-
-    {statement, formatted_assertion, suffix} =
-      trim_parentheses(statement, formatted_assertion, suffix)
-
-    {statement, rest, suffix} =
-      if opts[:actual_code] do
-        {formatted_actual, rest} =
-          parse_argument(formatted_assertion, opts[:actual_code])
-        statement = statement <> formatted_actual
-        {statement, rest, suffix}
-      else
-        {statement <> formatted_assertion, "", suffix}
-      end
-
-    {statement, formatted_expected, suffix} =
-      if opts[:expected_code] do
-        [_, operator, _, rest] =
-          Regex.run(~r/((\)|\s)+==\s*)(.*)/s, rest)
-        statement = statement <> operator
-        {formatted_expected, rest} =
-          parse_argument(rest, opts[:expected_code])
-        {statement, formatted_expected, rest <> suffix}
-      else
-        {statement, "", suffix}
-      end
-
-    {indentation, statement, formatted_expected, suffix}
-  end
-
-  defp parse_argument(code, formatted_value, parsed_value \\ "") do
-    {_, value} = Code.string_to_quoted(parsed_value)
-    value = if is_binary(value) && String.match?(value, ~r/<NOEOL>/) do
-      # In quoted code newlines are quoted
-      String.replace(value, "<NOEOL>\\n", "")
-    else
-      value
-    end
-    # There may be differences between AST evaluated from string and the one
-    # from compiler for complex values because of line numbers, etc...
-    #
-    #   iex(1)> a = [c: {:<<>>, [line: 1], [1, 2, 2]}]
-    #   iex(2)> b = [c: <<1, 2, 2>>]
-    #
-    #   iex(3)> a == b
-    #   false
-    #
-    # To deal with it compare formatted ASTs
-    #
-    #   iex(4)> Macro.to_string(a) == Macro.to_string(b)
-    #   true
-    #
-    if Macro.to_string(value) == formatted_value do
-      {parsed_value, code}
-    else
-      case String.next_grapheme(code) do
-        {char, rest} ->
-          parse_argument(rest, formatted_value, parsed_value <> char)
-        nil ->
-          raise AssertValue.ParseError
-      end
-    end
-  end
-
-  defp trim_parentheses(statement, code, suffix) do
-    if code =~ ~r/^\(.*\)$/s do
-      trimmed = code |> String.slice(1, String.length(code) - 2)
-      if Code.string_to_quoted(trimmed) == Code.string_to_quoted(code) do
-        {statement <> "(", trimmed, ")" <> suffix}
-      else
-        {statement, code, suffix}
-      end
-    else
-      {statement, code, suffix}
-    end
-  end
-
-  # Return new expected value and its length in lines
-  defp new_expected_from_actual(actual, indentation) when is_binary(actual) do
-    if length(to_lines(actual)) <= 1 do
-      new_string_expected(actual)
-    else
-      new_heredoc_expected(actual, indentation)
-    end
-  end
-
-  defp new_expected_from_actual(actual, _indentation) do
-    {Macro.to_string(actual), 1}
-  end
-
-  defp new_string_expected(actual) do
-    {Macro.to_string(actual), 1}
-  end
-
-  defp new_heredoc_expected(actual, indentation) do
-    actual =
-      actual
-      |> add_noeol_if_needed
-      |> to_lines
-      |> Enum.map(&(indentation <> &1))
-      |> Enum.map(&escape_string/1)
-    new_expected = ["\"\"\""] ++ actual ++ [indentation <> "\"\"\""]
-    {Enum.join(new_expected, "\n"), length(new_expected)}
-  end
-
-  # to work as a heredoc a string must end with a newline.  For
-  # strings that don't we append a special token and a newline when
-  # writing them to source file.  This way we can look for this
-  # special token when we read it back and strip it at that time.
-  defp add_noeol_if_needed(arg) do
-    if arg =~ ~r/\n\Z/ do
-      arg
-    else
-      arg <> "<NOEOL>\n"
-    end
   end
 
 end
