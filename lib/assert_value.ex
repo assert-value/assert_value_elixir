@@ -6,8 +6,14 @@ defmodule AssertValue do
 
   # Assertions with right argument like "assert_value actual == expected"
   defmacro assert_value({:==, _, [left, right]} = assertion) do
-    # This should be performed on AST outside "quote do"
-    {expected_type, expected_file} = get_expected_type(right)
+    {expected_type, expected_file} = case right do
+      {{:., _, [{:__aliases__, _, [:File]}, :read!]}, _, [filename]} ->
+        {:file, filename}
+      str when is_binary(str) ->
+        {:string, nil}
+      _ ->
+        {:other, nil}
+    end
     quote do
       assertion_code = unquote(Macro.to_string(assertion))
       actual_code = unquote(Macro.to_string(left))
@@ -86,16 +92,5 @@ defmodule AssertValue do
       end
     end
   end
-
-  # File.read!("/path/to/file")
-  defp get_expected_type(
-    {{:., _, [{:__aliases__, _, [:File]}, :read!]}, _, [filename]} = _expected
-  ) do
-    {:file, filename}
-  end
-  defp get_expected_type(expected) when is_binary(expected) do
-    {:string, nil}
-  end
-  defp get_expected_type(_), do: {:other, nil}
 
 end
