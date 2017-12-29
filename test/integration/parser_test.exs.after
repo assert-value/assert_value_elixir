@@ -100,4 +100,26 @@ defmodule ParserTest do
     assert_value ((((1 + 2)) == 4))
   end
 
+  test "create with parentheses" do
+    # prompt: y
+    assert_value (1 + 2 == 3)
+
+    # prompt: y
+    assert_value(
+      ("foo" <> "bar"
+      <> "baz")
+     == "foobarbaz")
+
+    # prompt: y
+    assert_value(
+      (("foo" <> "\nbar")
+      <> "\n"
+      <> "baz")
+     == """
+    foo
+    bar
+    baz<NOEOL>
+    """)
+  end
+
 end

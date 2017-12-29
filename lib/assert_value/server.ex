@@ -85,6 +85,7 @@ defmodule AssertValue.Server do
             state.file_changes,
             opts[:caller][:file],
             opts[:caller][:line],
+            opts[:assertion_code],
             opts[:actual_value]
           )
       end
@@ -183,22 +184,23 @@ defmodule AssertValue.Server do
     |> IO.puts
   end
 
-  def create_expected(file_changes, source_filename, original_line_number, actual) do
+  def create_expected(file_changes, source_filename, original_line_number, assertion_code, actual) do
     {prefix, line, suffix} =
       split_code(file_changes, source_filename, original_line_number)
 
-    [[indentation]] = Regex.scan(~r/^\s*/, line)
-    prefix =
-      (prefix ++ [line <> " == "])
-      |> Enum.join("\n")
-    suffix = suffix |> Enum.join("\n")
-    suffix = "\n" <> suffix
-    {new_expected, new_expected_length} =
-      new_expected_from_actual(actual, indentation)
-    File.write!(source_filename, prefix <> new_expected <> suffix)
-
-    {:ok, update_lines_count(file_changes, source_filename,
-      original_line_number, new_expected_length - 1)}
+    try do
+      {indentation, statement, _, suffix} =
+        parse_statement(line, suffix, assertion_code)
+      prefix = prefix <> "\n" <> indentation <> statement <> " == "
+      {new_expected, new_expected_length} =
+        new_expected_from_actual(actual, indentation)
+      File.write!(source_filename, prefix <> new_expected <> suffix)
+      {:ok, update_lines_count(file_changes, source_filename,
+        original_line_number, new_expected_length - 1)}
+    rescue
+      AssertValue.ParseError ->
+        {:error, :parse_error}
+    end
   end
 
   # Update expected when expected is File.read!
@@ -211,9 +213,6 @@ defmodule AssertValue.Server do
                       assertion_code, actual_code, actual, expected_code, _) do
     {prefix, line, suffix} =
       split_code(file_changes, source_filename, original_line_number)
-
-    prefix = prefix |> Enum.join("\n")
-    suffix = suffix |> Enum.join("\n")
 
     try do
       {indentation, statement, old_expected, suffix} = parse_statement(
@@ -272,6 +271,8 @@ defmodule AssertValue.Server do
       file_changes, source_filename, original_line_number)
     {prefix, rest} = Enum.split(source, line_number - 1)
     [line | suffix] = rest
+    prefix = prefix |> Enum.join("\n")
+    suffix = suffix |> Enum.join("\n")
     {prefix, line, suffix}
   end
 
@@ -294,7 +295,7 @@ defmodule AssertValue.Server do
     end
   end
 
-  defp parse_statement(line, suffix, assertion_code, actual_code, expected_code) do
+  defp parse_statement(line, suffix, assertion_code, actual_code \\ nil, expected_code \\ nil) do
     code = line <> "\n" <> suffix
     [_, indentation, statement, rest] =
       Regex.run(~r/(^\s*)(assert_value\s*)(.*)/s, code)
@@ -305,20 +306,27 @@ defmodule AssertValue.Server do
     {statement, formatted_assertion, suffix} =
       trim_parentheses(statement, formatted_assertion, suffix)
 
-    {formatted_actual, rest} =
-      parse_argument(formatted_assertion, actual_code)
+    {statement, rest, suffix} =
+      if actual_code do
+        {formatted_actual, rest} =
+          parse_argument(formatted_assertion, actual_code)
+        statement = statement <> formatted_actual
+        {statement, rest, suffix}
+      else
+        {statement <> formatted_assertion, "", suffix}
+      end
 
-    statement = statement <> formatted_actual
-
-    [_, operator, _, rest] =
-      Regex.run(~r/((\)|\s)+==\s*)(.*)/s, rest)
-
-    statement = statement <> operator
-
-    {formatted_expected, rest} =
-      parse_argument(rest, expected_code)
-
-    suffix = rest <> suffix
+    {statement, formatted_expected, suffix} =
+      if expected_code do
+        [_, operator, _, rest] =
+          Regex.run(~r/((\)|\s)+==\s*)(.*)/s, rest)
+        statement = statement <> operator
+        {formatted_expected, rest} =
+          parse_argument(rest, expected_code)
+        {statement, formatted_expected, rest <> suffix}
+      else
+        {statement, "", suffix}
+      end
 
     {indentation, statement, formatted_expected, suffix}
   end

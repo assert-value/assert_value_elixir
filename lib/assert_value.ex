@@ -79,6 +79,8 @@ defmodule AssertValue do
       case decision do
         {:ok, value} ->
           value
+        {:error, :parse_error} ->
+          raise AssertValue.ParseError
         {:error, :ex_unit_assertion_error,  error} ->
           raise ExUnit.AssertionError, error
       end
