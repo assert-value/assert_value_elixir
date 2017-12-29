@@ -1,7 +1,7 @@
 defmodule AssertValue do
 
   defmodule ParseError do
-    defexception [:message]
+    defexception [message: "Unable to parse assert_value arguments"]
   end
 
   # Assertions with right argument like "assert_value actual == expected"
@@ -50,7 +50,7 @@ defmodule AssertValue do
             {:ok, value} ->
               value
             {:error, :parse_error} ->
-              raise "Unable to parse expected value"
+              raise AssertValue.ParseError
             {:error, :ex_unit_assertion_error, error} ->
               raise ExUnit.AssertionError, error
           end

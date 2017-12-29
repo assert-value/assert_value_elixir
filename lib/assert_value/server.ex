@@ -74,6 +74,7 @@ defmodule AssertValue.Server do
             opts[:expected_type],
             opts[:caller][:file],
             opts[:caller][:line],
+            opts[:assertion_code],
             opts[:actual_code],
             opts[:actual_value],
             opts[:expected_code],
@@ -201,13 +202,13 @@ defmodule AssertValue.Server do
   end
 
   # Update expected when expected is File.read!
-  def update_expected(file_changes, :file, _, _, _, actual, _, expected_filename) do
+  def update_expected(file_changes, :file, _, _, _, _, actual, _, expected_filename) do
     File.write!(expected_filename, actual)
     {:ok, file_changes}
   end
 
   def update_expected(file_changes, _any, source_filename, original_line_number,
-                      actual_code, actual, expected_code, _) do
+                      assertion_code, actual_code, actual, expected_code, _) do
     {prefix, line, suffix} =
       split_code(file_changes, source_filename, original_line_number)
 
@@ -215,8 +216,8 @@ defmodule AssertValue.Server do
     suffix = suffix |> Enum.join("\n")
 
     try do
-      {indentation, statement, old_expected, suffix} =
-        parse_statement(line, suffix, actual_code, expected_code)
+      {indentation, statement, old_expected, suffix} = parse_statement(
+        line, suffix, assertion_code, actual_code, expected_code)
       prefix = prefix <> "\n" <> indentation <> statement
       {new_expected, new_expected_length} =
         new_expected_from_actual(actual, indentation)
@@ -293,47 +294,36 @@ defmodule AssertValue.Server do
     end
   end
 
-  defp parse_statement(line, suffix, actual_code, expected_code) do
+  defp parse_statement(line, suffix, assertion_code, actual_code, expected_code) do
     code = line <> "\n" <> suffix
     [_, indentation, statement, rest] =
       Regex.run(~r/(^\s*)(assert_value\s*)(.*)/s, code)
-    {result, formatted_actual, rest} =
-      parse_actual(rest, actual_code)
-    if result == :error do
-      raise AssertValue.ParseError, message: "Unable to parse actual value"
-    end
+
+    {formatted_assertion, suffix} =
+      parse_argument(rest, assertion_code)
+
+    {statement, formatted_assertion, suffix} =
+      trim_parentheses(statement, formatted_assertion, suffix)
+
+    {formatted_actual, rest} =
+      parse_argument(formatted_assertion, actual_code)
+
     statement = statement <> formatted_actual
+
     [_, operator, _, rest] =
       Regex.run(~r/((\)|\s)+==\s*)(.*)/s, rest)
+
     statement = statement <> operator
-    {result, formatted_expected, rest} =
-      parse_argument(rest, expected_code, "")
-    if result == :error do
-      raise AssertValue.ParseError, message: "Unable to parse expected value"
-    end
-    {indentation, statement, formatted_expected, rest}
+
+    {formatted_expected, rest} =
+      parse_argument(rest, expected_code)
+
+    suffix = rest <> suffix
+
+    {indentation, statement, formatted_expected, suffix}
   end
 
-  # Recursively parse actual value
-  # Try to parse actual value staring from first character after assert_value
-  # If we failed and code is started with parenthesis - cut first parenthesis
-  # and try again. Repeat until we parse actual
-  defp parse_actual(code, formatted_value) do
-    {result, formatted_actual, rest} =
-      parse_argument(code, formatted_value, "")
-    cond do
-      result == :ok ->
-        {result, formatted_actual, rest}
-      result == :error && code =~ ~r/^\s*\(/s ->
-        [_, parenthesis, rest] = Regex.run(~r/(^\s*\()(.*)/s, code)
-        {result, formatted_actual, rest} = parse_actual(rest, formatted_value)
-        {result, parenthesis <> formatted_actual, rest}
-      true ->
-        {:error, nil, nil}
-    end
-  end
-
-  defp parse_argument(code, formatted_value, parsed_value) do
+  defp parse_argument(code, formatted_value, parsed_value \\ "") do
     {_, value} = Code.string_to_quoted(parsed_value)
     value = if is_binary(value) && String.match?(value, ~r/<NOEOL>/) do
       # In quoted code newlines are quoted
@@ -356,14 +346,27 @@ defmodule AssertValue.Server do
     #   true
     #
     if Macro.to_string(value) == formatted_value do
-      {:ok, parsed_value, code}
+      {parsed_value, code}
     else
       case String.next_grapheme(code) do
         {char, rest} ->
           parse_argument(rest, formatted_value, parsed_value <> char)
         nil ->
-          {:error, nil, nil}
+          raise AssertValue.ParseError
       end
+    end
+  end
+
+  defp trim_parentheses(statement, code, suffix) do
+    if code =~ ~r/^\(.*\)$/s do
+      trimmed = code |> String.slice(1, String.length(code) - 2)
+      if Code.string_to_quoted(trimmed) == Code.string_to_quoted(code) do
+        {statement <> "(", trimmed, ")" <> suffix}
+      else
+        {statement, code, suffix}
+      end
+    else
+      {statement, code, suffix}
     end
   end
 

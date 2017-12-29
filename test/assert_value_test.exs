@@ -53,7 +53,7 @@ defmodule AssertValueTest do
 
   integration_test "parser", "parser_test.exs",
     env: [{'ASSERT_VALUE_ACCEPT_DIFFS', 'ask'}],
-    expected_exit_code: 0
+    expected_exit_code: 1 # One fail
 
   integration_test "diff and help promt", "diff_and_help_prompt_test.exs",
     env: [{'ASSERT_VALUE_ACCEPT_DIFFS', 'ask'}],

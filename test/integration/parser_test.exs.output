@@ -48,12 +48,6 @@ parser_test.exs:##:"test more parentheses" assert_value 1 + 2 == 4 failed
 +3
 
 Accept new value? [y,n,?] 
-parser_test.exs:##:"test more parentheses" assert_value 1 + 2 == 4 failed
-
--4
-+3
-
-Accept new value? [y,n,?] 
 parser_test.exs:##:"test more parentheses" assert_value "foo" <> "bar" <> "baz" == "foo" failed
 
 -foo
@@ -67,4 +61,18 @@ parser_test.exs:##:"test more parentheses" assert_value ("foo" <> "\nbar") <> "\
 +baz
 
 Accept new value? [y,n,?] .
-5 tests, 0 failures
+parser_test.exs:##:"test unable to parse" assert_value 1 + 2 == 4 failed
+
+-4
++3
+
+Accept new value? [y,n,?] 
+
+  1) test unable to parse (ParserTest)
+     parser_test.exs:##
+     ** (AssertValue.ParseError) Unable to parse assert_value arguments
+     stacktrace:
+       parser_test.exs:##: (test)
+
+
+6 tests, 1 failure

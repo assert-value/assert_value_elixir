@@ -74,9 +74,6 @@ defmodule ParserTest do
     assert_value (1 + 2) == 3
 
     # prompt: y
-    assert_value ((((1 + 2)) == 3))
-
-    # prompt: y
     assert_value(
       ("foo" <> "bar"
       <> "baz")
@@ -96,6 +93,11 @@ defmodule ParserTest do
     baz<NOEOL>
     """
     )
+  end
+
+  test "unable to parse" do
+    # prompt: y
+    assert_value ((((1 + 2)) == 4))
   end
 
 end
