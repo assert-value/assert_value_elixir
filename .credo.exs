@@ -31,8 +31,6 @@
         # Turn off function complexity check. It always fail on
         # assert_value macro because it is complex.
         {Credo.Check.Refactor.CyclomaticComplexity, false},
-        # Increase max function arity. We have function with 9 params.
-        {Credo.Check.Refactor.FunctionArity, max_arity: 9},
         # Long lines are not ok, Exit with status code
         {Credo.Check.Readability.MaxLineLength, priority: :high,
           max_length: 80, exit_status: 2},

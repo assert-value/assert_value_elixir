@@ -67,29 +67,7 @@ defmodule AssertValue.Server do
     if contents != "", do: IO.write contents
     {answer, state} = prompt_for_action(opts, state)
     if answer in ["y", "Y"] do
-      result = case opts[:expected_action] do
-        :update ->
-          update_expected(
-            state.file_changes,
-            opts[:expected_type],
-            opts[:caller][:file],
-            opts[:caller][:line],
-            opts[:assertion_code],
-            opts[:actual_code],
-            opts[:actual_value],
-            opts[:expected_code],
-            opts[:expected_file] # TODO: expected_filename
-          )
-        :create ->
-          create_expected(
-            state.file_changes,
-            opts[:caller][:file],
-            opts[:caller][:line],
-            opts[:assertion_code],
-            opts[:actual_value]
-          )
-      end
-      case result do
+      case update_expected(state.file_changes, opts[:expected_type], opts) do
         {:ok, file_changes} ->
           {:reply, {:ok, opts[:actual_value]},
             %{state | file_changes: file_changes}}
@@ -184,42 +162,27 @@ defmodule AssertValue.Server do
     |> IO.puts
   end
 
-  def create_expected(file_changes, source_filename, original_line_number, assertion_code, actual) do
-    {prefix, line, suffix} =
-      split_code(file_changes, source_filename, original_line_number)
-
-    try do
-      {indentation, statement, _, suffix} =
-        parse_statement(line, suffix, assertion_code)
-      prefix = prefix <> "\n" <> indentation <> statement <> " == "
-      {new_expected, new_expected_length} =
-        new_expected_from_actual(actual, indentation)
-      File.write!(source_filename, prefix <> new_expected <> suffix)
-      {:ok, update_lines_count(file_changes, source_filename,
-        original_line_number, new_expected_length - 1)}
-    rescue
-      AssertValue.ParseError ->
-        {:error, :parse_error}
-    end
-  end
-
   # Update expected when expected is File.read!
-  def update_expected(file_changes, :file, _, _, _, _, actual, _, expected_filename) do
-    File.write!(expected_filename, actual)
+  def update_expected(file_changes, :file, opts) do
+    File.write!(opts[:expected_file], opts[:actual_value])
     {:ok, file_changes}
   end
 
-  def update_expected(file_changes, _any, source_filename, original_line_number,
-                      assertion_code, actual_code, actual, expected_code, _) do
+  def update_expected(file_changes, _any, opts) do
+    source_filename = opts[:caller][:file]
+    original_line_number = opts[:caller][:line]
     {prefix, line, suffix} =
       split_code(file_changes, source_filename, original_line_number)
-
     try do
-      {indentation, statement, old_expected, suffix} = parse_statement(
-        line, suffix, assertion_code, actual_code, expected_code)
-      prefix = prefix <> "\n" <> indentation <> statement
+      {indentation, statement, old_expected, suffix} =
+        parse_statement(line, suffix, opts)
+      prefix =
+        prefix <> "\n"
+        <> indentation
+        <> statement
+        <> (if opts[:expected_action] == :create, do: " == ", else: "")
       {new_expected, new_expected_length} =
-        new_expected_from_actual(actual, indentation)
+        new_expected_from_actual(opts[:actual_value], indentation)
       File.write!(source_filename, prefix <> new_expected <> suffix)
       {:ok, update_lines_count(
           file_changes,
@@ -295,21 +258,21 @@ defmodule AssertValue.Server do
     end
   end
 
-  defp parse_statement(line, suffix, assertion_code, actual_code \\ nil, expected_code \\ nil) do
+  defp parse_statement(line, suffix, opts) do
     code = line <> "\n" <> suffix
     [_, indentation, statement, rest] =
       Regex.run(~r/(^\s*)(assert_value\s*)(.*)/s, code)
 
     {formatted_assertion, suffix} =
-      parse_argument(rest, assertion_code)
+      parse_argument(rest, opts[:assertion_code])
 
     {statement, formatted_assertion, suffix} =
       trim_parentheses(statement, formatted_assertion, suffix)
 
     {statement, rest, suffix} =
-      if actual_code do
+      if opts[:actual_code] do
         {formatted_actual, rest} =
-          parse_argument(formatted_assertion, actual_code)
+          parse_argument(formatted_assertion, opts[:actual_code])
         statement = statement <> formatted_actual
         {statement, rest, suffix}
       else
@@ -317,12 +280,12 @@ defmodule AssertValue.Server do
       end
 
     {statement, formatted_expected, suffix} =
-      if expected_code do
+      if opts[:expected_code] do
         [_, operator, _, rest] =
           Regex.run(~r/((\)|\s)+==\s*)(.*)/s, rest)
         statement = statement <> operator
         {formatted_expected, rest} =
-          parse_argument(rest, expected_code)
+          parse_argument(rest, opts[:expected_code])
         {statement, formatted_expected, rest <> suffix}
       else
         {statement, "", suffix}
