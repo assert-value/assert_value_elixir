@@ -2,11 +2,9 @@ defmodule AssertValue.Parser do
 
   def parse_expected(opts, current_line_number) do
     source = read_source(opts[:caller][:file])
-    {prefix, rest} = Enum.split(source, current_line_number - 1)
-    [line | suffix] = rest
+    {prefix, suffix} = Enum.split(source, current_line_number - 1)
     prefix = prefix |> Enum.join("\n")
     suffix = suffix |> Enum.join("\n")
-    suffix = line <> "\n" <> suffix
 
     [_, indentation, statement, rest] =
       Regex.run(~r/(^\s*)(assert_value\s*)(.*)/s, suffix)
@@ -49,7 +47,7 @@ defmodule AssertValue.Parser do
       {prefix, formatted_expected, suffix, indentation}
     rescue
       AssertValue.ParseError ->
-        :error
+        {:error, :parse_error}
     end
   end
 

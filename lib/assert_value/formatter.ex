@@ -12,13 +12,13 @@ defmodule AssertValue.Formatter do
   end
 
   def new_expected_from_actual(actual, _indentation) do
-    {Macro.to_string(actual), 1}
+    Macro.to_string(actual)
   end
 
   # Private
 
   defp new_string_expected(actual) do
-    {Macro.to_string(actual), 1}
+    Macro.to_string(actual)
   end
 
   defp new_heredoc_expected(actual, indentation) do
@@ -29,7 +29,7 @@ defmodule AssertValue.Formatter do
       |> Enum.map(&(indentation <> &1))
       |> Enum.map(&escape_string/1)
     new_expected = ["\"\"\""] ++ actual ++ [indentation <> "\"\"\""]
-    {Enum.join(new_expected, "\n"), length(new_expected)}
+    Enum.join(new_expected, "\n")
   end
 
   # Inspect protocol for String has the best implementation

@@ -177,17 +177,16 @@ defmodule AssertValue.Server do
     )
     case AssertValue.Parser.parse_expected(opts, current_line_number) do
       {prefix, old_expected, suffix, indentation} ->
-        {new_expected, new_expected_length} =
-          AssertValue.Formatter.new_expected_from_actual(
-            opts[:actual_value], indentation)
+        new_expected = AssertValue.Formatter.new_expected_from_actual(
+          opts[:actual_value], indentation)
         File.write!(opts[:caller][:file], prefix <> new_expected <> suffix)
         {:ok, update_lines_count(
           file_changes,
           opts[:caller][:file],
           opts[:caller][:line],
-          new_expected_length - length(to_lines(old_expected))
+          length(to_lines(new_expected)) - length(to_lines(old_expected))
         )}
-      :error ->
+      {:error, :parse_error} ->
         {:error, :parse_error}
     end
   end
