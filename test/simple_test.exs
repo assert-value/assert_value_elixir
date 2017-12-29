@@ -13,12 +13,4 @@ defmodule SimpleTest do
     assert_value (1 + 2) == 3
   end
 
-  test "expressions" do
-    assert_value (
-      "bar=="
-      <> "baz" ==
-      "bar==baz"
-    )
-  end
-
 end
