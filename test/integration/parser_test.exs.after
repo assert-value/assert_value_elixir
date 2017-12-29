@@ -105,6 +105,12 @@ defmodule ParserTest do
     assert_value (1 + 2 == 3)
 
     # prompt: y
+    assert_value ((1 + 2) == 3)
+
+    # prompt: y
+    assert_value (((1 + 2)) == 3)
+
+    # prompt: y
     assert_value(
       ("foo" <> "bar"
       <> "baz")
