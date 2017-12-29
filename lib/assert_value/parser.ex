@@ -11,41 +11,46 @@ defmodule AssertValue.Parser do
     [_, indentation, statement, rest] =
       Regex.run(~r/(^\s*)(assert_value\s*)(.*)/s, suffix)
 
-    {formatted_assertion, suffix} =
-      parse_argument(rest, opts[:assertion_code])
+    try do
+      {formatted_assertion, suffix} =
+        parse_argument(rest, opts[:assertion_code])
 
-    {statement, formatted_assertion, suffix} =
-      trim_parentheses(statement, formatted_assertion, suffix)
+      {statement, formatted_assertion, suffix} =
+        trim_parentheses(statement, formatted_assertion, suffix)
 
-    {statement, rest, suffix} =
-      if opts[:actual_code] do
-        {formatted_actual, rest} =
-          parse_argument(formatted_assertion, opts[:actual_code])
-        statement = statement <> formatted_actual
-        {statement, rest, suffix}
-      else
-        {statement <> formatted_assertion, "", suffix}
-      end
+      {statement, rest, suffix} =
+        if opts[:actual_code] do
+          {formatted_actual, rest} =
+            parse_argument(formatted_assertion, opts[:actual_code])
+          statement = statement <> formatted_actual
+          {statement, rest, suffix}
+        else
+          {statement <> formatted_assertion, "", suffix}
+        end
 
-    {statement, formatted_expected, suffix} =
-      if opts[:expected_code] do
-        [_, operator, _, rest] =
-          Regex.run(~r/((\)|\s)+==\s*)(.*)/s, rest)
-        statement = statement <> operator
-        {formatted_expected, rest} =
-          parse_argument(rest, opts[:expected_code])
-        {statement, formatted_expected, rest <> suffix}
-      else
-        {statement, "", suffix}
-      end
+      {statement, formatted_expected, suffix} =
+        if opts[:expected_code] do
+          [_, operator, _, rest] =
+            Regex.run(~r/((\)|\s)+==\s*)(.*)/s, rest)
+          statement = statement <> operator
+          {formatted_expected, rest} =
+            parse_argument(rest, opts[:expected_code])
+          {statement, formatted_expected, rest <> suffix}
+        else
+          {statement, "", suffix}
+        end
 
-    prefix =
-      prefix <> "\n"
-      <> indentation
-      <> statement
-      <> (if opts[:expected_action] == :create, do: " == ", else: "")
+      prefix =
+        prefix <> "\n"
+        <> indentation
+        <> statement
+        <> (if opts[:expected_action] == :create, do: " == ", else: "")
 
-    {prefix, formatted_expected, suffix, indentation}
+      {prefix, formatted_expected, suffix, indentation}
+    rescue
+      AssertValue.ParseError ->
+        :error
+    end
   end
 
   # Private
