@@ -17,7 +17,7 @@ defmodule ParserTest do
     == "bar"
   end
 
-  test "parentheses" do
+  test "parens" do
     assert_value("foo" == "foo")
     # prompt: y
     assert_value("foo" == "bar")
@@ -70,7 +70,7 @@ defmodule ParserTest do
     )
   end
 
-  test "more parentheses" do
+  test "more parens" do
     # prompt: y
     assert_value (1 + 2) == 4
 
@@ -92,12 +92,12 @@ defmodule ParserTest do
     )
   end
 
-  test "unable to parse" do
+  test "multiple parens" do
     # prompt: y
     assert_value ((((1 + 2)) == 4))
   end
 
-  test "create with parentheses" do
+  test "create with parens" do
     # prompt: y
     assert_value (1 + 2)
 

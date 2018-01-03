@@ -11,19 +11,19 @@ parser_test.exs:##:"test newlines" assert_value "foo" == "bar" failed
 +foo
 
 Accept new value? [y,n,?] .
-parser_test.exs:##:"test parentheses" assert_value "foo" == "bar" failed
+parser_test.exs:##:"test parens" assert_value "foo" == "bar" failed
 
 -bar
 +foo
 
 Accept new value? [y,n,?] 
-parser_test.exs:##:"test parentheses" assert_value "foo" == "bar" failed
+parser_test.exs:##:"test parens" assert_value "foo" == "bar" failed
 
 -bar
 +foo
 
 Accept new value? [y,n,?] 
-parser_test.exs:##:"test parentheses" assert_value "foo" == "bar" failed
+parser_test.exs:##:"test parens" assert_value "foo" == "bar" failed
 
 -bar
 +foo
@@ -42,64 +42,56 @@ parser_test.exs:##:"test expressions" assert_value "bar==" <> "baz" == "baz==" <
 +bar==baz
 
 Accept new value? [y,n,?] .
-parser_test.exs:##:"test more parentheses" assert_value 1 + 2 == 4 failed
+parser_test.exs:##:"test more parens" assert_value 1 + 2 == 4 failed
 
 -4
 +3
 
 Accept new value? [y,n,?] 
-parser_test.exs:##:"test more parentheses" assert_value "foo" <> "bar" <> "baz" == "foo" failed
+parser_test.exs:##:"test more parens" assert_value "foo" <> "bar" <> "baz" == "foo" failed
 
 -foo
 +foobarbaz
 
 Accept new value? [y,n,?] 
-parser_test.exs:##:"test more parentheses" assert_value ("foo" <> "\nbar") <> "\n" <> "baz" == "... failed
+parser_test.exs:##:"test more parens" assert_value ("foo" <> "\nbar") <> "\n" <> "baz" == "... failed
 
  foo
 +bar
 +baz
 
 Accept new value? [y,n,?] .
-parser_test.exs:##:"test unable to parse" assert_value 1 + 2 == 4 failed
+parser_test.exs:##:"test multiple parens" assert_value 1 + 2 == 4 failed
 
 -4
 +3
 
-Accept new value? [y,n,?] 
-
-  1) test unable to parse (ParserTest)
-     parser_test.exs:##
-     ** (AssertValue.ParseError) Unable to parse assert_value arguments
-     stacktrace:
-       parser_test.exs:##: (test)
-
-
-parser_test.exs:##:"test create with parentheses" assert_value 1 + 2 failed
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test create with parens" assert_value 1 + 2 failed
 
 -
 +3
 
 Accept new value? [y,n,?] 
-parser_test.exs:##:"test create with parentheses" assert_value 1 + 2 failed
+parser_test.exs:##:"test create with parens" assert_value 1 + 2 failed
 
 -
 +3
 
 Accept new value? [y,n,?] 
-parser_test.exs:##:"test create with parentheses" assert_value 1 + 2 failed
+parser_test.exs:##:"test create with parens" assert_value 1 + 2 failed
 
 -
 +3
 
 Accept new value? [y,n,?] 
-parser_test.exs:##:"test create with parentheses" assert_value "foo" <> "bar" <> "baz" failed
+parser_test.exs:##:"test create with parens" assert_value "foo" <> "bar" <> "baz" failed
 
 -
 +foobarbaz
 
 Accept new value? [y,n,?] 
-parser_test.exs:##:"test create with parentheses" assert_value ("foo" <> "\nbar") <> "\n" <> "baz" failed
+parser_test.exs:##:"test create with parens" assert_value ("foo" <> "\nbar") <> "\n" <> "baz" failed
 
 -
 +foo
@@ -107,4 +99,4 @@ parser_test.exs:##:"test create with parentheses" assert_value ("foo" <> "\nbar"
 +baz
 
 Accept new value? [y,n,?] .
-7 tests, 1 failure
+7 tests, 0 failures

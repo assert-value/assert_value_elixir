@@ -14,7 +14,7 @@ defmodule AssertValue.Parser do
         parse_argument(rest, opts[:assertion_code])
 
       {statement, formatted_assertion, suffix} =
-        trim_parentheses(statement, formatted_assertion, suffix)
+        trim_parens(statement, formatted_assertion, suffix)
 
       {statement, rest, suffix} =
         if opts[:actual_code] do
@@ -87,11 +87,17 @@ defmodule AssertValue.Parser do
     end
   end
 
-  defp trim_parentheses(statement, code, suffix) do
-    if code =~ ~r/^\(.*\)$/s do
-      trimmed = code |> String.slice(1, String.length(code) - 2)
-      if Code.string_to_quoted(trimmed) == Code.string_to_quoted(code) do
-        {statement <> "(", trimmed, ")" <> suffix}
+  # Try to trim parens and whitespace recursively
+  # "  ( (foo  ) ) " => "foo"
+  defp trim_parens(statement, code, suffix) do
+    regex = ~r/^(\s*\(\s*)(.*)(\s*\)\s*)$/s
+    if code =~ regex do
+      [_, lp, trimmed, rp] = Regex.run(regex, code)
+      # We need to compare code without meta information
+      # See comment in a parse_argument above
+      if Macro.to_string(Code.string_to_quoted(trimmed)) ==
+          Macro.to_string(Code.string_to_quoted(code)) do
+        trim_parens(statement <> lp, trimmed, rp <> suffix)
       else
         {statement, code, suffix}
       end
