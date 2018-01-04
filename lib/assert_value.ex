@@ -48,7 +48,6 @@ defmodule AssertValue do
             actual_code: actual_code,
             actual_value: actual_value,
             expected_type: expected_type,
-            expected_action: :update,
             expected_code: expected_code,
             expected_value: expected_value,
             expected_file: expected_file)
@@ -75,12 +74,10 @@ defmodule AssertValue do
           line: unquote(__CALLER__.line),
           function: unquote(__CALLER__.function),
         ],
-        actual_value: actual_value,
         assertion_code: assertion_code,
-        expected_type: :source,
-        expected_action: :create,
-        expected_code: nil,
-        expected_value: nil)
+        actual_value: actual_value,
+        expected_type: :source
+      )
 
       case decision do
         {:ok, value} ->

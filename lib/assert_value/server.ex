@@ -175,7 +175,13 @@ defmodule AssertValue.Server do
       opts[:caller][:file],
       opts[:caller][:line]
     )
-    case AssertValue.Parser.parse_expected(opts, current_line_number) do
+    case AssertValue.Parser.parse_expected(
+      opts[:caller][:file],
+      current_line_number,
+      opts[:assertion_code],
+      opts[:actual_code],
+      opts[:expected_code]
+    ) do
       {prefix, old_expected, suffix, indentation} ->
         new_expected = AssertValue.Formatter.new_expected_from_actual(
           opts[:actual_value], indentation)

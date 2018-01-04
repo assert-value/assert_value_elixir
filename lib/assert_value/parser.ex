@@ -1,50 +1,57 @@
 defmodule AssertValue.Parser do
 
-  def parse_expected(opts, current_line_number) do
-    source = read_source(opts[:caller][:file])
-    {prefix, suffix} = Enum.split(source, current_line_number - 1)
+  # Returns {prefix, expected, suffix, indentation}
+  #
+  # Split file contents (code) to three parts:
+  #   * everything before expected (prefix)
+  #   * expected as it is formatted in code include quotes (expected)
+  #   * everything after expected (suffix)
+  #
+  #   code == prefix <> expected <> suffix
+  #
+  # Also returns line indentation to create new expected value heredoc
+  #
+  # assertion_code, actual_code, and expected_code are strings representing
+  # ASTs got from assert_value macro.
+  def parse_expected(filename, line_num, assertion_code, actual_code \\ nil, expected_code \\ nil) do
+    source = read_source(filename)
+    {prefix, suffix} = Enum.split(source, line_num - 1)
     prefix = prefix |> Enum.join("\n")
     suffix = suffix |> Enum.join("\n")
 
     [_, indentation, statement, rest] =
       Regex.run(~r/(^\s*)(assert_value\s*)(.*)/s, suffix)
 
+    prefix = prefix <> "\n" <> indentation <> statement
+
     try do
-      {formatted_assertion, suffix} =
-        parse_argument(rest, opts[:assertion_code])
+      {assertion, suffix} = parse_code(rest, assertion_code)
+      {assertion, left_parens, right_parens} = trim_parens(assertion)
+      prefix = prefix <> left_parens
+      suffix = right_parens <> suffix
 
-      {statement, formatted_assertion, suffix} =
-        trim_parens(statement, formatted_assertion, suffix)
-
-      {statement, rest, suffix} =
-        if opts[:actual_code] do
-          {formatted_actual, rest} =
-            parse_argument(formatted_assertion, opts[:actual_code])
-          statement = statement <> formatted_actual
-          {statement, rest, suffix}
+      {prefix, rest, suffix} =
+        if actual_code do
+          {actual, rest} = parse_code(assertion, actual_code)
+          prefix = prefix <> actual
+          {prefix, rest, suffix}
         else
-          {statement <> formatted_assertion, "", suffix}
+          {prefix <> assertion, "", suffix}
         end
 
-      {statement, formatted_expected, suffix} =
-        if opts[:expected_code] do
-          [_, operator, _, rest] =
-            Regex.run(~r/((\)|\s)+==\s*)(.*)/s, rest)
-          statement = statement <> operator
-          {formatted_expected, rest} =
-            parse_argument(rest, opts[:expected_code])
-          {statement, formatted_expected, rest <> suffix}
+      {prefix, expected, suffix} =
+        if expected_code do
+          [_, operator, _, rest] = Regex.run(~r/((\)|\s)+==\s*)(.*)/s, rest)
+          prefix = prefix <> operator
+          {expected, rest} = parse_code(rest, expected_code)
+          {prefix, expected, rest <> suffix}
         else
-          {statement, "", suffix}
+          {prefix, "", suffix}
         end
 
-      prefix =
-        prefix <> "\n"
-        <> indentation
-        <> statement
-        <> (if opts[:expected_action] == :create, do: " == ", else: "")
+      prefix = if expected_code, do: prefix, else: prefix <> " == "
 
-      {prefix, formatted_expected, suffix, indentation}
+      {prefix, expected, suffix, indentation}
     rescue
       AssertValue.ParseError ->
         {:error, :parse_error}
@@ -53,8 +60,8 @@ defmodule AssertValue.Parser do
 
   # Private
 
-  defp parse_argument(code, formatted_value, parsed_value \\ "") do
-    {_, value} = Code.string_to_quoted(parsed_value)
+  defp parse_code(source, code, result \\ "") do
+    {_, value} = Code.string_to_quoted(result)
     value = if is_binary(value) && String.match?(value, ~r/<NOEOL>/) do
       # In quoted code newlines are quoted
       String.replace(value, "<NOEOL>\\n", "")
@@ -75,12 +82,12 @@ defmodule AssertValue.Parser do
     #   iex(4)> Macro.to_string(a) == Macro.to_string(b)
     #   true
     #
-    if Macro.to_string(value) == formatted_value do
-      {parsed_value, code}
+    if Macro.to_string(value) == code do
+      {result, source}
     else
-      case String.next_grapheme(code) do
+      case String.next_grapheme(source) do
         {char, rest} ->
-          parse_argument(rest, formatted_value, parsed_value <> char)
+          parse_code(rest, code, result <> char)
         nil ->
           raise AssertValue.ParseError
       end
@@ -88,8 +95,11 @@ defmodule AssertValue.Parser do
   end
 
   # Try to trim parens and whitespace recursively
-  # "  ( (foo  ) ) " => "foo"
-  defp trim_parens(statement, code, suffix) do
+  #
+  #   trim_parens("  ( (foo  ) ) ")
+  #   #=> {"foo", "  ( (", "  ) ) "}
+  #
+  defp trim_parens(code, left_parens \\ "", right_parens \\ "") do
     regex = ~r/^(\s*\(\s*)(.*)(\s*\)\s*)$/s
     if code =~ regex do
       [_, lp, trimmed, rp] = Regex.run(regex, code)
@@ -97,12 +107,12 @@ defmodule AssertValue.Parser do
       # See comment in a parse_argument above
       if Macro.to_string(Code.string_to_quoted(trimmed)) ==
           Macro.to_string(Code.string_to_quoted(code)) do
-        trim_parens(statement <> lp, trimmed, rp <> suffix)
+        trim_parens(trimmed, left_parens <> lp, rp <> right_parens)
       else
-        {statement, code, suffix}
+        {code, left_parens, right_parens}
       end
     else
-      {statement, code, suffix}
+      {code, left_parens, right_parens}
     end
   end
 
