@@ -1,0 +1,541 @@
+defmodule MatrixLiteralTest do
+  use ExUnit.Case
+
+  defmodule User do
+    defstruct name: "John", age: 27
+  end
+
+  import AssertValue
+
+  test "create expected from literal" do
+    # prompt: y
+    assert_value nil
+
+    # prompt: y
+    assert_value :nil
+
+    # prompt: y
+    assert_value true
+
+    # prompt: y
+    assert_value false
+
+    # prompt: y
+    assert_value :atom
+
+    # prompt: y
+    assert_value 42
+
+    # prompt: y
+    assert_value -42
+
+    # prompt: y
+    assert_value 0.42
+
+    # prompt: y
+    assert_value 42_000
+
+    # prompt: y
+    assert_value 42.0e-5
+
+    # prompt: y
+    assert_value 42.0e+5
+
+    # prompt: y
+    assert_value 0x2A
+
+    # prompt: y
+    assert_value "forty-two"
+
+    # prompt: y
+    assert_value "сорок два"
+
+    # prompt: y
+    assert_value "forty-two\nсорок два\n四十二\nquarante deux\ncuarenta y dos\nzweiundvierzig"
+
+    # prompt: y
+    assert_value """
+    forty-two
+    сорок два
+    四十二
+    quarante deux
+    cuarenta y dos
+    zweiundvierzig
+    """
+
+    # prompt: y
+    assert_value 'forty-two'
+
+    # prompt: y
+    assert_value '''
+    forty-two
+    сорок два
+    四十二
+    quarante deux
+    cuarenta y dos
+    zweiundvierzig
+    '''
+
+    # prompt: y
+    assert_value <<4,2>>
+
+    # prompt: y
+    assert_value [4, 2, true, nil, "42"]
+
+    # prompt: y
+    assert_value {:ok, 42}
+
+    # prompt: y
+    assert_value %{a: "forty", b: 2, c: nil}
+
+    # prompt: y
+    assert_value %User{}
+
+    # prompt: y
+    assert_value %User{age: 42}
+
+    # prompt: y
+    assert_value  [%{a: 42, b: {:left, :light}, c: [%User{}, 1]}, nil]
+  end
+
+  test "create expected from variable" do
+    # prompt: y
+    foo = nil
+    assert_value foo
+
+    # prompt: y
+    foo = :nil
+    assert_value foo
+
+    # prompt: y
+    foo = true
+    assert_value foo
+
+    # prompt: y
+    foo = false
+    assert_value foo
+
+    # prompt: y
+    foo = :atom
+    assert_value foo
+
+    # prompt: y
+    foo = 42
+    assert_value foo
+
+    # prompt: y
+    foo = -42
+    assert_value foo
+
+    # prompt: y
+    foo = 0.42
+    assert_value foo
+
+    # prompt: y
+    foo = 42_000
+    assert_value foo
+
+    # prompt: y
+    foo = 42.0e-5
+    assert_value foo
+
+    # prompt: y
+    foo = 42.0e+5
+    assert_value foo
+
+    # prompt: y
+    foo = 0x2A
+    assert_value foo
+
+    # prompt: y
+    foo = "forty-two"
+    assert_value foo
+
+    # prompt: y
+    foo = "сорок два"
+    assert_value foo
+
+    # prompt: y
+    foo = "forty-two\nсорок два\n四十二\nquarante deux\ncuarenta y dos\nzweiundvierzig"
+    assert_value foo
+
+    # prompt: y
+    foo = """
+    forty-two
+    сорок два
+    四十二
+    quarante deux
+    cuarenta y dos
+    zweiundvierzig
+    """
+    assert_value foo
+
+    # prompt: y
+    foo = 'forty-two'
+    assert_value foo
+
+    # prompt: y
+    foo = '''
+    forty-two
+    сорок два
+    四十二
+    quarante deux
+    cuarenta y dos
+    zweiundvierzig
+    '''
+    assert_value foo
+
+    # prompt: y
+    foo = <<4,2>>
+    assert_value foo
+
+    # prompt: y
+    foo = [4, 2, true, nil, "42"]
+    assert_value foo
+
+    # prompt: y
+    foo = {:ok, 42}
+    assert_value foo
+
+    # prompt: y
+    foo = %{a: "forty", b: 2, c: nil}
+    assert_value foo
+
+    # prompt: y
+    foo = %User{}
+    assert_value foo
+
+    # prompt: y
+    foo = %User{age: 42}
+    assert_value foo
+
+    # prompt: y
+    foo =  [%{a: 42, b: {:left, :light}, c: [%User{}, 1]}, nil]
+    assert_value foo
+  end
+
+  test "all literals equal" do
+    assert_value nil == nil
+    assert_value :nil == nil
+    assert_value nil == :nil
+    assert_value true == true
+    assert_value false == false
+    assert_value :atom == :atom
+    assert_value 42 == 42
+    assert_value -42 == -42
+    assert_value 0.42 == 0.42
+    assert_value 42.0 == 42
+    assert_value 42 == 42.0
+    assert_value 42_000 == 42000
+    assert_value 42.0e-5 == 4.2e-4
+    assert_value 42.0e+5 == 4.2e6
+    assert_value 0x2A == 42
+    assert_value 42 == 0x2A
+    assert_value "forty-two" == "forty-two"
+    assert_value "сорок два" == "сорок два"
+
+    assert_value "forty-two\nсорок два\n四十二\nquarante deux\ncuarenta y dos\nzweiundvierzig" == """
+    forty-two
+    сорок два
+    四十二
+    quarante deux
+    cuarenta y dos
+    zweiundvierzig<NOEOL>
+    """
+
+    assert_value """
+    forty-two
+    сорок два
+    四十二
+    quarante deux
+    cuarenta y dos
+    zweiundvierzig
+    """ == """
+    forty-two
+    сорок два
+    四十二
+    quarante deux
+    cuarenta y dos
+    zweiundvierzig
+    """
+
+    assert_value 'forty-two' == 'forty-two'
+    assert_value '''
+    forty-two
+    сорок два
+    四十二
+    quarante deux
+    cuarenta y dos
+    zweiundvierzig
+    ''' == [102, 111, 114, 116, 121, 45, 116, 119, 111, 10, 1089, 1086, 1088, 1086, 1082, 32, 1076, 1074, 1072, 10, 22235, 21313, 20108, 10, 113, 117, 97, 114, 97, 110, 116, 101, 32, 100, 101, 117, 120, 10, 99, 117, 97, 114, 101, 110, 116, 97, 32, 121, 32, 100, 111, 115, 10, 122, 119, 101, 105, 117, 110, 100, 118, 105, 101, 114, 122, 105, 103, 10]
+
+    assert_value <<4,2>> == <<4, 2>>
+    assert_value [4, 2, true, nil, "42"] == [4, 2, true, nil, "42"]
+    assert_value {:ok, 42} == {:ok, 42}
+    assert_value %{a: "forty", b: 2, c: nil} == %{a: "forty", b: 2, c: nil}
+    assert_value %User{} == %MatrixLiteralTest.User{age: 27, name: "John"}
+    assert_value %User{age: 42} == %MatrixLiteralTest.User{age: 42, name: "John"}
+    assert_value  [%{a: 42, b: {:left, :light}, c: [%User{}, 1]}, nil] == [%{a: 42, b: {:left, :light}, c: [%MatrixLiteralTest.User{age: 27, name: "John"}, 1]}, nil]
+  end
+
+  test "update expected from literal (same type)" do
+    # prompt: y
+    assert_value true == false
+
+    # prompt: y
+    assert_value false == true
+
+    # prompt: y
+    assert_value :atom == :another
+
+    # prompt: y
+    assert_value 42 == 43
+
+    # prompt: y
+    assert_value -42 == 42
+
+    # prompt: y
+    assert_value 0.42 == 0.43
+
+    # prompt: y
+    assert_value 42_000 == 42_001
+
+    # prompt: y
+    assert_value 42.0e-5 == 43.0e-5
+
+    # prompt: y
+    assert_value 42.0e+5 == 43.0e+5
+
+    # prompt: y
+    assert_value 0x2A == 0x2B
+
+    # prompt: y
+    assert_value "forty-two" == "forty-three"
+
+    # prompt: y
+    assert_value "сорок два" == "сорок три"
+
+    # prompt: y
+    assert_value """
+    forty-two
+    сорок два
+    四十二
+    quarante deux
+    cuarenta y dos
+    zweiundvierzig
+    """ == """
+    forty-three
+    сорок два
+    quarante deux
+    cuarenta y dos
+    """
+
+    # prompt: y
+    assert_value 'forty-two' == 'forty-three'
+
+    # prompt: y
+    assert_value '''
+    forty-two
+    сорок два
+    ''' == '''
+    forty-three
+    сорок три
+    '''
+
+    # prompt: y
+    assert_value <<4,2>> == <<4,3>>
+
+    # prompt: y
+    assert_value [4, 2, true, nil, "42"] == [4, 3, true, nil, "42"]
+
+    # prompt: y
+    assert_value {:ok, 42} == {:error, 42}
+
+    # prompt: y
+    assert_value %{a: "forty", b: 2, c: nil} == %{a: "forty", b: 2, c: true}
+
+    # prompt: y
+    assert_value %User{} == %User{age: 42}
+
+    # prompt: y
+    assert_value %User{age: 42} == %User{age: 43}
+
+    # prompt: y
+    assert_value  [%{a: 42, b: {:left, :light}, c: [%User{}, 1]}, nil] == [%{a: 42, b: {:left, :light}, c: [%User{}, 2]}, nil]
+  end
+
+  test "update expected from variable (same type)" do
+    # prompt: y
+    foo = true
+    assert_value foo == false
+
+    # prompt: y
+    foo = false
+    assert_value foo == true
+
+    # prompt: y
+    foo = :atom
+    assert_value foo == :another
+
+    # prompt: y
+    foo = 42
+    assert_value foo == 43
+
+    # prompt: y
+    foo = -42
+    assert_value foo == 42
+
+    # prompt: y
+    foo = 0.42
+    assert_value foo == 0.43
+
+    # prompt: y
+    foo = 42_000
+    assert_value foo == 42_001
+
+    # prompt: y
+    foo = 42.0e-5
+    assert_value foo == 43.0e-5
+
+    # prompt: y
+    foo = 42.0e+5
+    assert_value foo == 43.0e+5
+
+    # prompt: y
+    foo = 0x2A
+    assert_value foo == 0x2B
+
+    # prompt: y
+    foo = "forty-two"
+    assert_value foo == "forty-three"
+
+    # prompt: y
+    foo = "сорок два"
+    assert_value foo == "сорок три"
+
+    # prompt: y
+    foo = """
+    forty-two
+    сорок два
+    四十二
+    quarante deux
+    cuarenta y dos
+    zweiundvierzig
+    """
+    assert_value foo == """
+    forty-three
+    сорок два
+    quarante deux
+    cuarenta y dos
+    """
+
+    # prompt: y
+    foo = 'forty-two'
+    assert_value foo == 'forty-three'
+
+    # prompt: y
+    foo = '''
+    forty-two
+    сорок два
+    '''
+    assert_value foo == '''
+    forty-three
+    сорок три
+    '''
+
+    # prompt: y
+    foo = <<4,2>>
+    assert_value foo == <<4,3>>
+
+    # prompt: y
+    foo = [4, 2, true, nil, "42"]
+    assert_value foo == [4, 3, true, nil, "42"]
+
+    # prompt: y
+    foo = {:ok, 42}
+    assert_value foo == {:error, 42}
+
+    # prompt: y
+    foo = %{a: "forty", b: 2, c: nil}
+    assert_value foo == %{a: "forty", b: 2, c: true}
+
+    # prompt: y
+    foo = %User{}
+    assert_value foo == %User{age: 42}
+
+    # prompt: y
+    foo = %User{age: 42}
+    assert_value foo == %User{age: 43}
+
+    # prompt: y
+    foo = [%{a: 42, b: {:left, :light}, c: [%User{}, 1]}, nil]
+    assert_value foo == [%{a: 42, b: {:left, :light}, c: [%User{}, 2]}, nil]
+  end
+
+
+  test "corner case (float with trailing zeros)" do
+    # prompt: y
+    assert_value 42.0000
+
+    # prompt: y
+    assert_value 42.0000 == 42.0100
+
+    # prompt: y
+    assert_value :foo == 42.0000
+  end
+
+  test "diff test (similar values)" do
+    # prompt: y
+    assert_value true == "true"
+
+    # prompt: y
+    assert_value false == "false"
+
+    # prompt: y
+    assert_value :atom == "atom"
+
+    # prompt: y
+    assert_value 42 == "42"
+
+    # prompt: y
+    assert_value -42 == "-42"
+
+    # prompt: y
+    assert_value 0.42 == "0.42"
+
+    # All pass
+    assert_value 42 == 42.0
+    assert_value 42.0 == 42
+    assert_value 0x2A == 42
+
+    # prompt: y
+    assert_value "42" == '42'
+
+    # prompt: y
+    assert_value '42' == "42"
+
+    # prompt: y
+    assert_value "42" == """
+    42
+    """
+
+    # prompt: y
+    assert_value <<4,2>> == "<<4,2>>"
+
+    # prompt: y
+    assert_value [4, 2, true, nil, "42"] == "[4, 2, true, nil, \"42\"]"
+
+    # prompt: y
+    assert_value {:ok, 42} == "{:ok, 42}"
+
+    # prompt: y
+    assert_value %MatrixLiteralTest.User{age: 27, name: "John"} == "%MatrixLiteralTest.User{age: 27, name: \"John\"}"
+  end
+
+  test "string escaping" do
+    assert_value "foo\\nbar\" \" %{}" == "foo\\nbar\" \" %{}"
+    # prompt: y
+    assert_value "foo\\nbar\" \" %{}" == "bar"
+  end
+
+end

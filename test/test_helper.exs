@@ -124,6 +124,18 @@ defmodule AssertValue.Test.IntegrationTest do
     {output, exit_code}
   end
 
+  def prepare_expected_files(filenames) do
+    Enum.map(filenames, fn(filename) ->
+      before_path = Path.expand(filename <> ".before", @integration_test_dir)
+      after_path = Path.expand(filename <> ".after", @integration_test_dir)
+      runnable_path = Path.expand(filename, @runnable_test_dir)
+      if File.exists?(before_path) do
+        File.cp!(before_path, runnable_path)
+      end
+      [runnable_path, after_path]
+    end)
+  end
+
   # Integration tests flow:
   # * Copy integration_test.exs.before to @runnable_test_dir
   # * launch a child `mix test integration_test.exs`
@@ -133,16 +145,23 @@ defmodule AssertValue.Test.IntegrationTest do
 
   # integration_test "accept all (Y)", "accept_all_test.exs", exit_code: 1
   defmacro integration_test(test_name, test_filename, opts \\ []) do
+    expected_files = opts[:expected_files] || []
     quote do
       test unquote(test_name) do
         {runnable_path, after_path, output_path} =
           prepare_runnable_test(unquote(test_filename))
+
+        expected_files = prepare_expected_files(unquote(expected_files))
 
         {output, exit_code} = run_tests(runnable_path, unquote(opts[:env]))
         assert exit_code == unquote(opts[:expected_exit_code] || 0)
 
         assert_value File.read!(runnable_path) == File.read!(after_path)
         assert_value output == File.read!(output_path)
+
+        Enum.each(expected_files, fn([runnable_path, after_path]) ->
+          assert_value(File.read!(runnable_path) == File.read!(after_path))
+        end)
       end
     end
   end

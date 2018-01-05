@@ -1,0 +1,350 @@
+defmodule MatrixExpressionTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "newlines in operator (equal)" do
+    assert_value "foo" ==
+    "foo"
+
+    assert_value "foo"
+    == "foo"
+
+    assert_value "foo"
+    ==
+    "foo"
+  end
+
+  test "newlines in operator (not equal)" do
+    # prompt: y
+    assert_value "foo" ==
+    "bar"
+
+    # prompt: y
+    assert_value "foo"
+    == "bar"
+
+    # prompt: y
+    assert_value "foo"
+    ==
+    "bar"
+  end
+
+  test "simple parens (equal)" do
+    assert_value("foo" == "foo")
+
+    assert_value("foo" ==
+    "foo")
+
+    assert_value("foo"
+    == "foo")
+
+    assert_value("foo"
+    == "foo"
+    )
+
+    assert_value(
+    "foo" == "foo"
+    )
+
+    assert_value(
+    "foo"
+    ==
+    "foo"
+    )
+  end
+
+  test "simple parens (not equal)" do
+    # prompt: y
+    assert_value("foo" == "bar")
+
+    # prompt: y
+    assert_value("foo" ==
+    "bar")
+
+    # prompt: y
+    assert_value("foo"
+    == "bar")
+
+    # prompt: y
+    assert_value("foo"
+    == "bar"
+    )
+
+    # prompt: y
+    assert_value(
+    "foo" == "bar"
+    )
+
+    # prompt: y
+    assert_value(
+    "foo"
+    ==
+    "bar"
+    )
+  end
+
+  defp hello(arg), do: "Hello #{arg}!"
+
+  test "simple function" do
+    assert_value hello("World") == "Hello World!"
+
+    # prompt: y
+    assert_value hello("World")
+
+    # prompt: y
+    assert_value hello("Elixir") == "Hello World!"
+
+    # prompt: y
+    assert_value hello("Elixir\nHello AssertValue!") == """
+    Hello World!
+    """
+  end
+
+  test "simple function in expected" do
+    assert_value hello("World") == hello("World")
+
+    # prompt: y
+    assert_value hello("World") == hello("Elixir")
+  end
+
+
+  test "string concatenation in actual" do
+    assert_value "foo" <> "bar" == "foobar"
+
+    assert_value "foo" <> "\n" <> "bar" == """
+    foo
+    bar<NOEOL>
+    """
+
+    assert_value "foo" <>
+    "\n"
+    <> "bar" == """
+    foo
+    bar<NOEOL>
+    """
+
+    assert_value Kernel.<>("foo", "\n")
+    |> Kernel.<>("bar") ==
+    """
+    foo
+    bar<NOEOL>
+    """
+
+    assert_value(
+      Kernel.<>("foo", "\n")
+      |> Kernel.<>("bar")
+        ==
+          """
+          foo
+          bar<NOEOL>
+          """
+    )
+
+    # Create
+
+    # prompt: y
+    assert_value "foo" <> "bar"
+
+    # prompt: y
+    assert_value "foo" <> "\n" <> "bar"
+
+    # prompt: y
+    assert_value "foo" <>
+    "\n"
+    <> "bar"
+
+    # prompt: y
+    assert_value Kernel.<>("foo", "\n")
+    |> Kernel.<>("bar")
+
+    # prompt: y
+    assert_value(
+      to_string(:foo)
+      |> Kernel.<>("foo")
+      |> Kernel.<>(to_string(:bar))
+    )
+
+    # Update
+
+    # prompt: y
+    assert_value "foo" <> "bar" == """
+    foo
+    bar
+    """
+
+    # prompt: y
+    assert_value "foo" <> "\n" <> "bar" == """
+    foo
+    baz
+    """
+
+    # prompt: y
+    assert_value "foo" <>
+    "\n"
+    <> "bar" ==
+    """
+    foo
+    bar
+    """
+
+    # prompt: y
+    assert_value Kernel.<>("foo", "\n")
+    |> Kernel.<>("bar")
+    ==
+    "foobar"
+
+    # prompt: y
+    assert_value(
+      to_string(:foo)
+      |> Kernel.<>("foo")
+      |> Kernel.<>(to_string(:bar))
+    ==
+     to_string(:foo) <> to_string(:bar)
+    )
+  end
+
+  test "string concatenation in expected" do
+    assert_value "foo" <> "bar" == "foo" <> "bar"
+
+    assert_value "foo\nbar" == "foo" <> "\n" <> "bar"
+
+    assert_value "foo\nbar" == Kernel.<>("foo", "\n")
+    |> Kernel.<>("bar")
+
+    assert_value """
+    foo
+    bar
+    """ == Kernel.<>("foo", "\n")
+           |> Kernel.<>("bar")
+           |> Kernel.<>("\n")
+
+    assert_value(
+      "foofoobar" ==
+      to_string(:foo)
+      |> Kernel.<>("foo")
+      |> Kernel.<>(to_string(:bar))
+    )
+  end
+
+  test "array concatenation in actual" do
+    assert_value [1] ++ [2, 3] == [1, 2, 3]
+
+    assert_value [1 | [2, 3]] == [1, 2, 3]
+
+    assert_value [1] ++
+    [2]
+    ++ [3] == [1, 2, 3]
+
+    # prompt: y
+    assert_value [1] ++ [2, 3]
+
+    # prompt: y
+    assert_value [1 | [2, 3]]
+
+    # prompt: y
+    assert_value [1] ++
+    [2]
+    ++ [3]
+
+    # prompt: y
+    assert_value [1]
+    |> Kernel.++([2])
+    |> Kernel.++([3])
+  end
+
+  test "array concatenation in expected" do
+    assert_value [1, 2, 3] == [1] ++ [2, 3]
+
+    assert_value [1, 2, 3] == [1 | [2, 3]]
+
+    assert_value [1, 2, 3] == [1] ++
+    [2]
+    ++ [3]
+
+    # prompt: y
+    assert_value [1, 2, 3] == [1] ++ [2, 4]
+
+    # prompt: y
+    assert_value [1, 2, 3] == [1 | [2, 4]]
+
+    # prompt: y
+    assert_value [1, 2, 3] == [1] ++
+    [2]
+    ++ [4]
+
+    # prompt: y
+    assert_value [1, 2, 3]
+    ==
+    [1]
+    |> Kernel.++([2])
+    |> Kernel.++([4])
+  end
+
+  test "elixir 1.6 default formatter" do
+    assert_value(
+      "foo\nbar" == """
+      foo
+      bar<NOEOL>
+      """
+    )
+
+    # prompt: y
+    assert_value(
+      "foo\nbar" == """
+      foo
+      baz
+      """
+    )
+  end
+
+  test "parens in actual" do
+    # prompt: y
+    assert_value (1 + 2)
+
+    # prompt: y
+    assert_value ((1 + 2))
+
+    # prompt: y
+    assert_value (((1 + 2)))
+
+    # prompt: y
+    assert_value(
+      ("foo" <> "bar"
+      <> "baz")
+    )
+
+    # prompt: y
+    assert_value(
+      (("foo" <> "\nbar")
+      <> "\n"
+      <> "baz")
+    )
+
+    # prompt: y
+    assert_value (1 + 2) == 4
+
+    # prompt: y
+    assert_value(
+      ("foo" <> "bar"
+      <> "baz")
+      ==
+      "foo"
+    )
+
+    # prompt: y
+    assert_value(
+      (("foo" <> "\nbar")
+      <> "\n"
+      <> "baz")
+      ==
+      "foo"
+    )
+  end
+
+  test "multiple parens" do
+    # prompt: y
+    assert_value ((((1 + 2)) == 4))
+  end
+
+end

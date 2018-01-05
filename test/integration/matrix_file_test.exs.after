@@ -1,0 +1,55 @@
+defmodule MatrixFileTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "create file" do
+    actual = """
+    aaa
+    bbb
+    ccc
+    """
+    # prompt: y
+    assert_value actual == File.read!(Path.expand("file_to_create", __DIR__))
+  end
+
+  test "update file" do
+    actual = """
+    aaa
+    bbb
+    ccc
+    """
+    # prompt: y
+    assert_value actual == File.read!(Path.expand("file_to_update", __DIR__))
+  end
+
+  test "file expression in actual" do
+    # prompt: y
+    assert_value File.read!(Path.expand("file_1", __DIR__)) <> File.read!(Path.expand("file_2", __DIR__)) == """
+    aaa
+    bbb
+    ccc
+    ddd
+    """
+  end
+
+  test "file expression in expected" do
+    assert_value """
+    aaa
+    bbb
+    ccc
+    ddd
+    """ == File.read!(Path.expand("file_1", __DIR__)) <> File.read!(Path.expand("file_2", __DIR__))
+  end
+
+  test "file expression in both" do
+    assert_value File.read!(Path.expand("file_1", __DIR__)) <> File.read!(Path.expand("file_2", __DIR__)) ==
+        File.read!(Path.expand("file_3", __DIR__)) <> File.read!(Path.expand("file_4", __DIR__))
+  end
+
+  test "file expression and update" do
+    # prompt: y
+    assert_value File.read!(Path.expand("file_1", __DIR__)) <> File.read!(Path.expand("file_2", __DIR__)) == File.read!(Path.expand("file_5", __DIR__))
+  end
+
+end

@@ -1,0 +1,65 @@
+
+misc_test.exs:##:"test reprompt context" assert_value actual failed
+
+-
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
++line
+
+misc_test.exs:##:"test reprompt context" assert_value actual failed
+Accept new value? [y,n,?] .
+misc_test.exs:##:"test simple fail" assert_value actual == "aaa\nbBb\nccc\n" failed
+
+ aaa
+-bBb
++bbb
+ ccc
+
+Accept new value? [y,n,?] 
+
+  1) test simple fail (MiscTest)
+     misc_test.exs:##
+     AssertValue assertion failed
+     code: actual == "aaa\nbBb\nccc\n"
+     left: "aaa\nbbb\nccc\n"
+     right: "aaa\nbBb\nccc\n"
+     stacktrace:
+       misc_test.exs:##: (test)
+
+
+2 tests, 1 failure

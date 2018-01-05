@@ -1,0 +1,36 @@
+
+matrix_file_test.exs:##:"test create file" assert_value actual == File.read!(Path.expand("file_t... failed
+
+-
++aaa
++bbb
++ccc
+
+Accept new value? [y,n,?] .
+matrix_file_test.exs:##:"test update file" assert_value actual == File.read!(Path.expand("file_t... failed
+
+ aaa
+-bBb
++bbb
+ ccc
+
+Accept new value? [y,n,?] .
+matrix_file_test.exs:##:"test file expression in actual" assert_value File.read!(Path.expand("file_1", __DIR__... failed
+
+-
++aaa
++bbb
++ccc
++ddd
+
+Accept new value? [y,n,?] ...
+matrix_file_test.exs:##:"test file expression and update" assert_value File.read!(Path.expand("file_1", __DIR__... failed
+
+-
++aaa
++bbb
++ccc
++ddd
+
+Accept new value? [y,n,?] .
+6 tests, 0 failures
