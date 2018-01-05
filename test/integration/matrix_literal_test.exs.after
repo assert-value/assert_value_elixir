@@ -501,13 +501,13 @@ defmodule MatrixLiteralTest do
 
   test "corner case (float with trailing zeros)" do
     # prompt: y
-    assert_value 42.0 == 42.0000
+    assert_value 42.0000 == 42.0
 
     # prompt: y
-    assert_value 42.0 == 42.000
+    assert_value 42.0000 == 42.0
 
     # prompt: y
-    assert_value :foo == :foo000
+    assert_value :foo == :foo
   end
 
   test "diff test (similar values)" do

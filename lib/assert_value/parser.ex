@@ -83,7 +83,9 @@ defmodule AssertValue.Parser do
   #   iex(4)> Macro.to_string(a) == Macro.to_string(b)
   #   true
   #
-  # NOTE: There is a corner case when result is empty string and code is "nil":
+  # NOTE: Corner Cases
+  #
+  # * result is empty string and code is "nil":
   #
   #   # Elixir 1.5.3
   #   iex(1)> Code.string_to_quoted("")
@@ -97,6 +99,11 @@ defmodule AssertValue.Parser do
   #   iex(2)> Macro.to_string({:__block__, [], []})
   #   "(\n  \n)"
   #
+  # * floats with trailing zeros
+  #   Since 42.0 is equal 42.0000 we should always
+  #   check that the rest of the source does not contain leading
+  #   zeros. They all belong to parsed value
+  #
   defp parse_code(source, code, result \\ "") do
     {_, value} = Code.string_to_quoted(result)
     value = if is_binary(value) && String.match?(value, ~r/<NOEOL>/) do
@@ -105,7 +112,9 @@ defmodule AssertValue.Parser do
     else
       value
     end
-    if Macro.to_string(value) == code && !(result == "" && code == "nil") do
+    if Macro.to_string(value) == code &&
+        !(result == "" && code == "nil") &&
+        !(source =~ ~r/^0+(\s|$)/s) do
       {result, source}
     else
       case String.next_grapheme(source) do
