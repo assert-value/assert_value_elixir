@@ -60,6 +60,43 @@ defmodule AssertValue.Parser do
 
   # Private
 
+  # Take one characted from source append to result and compare
+  # result with code. Repeat recursively until result is the same as the code.
+  # Return pair {result, rest} where rest is the rest of the source.
+  #
+  #   iex(1) parse_code("(1 + 2) == 3", "1 + 2")
+  #   #=> {"(1 + 2)", "== 3"}
+  #
+  # NOTE: We are sure that there are no surrounding parens aroung source
+  #
+  # NOTE: There may be differences between AST evaluated from string and
+  # the one from compiler for complex values because of line numbers, etc...
+  #
+  #   iex(1)> a = [c: {:<<>>, [line: 1], [1, 2, 2]}]
+  #   iex(2)> b = [c: <<1, 2, 2>>]
+  #
+  #   iex(3)> a == b
+  #   false
+  #
+  # To deal with it compare formatted ASTs
+  #
+  #   iex(4)> Macro.to_string(a) == Macro.to_string(b)
+  #   true
+  #
+  # NOTE: There is a corner case when result is empty string and code is "nil":
+  #
+  #   # Elixir 1.5.3
+  #   iex(1)> Code.string_to_quoted("")
+  #   {:ok, nil}
+  #   iex(2)> Macro.to_string(nil)
+  #   "nil"
+  #
+  #   # Elixir 1.6.0-rc.0
+  #   iex(1)> Code.string_to_quoted("")
+  #   {:ok, {:__block__, [], []}}
+  #   iex(2)> Macro.to_string({:__block__, [], []})
+  #   "(\n  \n)"
+  #
   defp parse_code(source, code, result \\ "") do
     {_, value} = Code.string_to_quoted(result)
     value = if is_binary(value) && String.match?(value, ~r/<NOEOL>/) do
@@ -68,21 +105,7 @@ defmodule AssertValue.Parser do
     else
       value
     end
-    # There may be differences between AST evaluated from string and the one
-    # from compiler for complex values because of line numbers, etc...
-    #
-    #   iex(1)> a = [c: {:<<>>, [line: 1], [1, 2, 2]}]
-    #   iex(2)> b = [c: <<1, 2, 2>>]
-    #
-    #   iex(3)> a == b
-    #   false
-    #
-    # To deal with it compare formatted ASTs
-    #
-    #   iex(4)> Macro.to_string(a) == Macro.to_string(b)
-    #   true
-    #
-    if Macro.to_string(value) == code do
+    if Macro.to_string(value) == code && !(result == "" && code == "nil") do
       {result, source}
     else
       case String.next_grapheme(source) do
