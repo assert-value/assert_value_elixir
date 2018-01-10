@@ -88,12 +88,16 @@ defmodule AssertValue.Parser do
   # * result is empty string and code is "nil":
   #
   #   # Elixir 1.5.3
+  #   iex(1)> Code.string_to_quoted(nil)
+  #   {:ok, nil}
   #   iex(1)> Code.string_to_quoted("")
   #   {:ok, nil}
   #   iex(2)> Macro.to_string(nil)
   #   "nil"
   #
   #   # Elixir 1.6.0-rc.0
+  #   iex(1)> Code.string_to_quoted(nil)
+  #   {:ok, nil}
   #   iex(1)> Code.string_to_quoted("")
   #   {:ok, {:__block__, [], []}}
   #   iex(2)> Macro.to_string({:__block__, [], []})
