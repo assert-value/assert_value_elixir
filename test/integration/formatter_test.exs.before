@@ -1,0 +1,25 @@
+defmodule FormatterTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "integer variants" do
+    # prompt: y
+    assert_value 42_000_000
+
+    # prompt: y
+    assert_value 42.0e-5
+
+    # prompt: y
+    assert_value 43.0e+5
+
+    # prompt: y
+    assert_value 0x2A
+  end
+
+  test "multiline strings" do
+    # prompt: y
+    assert_value "foo\nbar"
+  end
+
+end

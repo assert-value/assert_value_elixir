@@ -12,16 +12,16 @@ defmodule AssertValueTest do
     :ok
   end
 
-  integration_test "matrix_literal", "matrix_literal_test.exs",
+  integration_test "parser_test", "parser_test.exs",
+    env: [{'ASSERT_VALUE_ACCEPT_DIFFS', 'ask'}],
+    expected_exit_code: 0,
+    expected_files: ["file_to_create", "file_to_update"]
+
+  integration_test "formatter_test", "formatter_test.exs",
     env: [{'ASSERT_VALUE_ACCEPT_DIFFS', 'ask'}],
     expected_exit_code: 0
 
-  integration_test "matrix_file", "matrix_file_test.exs",
-    env: [{'ASSERT_VALUE_ACCEPT_DIFFS', 'ask'}],
-    expected_exit_code: 0,
-    expected_files: ["file_to_create", "file_to_update", "file_1", "file_2", "file_3", "file_4", "file_5"]
-
-  integration_test "matrix_expression", "matrix_expression_test.exs",
+  integration_test "diff_test", "diff_test.exs",
     env: [{'ASSERT_VALUE_ACCEPT_DIFFS', 'ask'}],
     expected_exit_code: 0
 

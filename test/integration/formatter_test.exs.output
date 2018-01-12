@@ -1,0 +1,33 @@
+
+formatter_test.exs:##:"test integer variants" assert_value 42000000 failed
+
+-
++42000000
+
+Accept new value? [y,n,?] 
+formatter_test.exs:##:"test integer variants" assert_value 4.2e-4 failed
+
+-
++4.2e-4
+
+Accept new value? [y,n,?] 
+formatter_test.exs:##:"test integer variants" assert_value 4.3e6 failed
+
+-
++4.3e6
+
+Accept new value? [y,n,?] 
+formatter_test.exs:##:"test integer variants" assert_value 42 failed
+
+-
++42
+
+Accept new value? [y,n,?] .
+formatter_test.exs:##:"test multiline strings" assert_value "foo\nbar" failed
+
+-
++foo
++bar
+
+Accept new value? [y,n,?] .
+2 tests, 0 failures

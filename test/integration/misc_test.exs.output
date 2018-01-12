@@ -1,4 +1,4 @@
-
+.
 misc_test.exs:##:"test reprompt context" assert_value actual failed
 
 -
@@ -62,4 +62,4 @@ Accept new value? [y,n,?]
        misc_test.exs:##: (test)
 
 
-2 tests, 1 failure
+3 tests, 1 failure

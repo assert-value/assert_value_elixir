@@ -3,6 +3,10 @@ defmodule MiscTest do
 
   import AssertValue
 
+  test "simple pass" do
+    assert_value 1 == 1
+  end
+
   test "reprompt context" do
     actual = String.duplicate("line\n", 38)
     # prompt: y

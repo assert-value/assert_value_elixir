@@ -1,0 +1,11 @@
+defmodule DiffTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "empty string" do
+    # prompt: y
+    assert_value "" == ""
+  end
+
+end
