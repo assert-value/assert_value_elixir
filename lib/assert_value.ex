@@ -4,6 +4,10 @@ defmodule AssertValue do
     defexception [message: "Unable to parse assert_value arguments"]
   end
 
+  defmodule ArgumentError do
+    defexception [:message]
+  end
+
   # Assertions with right argument like "assert_value actual == expected"
   defmacro assert_value({:==, _, [left, right]} = assertion) do
     {expected_type, expected_file} = case right do
@@ -34,6 +38,8 @@ defmodule AssertValue do
           :other ->
               unquote(right)
         end
+      check_type(actual_value)
+      check_type(expected_value)
       case (actual_value == expected_value) do
         true ->
           {:ok, actual_value}
@@ -68,6 +74,7 @@ defmodule AssertValue do
     quote do
       assertion_code = unquote(Macro.to_string(assertion))
       actual_value = unquote(assertion)
+      check_type(actual_value)
       decision = AssertValue.Server.ask_user_about_diff(
         caller: [
           file: unquote(__CALLER__.file),
@@ -78,7 +85,6 @@ defmodule AssertValue do
         actual_value: actual_value,
         expected_type: :source
       )
-
       case decision do
         {:ok, value} ->
           value
@@ -89,5 +95,15 @@ defmodule AssertValue do
       end
     end
   end
+
+  def check_type(arg)
+        when is_pid(arg)
+        when is_port(arg)
+        when is_reference(arg)
+        when is_function(arg) do
+    raise AssertValue.ArgumentError, message: "AssertValue does not " <>
+    "suppport PID, Port, Reference, and Function types"
+  end
+  def check_type(_), do: :ok
 
 end
