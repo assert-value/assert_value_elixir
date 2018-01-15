@@ -46,26 +46,6 @@ defmodule AssertValue.BadArgumentsTest do
     Port.close(port)
   end
 
-  test "bad expected" do
-    f = fn -> true end
-    assert_raise AssertValue.ArgumentError, fn ->
-      assert_value :foo == f
-    end
-
-    task = Task.async(f)
-    assert_raise AssertValue.ArgumentError, fn ->
-      assert_value :foo == task.pid
-    end
-    assert_raise AssertValue.ArgumentError, fn ->
-      assert_value :foo == task.ref
-    end
-    {:ok, port} = :gen_udp.open(0)
-    assert_raise AssertValue.ArgumentError, fn ->
-      assert_value :foo == port
-    end
-    Port.close(port)
-  end
-
   test "left argument for File.read!" do
     assert_raise AssertValue.ArgumentError, fn ->
       assert_value nil == File.read!("file.txt")

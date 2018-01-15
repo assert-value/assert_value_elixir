@@ -39,8 +39,7 @@ defmodule AssertValue do
               unquote(right)
         end
       check_serializable(actual_value)
-      check_serializable(expected_value)
-      check_left_argument_for_file_read(actual_value, expected_type)
+      check_string_and_file_read(actual_value, expected_type)
       case (actual_value == expected_value) do
         true ->
           {:ok, actual_value}
@@ -102,16 +101,31 @@ defmodule AssertValue do
         when is_port(arg)
         when is_reference(arg)
         when is_function(arg) do
-    raise AssertValue.ArgumentError, message: "AssertValue does not " <>
-    "suppport PID, Port, Reference, and Function types"
+    raise AssertValue.ArgumentError,
+      message: "Unable to serialize ##{get_type(arg)}\n" <>
+        "You might want to use inspect/1 to use it in assert_value"
   end
   def check_serializable(_), do: :ok
 
-  def check_left_argument_for_file_read(left, :file) when is_binary(left), do: :ok
-  def check_left_argument_for_file_read(_, :file) do
-    raise AssertValue.ArgumentError, message: "File.read! should be " <>
-      "compared only with strings"
+  def check_string_and_file_read(arg, _expected_type = :file) when is_binary(arg), do: :ok
+  def check_string_and_file_read(arg, _expected_type = :file) do
+    raise AssertValue.ArgumentError,
+      message: "Unable to compare ##{get_type(arg)} with File.read!\n" <>
+        "You might want to use inspect/1 for that"
   end
-  def check_left_argument_for_file_read(_, _), do: :ok
+  def check_string_and_file_read(_, _), do: :ok
+
+  defp get_type(arg) do
+    [h | _t] = IEx.Info.info(arg)
+    case h do
+      # Elixir < 1.6
+      {:"Data type", type} ->
+        type
+      # Elixir 1.6
+      {"Data type", type} ->
+        type
+      # else CaseClauseError
+    end
+  end
 
 end
