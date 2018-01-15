@@ -38,8 +38,9 @@ defmodule AssertValue do
           :other ->
               unquote(right)
         end
-      check_type(actual_value)
-      check_type(expected_value)
+      check_serializable(actual_value)
+      check_serializable(expected_value)
+      check_left_argument_for_file_read(actual_value, expected_type)
       case (actual_value == expected_value) do
         true ->
           {:ok, actual_value}
@@ -74,7 +75,7 @@ defmodule AssertValue do
     quote do
       assertion_code = unquote(Macro.to_string(assertion))
       actual_value = unquote(assertion)
-      check_type(actual_value)
+      check_serializable(actual_value)
       decision = AssertValue.Server.ask_user_about_diff(
         caller: [
           file: unquote(__CALLER__.file),
@@ -96,7 +97,7 @@ defmodule AssertValue do
     end
   end
 
-  def check_type(arg)
+  def check_serializable(arg)
         when is_pid(arg)
         when is_port(arg)
         when is_reference(arg)
@@ -104,6 +105,13 @@ defmodule AssertValue do
     raise AssertValue.ArgumentError, message: "AssertValue does not " <>
     "suppport PID, Port, Reference, and Function types"
   end
-  def check_type(_), do: :ok
+  def check_serializable(_), do: :ok
+
+  def check_left_argument_for_file_read(left, :file) when is_binary(left), do: :ok
+  def check_left_argument_for_file_read(_, :file) do
+    raise AssertValue.ArgumentError, message: "File.read! should be " <>
+      "compared only with strings"
+  end
+  def check_left_argument_for_file_read(_, _), do: :ok
 
 end

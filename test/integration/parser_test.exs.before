@@ -277,4 +277,14 @@ defmodule ParserTest do
     assert_value -42.0001000 == -42.00020010
   end
 
+  test "bitstring and string" do
+    assert_value <<65>> == "A"
+    # prompt: y
+    assert_value <<66>> == "A"
+
+    assert_value "A" == <<65>>
+    # prompt: y
+    assert_value "B" == <<65>>
+  end
+
 end
