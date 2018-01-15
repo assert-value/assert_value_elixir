@@ -7,6 +7,8 @@ defmodule ParserTest do
 
   import AssertValue
 
+  # Literals
+
   test "actual literals" do
     # prompt: y
     assert_value nil
@@ -34,6 +36,12 @@ defmodule ParserTest do
     """
 
     # prompt: y
+    assert_value ~S(forty-two)
+
+    # prompt: y
+    assert_value ~s(forty-two)
+
+    # prompt: y
     assert_value <<0, 1, 2, 3>>
 
     # prompt: y
@@ -44,6 +52,11 @@ defmodule ParserTest do
     forty-two
     сорок два
     '''
+    # prompt: y
+    assert_value ~C(forty-two)
+
+    # prompt: y
+    assert_value ~c(forty-two)
 
     # prompt: y
     assert_value ~D[2018-01-01]
@@ -67,6 +80,9 @@ defmodule ParserTest do
     assert_value ~N[2018-01-01 21:01:50]
 
     # prompt: y
+    assert_value ~r/foo/
+
+    # prompt: y
     assert_value ~T[23:00:07]
 
     # prompt: y
@@ -77,6 +93,9 @@ defmodule ParserTest do
 
     # prompt: y
     assert_value %User{age: 43}
+
+    # prompt: y
+    assert_value ~W(foo bar)
 
     # prompt: y
     assert_value  [%{a: 42, b: {:left, :light}, c: [%User{}, 1]}, nil]
@@ -111,6 +130,12 @@ defmodule ParserTest do
     """
 
     # prompt: y
+    assert_value ~S(forty-two) == ~S(forty-three)
+
+    # prompt: y
+    assert_value ~s(forty-two) == ~s(forty-three)
+
+    # prompt: y
     assert_value <<0, 1, 2, 3>> == <<0, 1, 2, 4>>
 
     # prompt: y
@@ -124,6 +149,12 @@ defmodule ParserTest do
     forty-three
     сорок три
     '''
+
+    # prompt: y
+    assert_value ~C(forty-two) == ~C(forty-three)
+
+    # prompt: y
+    assert_value ~c(forty-two) == ~c(forty-three)
 
     # prompt: y
     assert_value ~D[2018-01-01] == ~D[2018-01-02]
@@ -162,6 +193,9 @@ defmodule ParserTest do
     assert_value %User{age: 42} == %User{age: 43}
 
     # prompt: y
+    assert_value ~W(foo bar) == ~W(foo baz)
+
+    # prompt: y
     assert_value  [%{a: 42, b: {:left, :light}, c: [%User{}, 1]}, nil] == [%{a: 42, b: {:left, :light}, c: [%User{}, 2]}, nil]
   end
 
@@ -190,6 +224,12 @@ defmodule ParserTest do
     """
 
     # prompt: y
+    assert_value "foo" == ~S(forty-two)
+
+    # prompt: y
+    assert_value "foo" == ~s(forty-two)
+
+    # prompt: y
     assert_value "foo" == <<0, 1, 2, 4>>
 
     # prompt: y
@@ -200,6 +240,12 @@ defmodule ParserTest do
     forty-three
     сорок три
     '''
+
+    # prompt: y
+    assert_value "foo" == ~C(forty-two)
+
+    # prompt: y
+    assert_value "foo" == ~c(forty-two)
 
     # prompt: y
     assert_value "foo" == ~D[2018-01-01]
@@ -226,6 +272,9 @@ defmodule ParserTest do
     assert_value "foo" == ~N[2018-01-01 21:01:50]
 
     # prompt: y
+    assert_value "foo" == ~r/foo/
+
+    # prompt: y
     assert_value "foo" == ~T[23:00:07]
 
     # prompt: y
@@ -236,6 +285,9 @@ defmodule ParserTest do
 
     # prompt: y
     assert_value "foo" == %User{age: 43}
+
+    # prompt: y
+    assert_value "foo" == ~W(foo bar)
 
     # prompt: y
     assert_value "foo" == [%{a: 42, b: {:left, :light}, c: [%User{}, 2]}, nil]
@@ -285,6 +337,115 @@ defmodule ParserTest do
     assert_value "A" == <<65>>
     # prompt: y
     assert_value "B" == <<65>>
+  end
+
+  # Expressions
+
+  test "variable" do
+    foo = "foo"
+    bar = "bar"
+
+    # prompt: y
+    assert_value foo
+
+    # prompt: y
+    assert_value foo == bar
+  end
+
+  test "parens" do
+    # prompt: y
+    assert_value("foo")
+
+    # prompt: y
+    assert_value ("foo")
+
+    # prompt: y
+    assert_value(("foo"))
+
+    # prompt: y
+    assert_value (("foo"))
+
+    # prompt: y
+    assert_value("foo" == "bar")
+
+    # prompt: y
+    assert_value ("foo" == "bar")
+
+    # prompt: y
+    assert_value(("foo" == "bar"))
+
+    # prompt: y
+    assert_value (("foo" == "bar"))
+
+    # prompt: y
+    assert_value ("foo") == ("bar")
+
+    # prompt: y
+    assert_value (("foo")) == (("bar"))
+
+    # prompt: y
+    assert_value((("foo")) == (("bar")))
+
+    # prompt: y
+    assert_value ((("foo")) == (("bar")))
+
+    # prompt: y
+    assert_value(
+      (
+        ("foo")
+      ) == (
+        ("bar")
+      )
+    )
+  end
+
+  test "left/right expressions" do
+    foo = "foo"
+    bar = "bar"
+
+    # prompt: y
+    assert_value foo <> "bar"
+
+    # prompt: y
+    assert_value foo <> "bar" == bar <> "baz"
+
+    # prompt: y
+    assert_value foo <>
+      "bar"
+
+    # prompt: y
+    assert_value foo <>
+      "bar" ==
+      bar
+      <> "baz"
+  end
+
+  test "functions" do
+    # prompt: y
+    assert_value String.upcase("foo")
+
+    # prompt: y
+    assert_value String.upcase("foo") == String.upcase("bar")
+
+    # prompt: y
+    assert_value String.upcase(
+      "foo"
+    ) == String.upcase(
+      "bar"
+    )
+  end
+
+  test "pipes" do
+    # prompt: y
+    assert_value String.upcase("foo") |> String.reverse ==
+        String.upcase("bar") |> String.reverse
+
+    # prompt: y
+    assert_value String.upcase("foo")
+                 |> String.reverse
+                 ==
+                 String.upcase("bar")
+                 |> String.reverse
   end
 
 end
