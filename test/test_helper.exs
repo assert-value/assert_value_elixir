@@ -156,7 +156,11 @@ defmodule AssertValue.Test.IntegrationTest do
         {output, exit_code} = run_tests(runnable_path, unquote(opts[:env]))
         assert exit_code == unquote(opts[:expected_exit_code] || 0)
 
-        assert_value File.read!(runnable_path) == File.read!(after_path)
+        test_source_result = File.read!(runnable_path)
+        # Make sure resulting test file is valid Elixir code
+        # Will raise SyntaxError or TokenMissingError otherwise
+        Code.string_to_quoted!(test_source_result)
+        assert_value test_source_result == File.read!(after_path)
         assert_value output == File.read!(output_path)
 
         Enum.each(expected_files, fn([runnable_path, after_path]) ->
