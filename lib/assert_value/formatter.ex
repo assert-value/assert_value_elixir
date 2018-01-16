@@ -12,7 +12,14 @@ defmodule AssertValue.Formatter do
   end
 
   def new_expected_from_actual(actual, _indentation) do
-    Macro.to_string(actual)
+    result = Macro.to_string(actual)
+    # Check for unserializable types like #Function, #PID, etc...
+    # We have check for known types in macro and this one is to
+    # be sure we won't miss any new type in future Elixir versions
+    if String.at(result, 0) == "#" do
+      raise "Unserializable type #{inspect(actual)}"
+    end
+    result
   end
 
   # Private
