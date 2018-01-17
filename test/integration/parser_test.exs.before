@@ -42,7 +42,7 @@ defmodule ParserTest do
     assert_value ~s(forty-two)
 
     # prompt: y
-    assert_value <<0, 1, 2, 3>>
+    assert_value <<65, 66, 67>>
 
     # prompt: y
     assert_value 'forty-two'
@@ -136,7 +136,7 @@ defmodule ParserTest do
     assert_value ~s(forty-two) == ~s(forty-three)
 
     # prompt: y
-    assert_value <<0, 1, 2, 3>> == <<0, 1, 2, 4>>
+    assert_value <<65, 66, 67>> == <<65, 66, 68>>
 
     # prompt: y
     assert_value 'forty-two' == 'forty-three'
@@ -230,7 +230,7 @@ defmodule ParserTest do
     assert_value "foo" == ~s(forty-two)
 
     # prompt: y
-    assert_value "foo" == <<0, 1, 2, 4>>
+    assert_value "foo" == <<65, 66, 67>>
 
     # prompt: y
     assert_value "foo" == 'forty-three'
