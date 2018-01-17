@@ -1,9 +1,5 @@
 defmodule AssertValue do
 
-  defmodule ArgumentError do
-    defexception [:message]
-  end
-
   # Assertions with right argument like "assert_value actual == expected"
   defmacro assert_value({:==, _, [left, right]} = assertion) do
     {expected_type, expected_file} = case right do
@@ -92,6 +88,10 @@ defmodule AssertValue do
           raise ExUnit.AssertionError, error
       end
     end
+  end
+
+  defmodule ArgumentError do
+    defexception [:message]
   end
 
   def check_serializable(arg)
