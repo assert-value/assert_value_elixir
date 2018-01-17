@@ -1,9 +1,5 @@
 defmodule AssertValue do
 
-  defmodule ParseError do
-    defexception [message: "Unable to parse assert_value arguments"]
-  end
-
   defmodule ArgumentError do
     defexception [:message]
   end
@@ -61,7 +57,8 @@ defmodule AssertValue do
             {:ok, value} ->
               value
             {:error, :parse_error} ->
-              raise AssertValue.ParseError
+              # reraise ParseError raised in genserver
+              raise AssertValue.Parser.ParseError
             {:error, :ex_unit_assertion_error, error} ->
               raise ExUnit.AssertionError, error
           end
@@ -89,7 +86,8 @@ defmodule AssertValue do
         {:ok, value} ->
           value
         {:error, :parse_error} ->
-          raise AssertValue.ParseError
+          # reraise ParseError raised in genserver
+          raise AssertValue.Parser.ParseError
         {:error, :ex_unit_assertion_error,  error} ->
           raise ExUnit.AssertionError, error
       end

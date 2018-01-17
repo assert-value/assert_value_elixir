@@ -1,5 +1,11 @@
 defmodule AssertValue.Parser do
 
+  # This is internal parser error
+  # In theory we parse any valid Elixir code and should not face it
+  defmodule ParseError do
+    defexception [message: "Unable to parse assert_value arguments"]
+  end
+
   # Returns {prefix, expected, suffix, indentation}
   #
   # Split file contents (code) to three parts:
@@ -24,6 +30,10 @@ defmodule AssertValue.Parser do
 
     prefix = prefix <> "\n" <> indentation <> statement
 
+    # We enclose parsing in try/rescue because parser code is executed
+    # inside genserver. Exceptions raised in genserver produce unreadable
+    # Erlang error messages so it is better to pass theese exceptions outside
+    # genserver and reraise them to show readable Elixir error messages
     try do
       {assertion, suffix} = parse_code(rest, assertion_code)
       {assertion, left_parens, right_parens} = trim_parens(assertion)
@@ -53,7 +63,7 @@ defmodule AssertValue.Parser do
 
       {prefix, expected, suffix, indentation}
     rescue
-      AssertValue.ParseError ->
+      AssertValue.Parser.ParseError ->
         {:error, :parse_error}
     end
   end
@@ -125,7 +135,7 @@ defmodule AssertValue.Parser do
         {char, rest} ->
           parse_code(rest, code, result <> char)
         nil ->
-          raise AssertValue.ParseError
+          raise AssertValue.Parser.ParseError
       end
     end
   end
