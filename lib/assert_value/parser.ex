@@ -20,8 +20,11 @@ defmodule AssertValue.Parser do
   # assertion_code, actual_code, and expected_code are strings representing
   # ASTs got from assert_value macro.
   def parse_expected(filename, line_num, assertion_code, actual_code \\ nil, expected_code \\ nil) do
-    source = read_source(filename)
-    {prefix, suffix} = Enum.split(source, line_num - 1)
+    {prefix, suffix} =
+      File.read!(filename)
+      |> String.split("\n")
+      |> Enum.split(line_num - 1)
+
     prefix = prefix |> Enum.join("\n")
     suffix = suffix |> Enum.join("\n")
 
@@ -160,10 +163,6 @@ defmodule AssertValue.Parser do
     else
       {code, left_parens, right_parens}
     end
-  end
-
-  defp read_source(filename) do
-    File.read!(filename) |> String.split("\n")
   end
 
 end
