@@ -28,10 +28,10 @@ defmodule AssertValue.Parser do
     prefix = prefix |> Enum.join("\n")
     suffix = suffix |> Enum.join("\n")
 
-    [_, indentation, statement, rest] =
+    [_, indentation, assert_value, rest] =
       Regex.run(~r/(^\s*)(assert_value\s*)(.*)/s, suffix)
 
-    prefix = prefix <> "\n" <> indentation <> statement
+    prefix = prefix <> "\n" <> indentation <> assert_value
 
     # We enclose parsing in try/rescue because parser code is executed
     # inside genserver. Exceptions raised in genserver produce unreadable
