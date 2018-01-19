@@ -73,7 +73,7 @@ defmodule AssertValue.Parser do
 
   # Private
 
-  # Take one characted from source append to result and compare
+  # Take one character from source, append it to resultm, and compare
   # result with code. Repeat recursively until result is the same as the code.
   # Return pair {result, rest} where rest is the rest of the source.
   #
