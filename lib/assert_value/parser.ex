@@ -125,7 +125,7 @@ defmodule AssertValue.Parser do
   #
   defp parse_code(source, code, result \\ "") do
     {_, value} = Code.string_to_quoted(result)
-    value = if is_binary(value) && String.match?(value, ~r/<NOEOL>/) do
+    value = if is_binary(value) do
       # In quoted code newlines are quoted
       String.replace(value, "<NOEOL>\\n", "")
     else
