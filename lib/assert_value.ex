@@ -32,32 +32,34 @@ defmodule AssertValue do
         end
       check_serializable(actual_value)
       check_string_and_file_read(actual_value, expected_type)
-      case (actual_value == expected_value) do
-        true ->
-          {:ok, actual_value}
-        _ ->
-          decision = AssertValue.Server.ask_user_about_diff(
-            caller: [
-              file: unquote(__CALLER__.file),
-              line: unquote(__CALLER__.line),
-              function: unquote(__CALLER__.function),
-            ],
-            assertion_code: assertion_code,
-            actual_code: actual_code,
-            actual_value: actual_value,
-            expected_type: expected_type,
-            expected_code: expected_code,
-            expected_value: expected_value,
-            expected_file: expected_file)
-          case decision do
-            {:ok, value} ->
-              value
-            {:error, :parse_error} ->
-              # reraise ParseError raised in genserver
-              raise AssertValue.Parser.ParseError
-            {:error, :ex_unit_assertion_error, error} ->
-              raise ExUnit.AssertionError, error
-          end
+      # We need to check for regenerate_expected? first to disable
+      # "this check/guard will always yield the same result" warnings
+      if AssertValue.Server.reformat_expected? ||
+          (actual_value != expected_value) do
+        decision = AssertValue.Server.ask_user_about_diff(
+          caller: [
+            file: unquote(__CALLER__.file),
+            line: unquote(__CALLER__.line),
+            function: unquote(__CALLER__.function),
+          ],
+          assertion_code: assertion_code,
+          actual_code: actual_code,
+          actual_value: actual_value,
+          expected_type: expected_type,
+          expected_code: expected_code,
+          expected_value: expected_value,
+          expected_file: expected_file)
+        case decision do
+          {:ok, value} ->
+            value
+          {:error, :parse_error} ->
+            # reraise ParseError raised in genserver
+            raise AssertValue.Parser.ParseError
+          {:error, :ex_unit_assertion_error, error} ->
+            raise ExUnit.AssertionError, error
+        end
+      else
+        {:ok, actual_value}
       end
     end
   end

@@ -162,4 +162,8 @@ defmodule AssertValueTest do
     env: [{'ASSERT_VALUE_ACCEPT_DIFFS', 'n'}],
     expected_exit_code: 1
 
+  integration_test "reformat expected", "reformat_expected_test.exs",
+    env: [{'ASSERT_VALUE_ACCEPT_DIFFS', 'reformat'}],
+    expected_exit_code: 0
+
 end

@@ -17,13 +17,15 @@ defmodule AssertValue.Server do
         "Y"
       env_settings == "n" ->
         "N"
+      env_settings == "reformat" ->
+        "R"
       env_settings == "ask" ->
         nil
       # ASSERT_VALUE_ACCEPT_DIFFS is set to unknown value
       is_binary(env_settings) ->
         raise """
         Unknown ASSERT_VALUE_ACCEPT_DIFFS env variable value "#{env_settings}"
-        Should be one of [ask,y,n]
+        Should be one of [y,n,ask,reformat]
         """
       # Check that we are running in continuous integration environment
       # TravisCI and CircleCI have this variable
@@ -56,6 +58,10 @@ defmodule AssertValue.Server do
     {:noreply, state}
   end
 
+  def handle_call({:reformat_expected?}, _from, state) do
+    {:reply, state.recurring_answer == "R", state}
+  end
+
   # This a synchronous call
   # No other AssertValue diffs will be shown until user give answer
   def handle_call({:ask_user_about_diff, opts}, _from, state) do
@@ -67,7 +73,7 @@ defmodule AssertValue.Server do
     contents = StringIO.flush(state.captured_ex_unit_io_pid)
     if contents != "", do: IO.write contents
     {answer, state} = prompt_for_action(opts, state)
-    if answer in ["y", "Y"] do
+    if answer in ["y", "Y", "R"] do
       case update_expected(state.file_changes, opts[:expected_type], opts) do
         {:ok, file_changes} ->
           {:reply, {:ok, opts[:actual_value]},
@@ -91,6 +97,10 @@ defmodule AssertValue.Server do
 
   def flush_ex_unit_io do
     GenServer.cast __MODULE__, {:flush_ex_unit_io}
+  end
+
+  def reformat_expected? do
+    GenServer.call __MODULE__, {:reformat_expected?}, :infinity
   end
 
   def ask_user_about_diff(opts) do

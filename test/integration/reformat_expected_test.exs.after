@@ -1,0 +1,21 @@
+defmodule ReformatExpectedTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "regenerate" do
+    assert_value "foo\nbar" == """
+    foo
+    bar<NOEOL>
+    """
+    assert_value "foobar" == "foobar"
+
+    assert_value "foo\nbar\n" == """
+    foo
+    bar
+    """
+
+    assert_value 2 + 2 == 4
+  end
+
+end
