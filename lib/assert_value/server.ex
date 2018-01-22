@@ -183,7 +183,7 @@ defmodule AssertValue.Server do
       opts[:expected_code]
     ) do
       {prefix, old_expected, suffix, indentation} ->
-        new_expected = AssertValue.Formatter.new_expected_from_actual(
+        new_expected = AssertValue.Formatter.new_expected_from_actual_value(
           opts[:actual_value], indentation)
         File.write!(opts[:caller][:file], prefix <> new_expected <> suffix)
         {:ok, update_lines_count(
