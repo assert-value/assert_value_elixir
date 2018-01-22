@@ -448,4 +448,15 @@ defmodule ParserTest do
                  |> String.reverse
   end
 
+  test "repeatable expressions" do
+    # prompt: y
+    assert_value 2 + 2 - 2 + 2 - 2 + 2
+
+    # prompt: y
+    assert_value 2 + 2 - 2 + 2 - 2 + 2 == 5
+
+    # prompt: y
+    assert_value 5 == 2 + 2 - 2 + 2 - 2 + 2
+  end
+
 end

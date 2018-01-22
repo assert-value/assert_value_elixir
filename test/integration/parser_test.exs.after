@@ -440,4 +440,15 @@ defmodule ParserTest do
                  "OOF"
   end
 
+  test "repeatable expressions" do
+    # prompt: y
+    assert_value 2 + 2 - 2 + 2 - 2 + 2 == 4
+
+    # prompt: y
+    assert_value 2 + 2 - 2 + 2 - 2 + 2 == 4
+
+    # prompt: y
+    assert_value 5 == 5
+  end
+
 end

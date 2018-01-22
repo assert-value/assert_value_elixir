@@ -694,4 +694,22 @@ parser_test.exs:##:"test pipes" assert_value String.upcase("foo") |> String.reve
 +OOF
 
 Accept new value? [y,n,?] .
-13 tests, 0 failures
+parser_test.exs:##:"test repeatable expressions" assert_value 2 + 2 - 2 + 2 - 2 + 2 failed
+
+-
++4
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test repeatable expressions" assert_value 2 + 2 - 2 + 2 - 2 + 2 == 5 failed
+
+-5
++4
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test repeatable expressions" assert_value 5 == 2 + 2 - 2 + 2 - 2 + 2 failed
+
+-4
++5
+
+Accept new value? [y,n,?] .
+14 tests, 0 failures
