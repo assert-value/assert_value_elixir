@@ -73,12 +73,14 @@ defmodule AssertValue.Parser do
 
   # Private
 
-  # Take one character from source, append it to resultm, and compare
-  # result with code. Repeat recursively until result is the same as the code.
-  # Return pair {result, rest} where rest is the rest of the source.
+  # Finds the part of the source with AST matching AST of the code
+  # Return pair {result, rest}
   #
   #   iex(1) parse_code("(1 + 2) == 3", "1 + 2")
   #   #=> {"(1 + 2)", "== 3"}
+  #
+  # Recursively take one character from source, append it to result, and
+  # compare result with code.
   #
   # NOTE: We are sure that there are no surrounding parens aroung source
   #
