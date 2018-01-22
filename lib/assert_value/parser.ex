@@ -74,13 +74,13 @@ defmodule AssertValue.Parser do
   # Private
 
   # Finds the part of the source with AST matching AST of the code
-  # Return pair {result, rest}
+  # Return pair {accumulator, rest}
   #
   #   iex(1) parse_code("(1 + 2) == 3", "1 + 2")
   #   #=> {"(1 + 2)", "== 3"}
   #
-  # Recursively take one character from source, append it to result, and
-  # compare result with code.
+  # Recursively take one character from source, append it to accumulator, and
+  # compare accumulator with code.
   #
   # NOTE: We are sure that there are no surrounding parens aroung source
   #
@@ -100,7 +100,7 @@ defmodule AssertValue.Parser do
   #
   # NOTE: Corner Cases
   #
-  # * result is empty string and code is "nil":
+  # * accumulator is empty string and code is "nil":
   #
   #   # Elixir 1.5.3
   #   iex(1)> Code.string_to_quoted(nil)
@@ -123,8 +123,8 @@ defmodule AssertValue.Parser do
   #   check that the rest of the source does not contain leading
   #   zeros. They all belong to parsed value
   #
-  defp parse_code(source, code, result \\ "") do
-    {_, value} = Code.string_to_quoted(result)
+  defp parse_code(source, code, accumulator \\ "") do
+    {_, value} = Code.string_to_quoted(accumulator)
     value = if is_binary(value) do
       # In quoted code newlines are quoted
       String.replace(value, "<NOEOL>\\n", "")
@@ -132,13 +132,13 @@ defmodule AssertValue.Parser do
       value
     end
     if Macro.to_string(value) == code &&
-        !(result == "" && code == "nil") &&
+        !(accumulator == "" && code == "nil") &&
         !(source =~ ~r/^0+(\s|$)/s) do
-      {result, source}
+      {accumulator, source}
     else
       case String.next_grapheme(source) do
-        {char, rest} ->
-          parse_code(rest, code, result <> char)
+        {first_grapheme, rest} ->
+          parse_code(rest, code, accumulator <> first_grapheme)
         nil ->
           raise AssertValue.Parser.ParseError
       end
