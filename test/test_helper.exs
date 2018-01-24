@@ -145,7 +145,8 @@ defmodule AssertValue.Test.IntegrationTest do
 
   # integration_test "accept all (Y)", "accept_all_test.exs", exit_code: 1
   defmacro integration_test(test_name, test_filename, opts \\ []) do
-    expected_files = opts[:expected_files] || []
+    expected_files = Keyword.get(opts, :expected_files, [])
+    expected_exit_code = Keyword.get(opts, :expected_exit_code, 0)
     quote do
       test unquote(test_name) do
         {runnable_path, after_path, output_path} =
@@ -154,7 +155,7 @@ defmodule AssertValue.Test.IntegrationTest do
         expected_files = prepare_expected_files(unquote(expected_files))
 
         {output, exit_code} = run_tests(runnable_path, unquote(opts[:env]))
-        assert exit_code == unquote(opts[:expected_exit_code] || 0)
+        assert exit_code == unquote(expected_exit_code)
 
         test_source_result = File.read!(runnable_path)
         # Make sure resulting test file is valid Elixir code
