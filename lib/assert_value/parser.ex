@@ -34,7 +34,7 @@ defmodule AssertValue.Parser do
     # Erlang error messages so it is better to pass theese exceptions outside
     # genserver and reraise them to show readable Elixir error messages
     try do
-      {assertion, suffix} = parse_code(rest, assertion_ast)
+      {assertion, suffix} = get_string_by_ast(rest, assertion_ast)
       {assertion, left_parens, right_parens} = trim_parens(assertion)
       prefix = prefix <> left_parens
       suffix = right_parens <> suffix
@@ -43,7 +43,7 @@ defmodule AssertValue.Parser do
         if actual_ast == :_not_present_ do
           {prefix <> assertion, "", suffix}
         else
-          {actual, rest} = parse_code(assertion, actual_ast)
+          {actual, rest} = get_string_by_ast(assertion, actual_ast)
           prefix = prefix <> actual
           {prefix, rest, suffix}
         end
@@ -54,7 +54,7 @@ defmodule AssertValue.Parser do
         else
           [_, operator, _, rest] = Regex.run(~r/((\)|\s)+==\s*)(.*)/s, rest)
           prefix = prefix <> operator
-          {expected, rest} = parse_code(rest, expected_ast)
+          {expected, rest} = get_string_by_ast(rest, expected_ast)
           {prefix, expected, rest <> suffix}
         end
 
@@ -73,10 +73,10 @@ defmodule AssertValue.Parser do
 
   # Private
 
-  # Finds the part of the source with AST matching AST of the code
+  # Finds the part of the source with the same AST as second parameter
   # Return pair {accumulator, rest}
   #
-  #   iex(1) parse_code("(1 + 2) == 3", "1 + 2")
+  #   iex(1) get_string_by_ast("(1 + 2) == 3", {:+, [], [1, 2]})
   #   #=> {"(1 + 2)", "== 3"}
   #
   # Recursively take one character from source, append it to accumulator, and
@@ -89,13 +89,13 @@ defmodule AssertValue.Parser do
   #   so we need to check that the rest of the source does not contain
   #   leading zeros. They all belong to parsed value
   #
-  defp parse_code(source, ast, accumulator \\ "") do
-    if compare_ast(accumulator, ast) && !(source =~ ~r/^0+(\s|$)/s) do
+  defp get_string_by_ast(source, ast, accumulator \\ "") do
+    if compare_ast(accumulator, ast) && (String.at(source, 0) != "0") do
       {accumulator, source}
     else
       case String.next_grapheme(source) do
         {first_grapheme, rest} ->
-          parse_code(rest, ast, accumulator <> first_grapheme)
+          get_string_by_ast(rest, ast, accumulator <> first_grapheme)
         nil ->
           raise AssertValue.Parser.ParseError
       end
@@ -138,7 +138,7 @@ defmodule AssertValue.Parser do
     end
   end
 
-  # recursively delete meta information about line from AST
+  # recursively delete meta information about line numbers from AST
   # iex> remove_lines_meta({:foo, [line: 10], []})
   # {:foo, [], []}
   defp remove_lines_meta(ast) do
