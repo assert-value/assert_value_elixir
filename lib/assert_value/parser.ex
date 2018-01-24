@@ -86,7 +86,7 @@ defmodule AssertValue.Parser do
   #
   # * floats with trailing zeros
   #   AST for "42.00000" is 42.0
-  #   so we need to check that the rest of the source does not contain 
+  #   so we need to check that the rest of the source does not contain
   #   leading zeros. They all belong to parsed value
   #
   defp parse_code(source, ast, accumulator \\ "") do
