@@ -77,6 +77,8 @@ defmodule AssertValue do
           function: unquote(__CALLER__.function),
         ],
         assertion_ast: assertion_ast,
+        # :_not_present_ is to show the difference between
+        # nil and actually not present actual/expected
         actual_ast: :_not_present_,
         actual_value: actual_value,
         expected_type: :source,
