@@ -52,6 +52,9 @@ defmodule ParserTest do
     assert_value <<65, 66, 67>> == "ABC"
 
     # prompt: y
+    assert_value <<256 :: utf8>> == "Ā"
+
+    # prompt: y
     assert_value 'forty-two' == 'forty-two'
 
     # prompt: y
@@ -148,6 +151,9 @@ defmodule ParserTest do
     assert_value <<65, 66, 67>> == "ABC"
 
     # prompt: y
+    assert_value <<256 :: utf8>> == "Ā"
+
+    # prompt: y
     assert_value 'forty-two' == 'forty-two'
 
     # prompt: y
@@ -206,6 +212,9 @@ defmodule ParserTest do
   end
 
   test "expected literal" do
+    # prompt: y
+    assert_value "foo" == "foo"
+
     # prompt: y
     assert_value "foo" == "foo"
 

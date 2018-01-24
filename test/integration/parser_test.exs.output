@@ -58,6 +58,12 @@ parser_test.exs:##:"test actual literals" assert_value <<65, 66, 67>> failed
 +ABC
 
 Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value <<256::utf8>> failed
+
+-
++Ā
+
+Accept new value? [y,n,?] 
 parser_test.exs:##:"test actual literals" assert_value 'forty-two' failed
 
 -
@@ -217,6 +223,12 @@ parser_test.exs:##:"test actual and expected literals" assert_value <<65, 66, 67
 
 -ABD
 +ABC
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value <<256::utf8>> == <<267::utf8>> failed
+
+-ċ
++Ā
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test actual and expected literals" assert_value 'forty-two' == 'forty-three' failed
@@ -381,6 +393,12 @@ Accept new value? [y,n,?]
 parser_test.exs:##:"test expected literal" assert_value "foo" == <<65, 66, 67>> failed
 
 -ABC
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == <<256::utf8>> failed
+
+-Ā
 +foo
 
 Accept new value? [y,n,?] 
