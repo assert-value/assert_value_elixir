@@ -430,11 +430,21 @@ defmodule ParserTest do
   end
 
   test "functions" do
+    hello = fn(x) ->
+        "Hello " <> x <> "!"
+    end
+
     # prompt: y
     assert_value String.upcase("foo")
 
     # prompt: y
+    assert_value hello.("World")
+
+    # prompt: y
     assert_value String.upcase("foo") == String.upcase("bar")
+
+    # prompt: y
+    assert_value hello.("World") == hello.("Elixir")
 
     # prompt: y
     assert_value String.upcase(

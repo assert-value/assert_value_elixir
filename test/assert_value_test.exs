@@ -84,7 +84,7 @@ defmodule AssertValueTest do
     * Variable
     * Parens (including recursive)
     * Left, Right expressions
-    * Functions
+    * Functions calls (named and anonymous)
     * Pipes
 
     * Expressions could be one-liners or multi-line

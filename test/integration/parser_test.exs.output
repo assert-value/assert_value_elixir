@@ -688,10 +688,22 @@ parser_test.exs:##:"test functions" assert_value String.upcase("foo") failed
 +FOO
 
 Accept new value? [y,n,?] 
+parser_test.exs:##:"test functions" assert_value hello.("World") failed
+
+-
++Hello World!
+
+Accept new value? [y,n,?] 
 parser_test.exs:##:"test functions" assert_value String.upcase("foo") == String.upcase("b... failed
 
 -BAR
 +FOO
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test functions" assert_value hello.("World") == hello.("Elixir") failed
+
+-Hello Elixir!
++Hello World!
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test functions" assert_value String.upcase("foo") == String.upcase("b... failed
