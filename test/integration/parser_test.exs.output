@@ -160,6 +160,12 @@ parser_test.exs:##:"test actual literals" assert_value %User{age: 43} failed
 +%ParserTest.User{age: 43, name: "John"}
 
 Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value %{__struct__: ParserTest.User, age: 21, ... failed
+
+-
++%ParserTest.User{age: 21, name: "Peter"}
+
+Accept new value? [y,n,?] 
 parser_test.exs:##:"test actual literals" assert_value ~W"foo bar" failed
 
 -
@@ -325,6 +331,12 @@ parser_test.exs:##:"test actual and expected literals" assert_value %User{age: 4
 
 -%ParserTest.User{age: 43, name: "John"}
 +%ParserTest.User{age: 42, name: "John"}
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value %{__struct__: ParserTest.User, age: 21, ... failed
+
+-%ParserTest.User{age: 25, name: "James"}
++%ParserTest.User{age: 21, name: "Peter"}
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test actual and expected literals" assert_value ~W"foo bar" == ~W"foo baz" failed

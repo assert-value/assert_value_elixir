@@ -98,6 +98,9 @@ defmodule ParserTest do
     assert_value %User{age: 43}
 
     # prompt: y
+    assert_value %{__struct__: ParserTest.User, age: 21, name: "Peter"}
+
+    # prompt: y
     assert_value ~W(foo bar)
 
     # prompt: y
@@ -197,6 +200,12 @@ defmodule ParserTest do
 
     # prompt: y
     assert_value %User{age: 42} == %User{age: 43}
+
+    # This should pass
+    assert_value %{__struct__: ParserTest.User, age: 21, name: "Peter"} == %User{age: 21, name: "Peter"}
+
+    # prompt: y
+    assert_value %{__struct__: ParserTest.User, age: 21, name: "Peter"} == %{__struct__: ParserTest.User, age: 25, name: "James"}
 
     # prompt: y
     assert_value ~W(foo bar) == ~W(foo baz)
