@@ -333,10 +333,10 @@ defmodule ParserTest do
 
   test "string escaping" do
     # prompt: y
-    assert_value "foo\\nbar\" \" %{}" == "foo"
+    assert_value "foo\\nbar\" \" \t \r %{}" == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo\\nbar\" \" %{}" == "foo"
+    assert_value "foo" == "foo\\nbar\" \" \t \r %{}" == "foo"
   end
 
   test "float trailing zeros" do

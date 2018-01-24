@@ -544,13 +544,13 @@ parser_test.exs:##:"test update file" assert_value "aaa\nbbb\nccc\n" == File.rea
  ccc
 
 Accept new value? [y,n,?] .
-parser_test.exs:##:"test string escaping" assert_value "foo\\nbar\" \" %{}" == "foo" failed
+parser_test.exs:##:"test string escaping" assert_value "foo\\nbar\" \" \t \r %{}" == "foo" failed
 
 -foo
-+foo\nbar" " %{}
++foo\nbar" " 	  %{}
 
 Accept new value? [y,n,?] 
-parser_test.exs:##:"test string escaping" assert_value "foo" == "foo\\nbar\" \" %{}" == "foo" failed
+parser_test.exs:##:"test string escaping" assert_value "foo" == "foo\\nbar\" \" \t \r %{}" == "... failed
 
 -"foo"
 +false
