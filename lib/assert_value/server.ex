@@ -18,7 +18,7 @@ defmodule AssertValue.Server do
       env_settings == "n" ->
         "N"
       env_settings == "reformat" ->
-        "R"
+        :reformat
       env_settings == "ask" ->
         nil
       # ASSERT_VALUE_ACCEPT_DIFFS is set to unknown value
@@ -59,7 +59,7 @@ defmodule AssertValue.Server do
   end
 
   def handle_call({:reformat_expected?}, _from, state) do
-    {:reply, state.recurring_answer == "R", state}
+    {:reply, state.recurring_answer == :reformat, state}
   end
 
   # This a synchronous call
@@ -73,7 +73,7 @@ defmodule AssertValue.Server do
     contents = StringIO.flush(state.captured_ex_unit_io_pid)
     if contents != "", do: IO.write contents
     {answer, state} = prompt_for_action(opts, state)
-    if answer in ["y", "Y", "R"] do
+    if answer in ["y", "Y", :reformat] do
       case update_expected(state.file_changes, opts[:expected_type], opts) do
         {:ok, file_changes} ->
           {:reply, {:ok, opts[:actual_value]},
