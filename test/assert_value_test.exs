@@ -63,6 +63,7 @@ defmodule AssertValueTest do
     * Regexp
     * Time
     * Tuple
+    * Module attributes @
     * Any (Struct)
 
   Not Serializable
@@ -83,7 +84,10 @@ defmodule AssertValueTest do
 
     * Variable
     * Parens (including recursive)
+    * Match operator (=)
     * Left, Right expressions
+    ** Comparison (===, <, >, >=, <=, !=, =~)
+    ** Other (++, <>, etc...)
     * Functions calls (named and anonymous)
     * Pipes
 
