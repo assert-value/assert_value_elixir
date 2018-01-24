@@ -1,6 +1,9 @@
 defmodule ParserTest do
   use ExUnit.Case
 
+  @foo "foo"
+  @bar "bar"
+
   defmodule User do
     defstruct name: "John", age: 27
   end
@@ -366,6 +369,17 @@ defmodule ParserTest do
 
     # prompt: y
     assert_value foo == "foo"
+  end
+
+  test "module attributes" do
+    # prompt: y
+    assert_value @foo == "foo"
+
+    # prompt: y
+    assert_value @foo == "foo"
+
+    # prompt: y
+    assert_value "foo" == @foo
   end
 
   test "parens" do
