@@ -85,7 +85,7 @@ defmodule AssertValue.Server do
       # Fail test. Pass exception up to the caller and throw it there
       {:reply,  {:error, :ex_unit_assertion_error, [left: opts[:actual_value],
           right: opts[:expected_value],
-          expr: opts[:assertion_code],
+          expr: Macro.to_string(opts[:assertion_ast]),
           message: "AssertValue assertion failed"]},
       state}
     end
@@ -129,7 +129,7 @@ defmodule AssertValue.Server do
     # * not be unreasonably long, so the user sees it on the screen
     #   grouped with the diff
     {function, _} = opts[:caller][:function]
-    code = opts[:assertion_code] |> smart_truncate(40)
+    code = opts[:assertion_ast] |> Macro.to_string |> smart_truncate(40)
     diff_context = "#{file}:#{line}:\"#{Atom.to_string function}\" assert_value #{code} failed"
     diff = AssertValue.Diff.diff(opts[:expected_value], opts[:actual_value])
     diff_lines_count = String.split(diff, "\n") |> Enum.count()
@@ -188,9 +188,9 @@ defmodule AssertValue.Server do
     case AssertValue.Parser.parse_expected(
       opts[:caller][:file],
       current_line_number,
-      opts[:assertion_code],
-      opts[:actual_code],
-      opts[:expected_code]
+      opts[:assertion_ast],
+      opts[:actual_ast],
+      opts[:expected_ast]
     ) do
       {prefix, old_expected, suffix, indentation} ->
         new_expected = AssertValue.Formatter.new_expected_from_actual_value(

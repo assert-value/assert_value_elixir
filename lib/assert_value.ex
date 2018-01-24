@@ -11,12 +11,12 @@ defmodule AssertValue do
         {:other, nil}
     end
     quote do
-      assertion_code = unquote(Macro.to_string(assertion))
-      actual_code = unquote(Macro.to_string(left))
+      assertion_ast = unquote(Macro.escape(assertion))
+      actual_ast = unquote(Macro.escape(left))
       actual_value = unquote(left)
       expected_type = unquote(expected_type)
       expected_file = unquote(expected_file)
-      expected_code = unquote(Macro.to_string(right))
+      expected_ast = unquote(Macro.escape(right))
       expected_value =
         case expected_type do
           :string ->
@@ -42,11 +42,11 @@ defmodule AssertValue do
             line: unquote(__CALLER__.line),
             function: unquote(__CALLER__.function),
           ],
-          assertion_code: assertion_code,
-          actual_code: actual_code,
+          assertion_ast: assertion_ast,
+          actual_ast: actual_ast,
           actual_value: actual_value,
           expected_type: expected_type,
-          expected_code: expected_code,
+          expected_ast: expected_ast,
           expected_value: expected_value,
           expected_file: expected_file)
         case decision do
@@ -67,7 +67,7 @@ defmodule AssertValue do
   # Assertions without right argument like (assert_value "foo")
   defmacro assert_value(assertion) do
     quote do
-      assertion_code = unquote(Macro.to_string(assertion))
+      assertion_ast = unquote(Macro.escape(assertion))
       actual_value = unquote(assertion)
       check_serializable(actual_value)
       decision = AssertValue.Server.ask_user_about_diff(
@@ -76,10 +76,11 @@ defmodule AssertValue do
           line: unquote(__CALLER__.line),
           function: unquote(__CALLER__.function),
         ],
-        assertion_code: assertion_code,
+        assertion_ast: assertion_ast,
+        actual_ast: :_not_present_,
         actual_value: actual_value,
-        expected_type: :source
-      )
+        expected_type: :source,
+        expected_ast: :_not_present_)
       case decision do
         {:ok, value} ->
           value

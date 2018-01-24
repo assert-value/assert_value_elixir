@@ -550,10 +550,10 @@ parser_test.exs:##:"test string escaping" assert_value "foo\\nbar\" \" \t \r %{}
 +foo\nbar" " 	  %{}
 
 Accept new value? [y,n,?] 
-parser_test.exs:##:"test string escaping" assert_value "foo" == "foo\\nbar\" \" \t \r %{}" == "... failed
+parser_test.exs:##:"test string escaping" assert_value "foo" == "foo\\nbar\" \" \t \r %{}" failed
 
--"foo"
-+false
+-foo\nbar" " 	  %{}
++foo
 
 Accept new value? [y,n,?] .
 parser_test.exs:##:"test float trailing zeros" assert_value 42.0001 == 42.0002001 failed

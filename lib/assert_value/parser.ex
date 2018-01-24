@@ -15,11 +15,7 @@ defmodule AssertValue.Parser do
   #
   #   code == prefix <> expected <> suffix
   #
-  # Also returns line indentation to create new expected value heredoc
-  #
-  # assertion_code, actual_code, and expected_code are strings representing
-  # ASTs got from assert_value macro.
-  def parse_expected(filename, line_num, assertion_code, actual_code \\ nil, expected_code \\ nil) do
+  def parse_expected(filename, line_num, assertion_ast, actual_ast, expected_ast) do
     {prefix, suffix} =
       File.read!(filename)
       |> String.split("\n")
@@ -38,31 +34,35 @@ defmodule AssertValue.Parser do
     # Erlang error messages so it is better to pass theese exceptions outside
     # genserver and reraise them to show readable Elixir error messages
     try do
-      {assertion, suffix} = parse_code(rest, assertion_code)
+      {assertion, suffix} = parse_code(rest, assertion_ast)
       {assertion, left_parens, right_parens} = trim_parens(assertion)
       prefix = prefix <> left_parens
       suffix = right_parens <> suffix
 
       {prefix, rest, suffix} =
-        if actual_code do
-          {actual, rest} = parse_code(assertion, actual_code)
+        if actual_ast == :_not_present_ do
+          {prefix <> assertion, "", suffix}
+        else
+          {actual, rest} = parse_code(assertion, actual_ast)
           prefix = prefix <> actual
           {prefix, rest, suffix}
-        else
-          {prefix <> assertion, "", suffix}
         end
 
       {prefix, expected, suffix} =
-        if expected_code do
+        if expected_ast == :_not_present_ do
+          {prefix, "", suffix}
+        else
           [_, operator, _, rest] = Regex.run(~r/((\)|\s)+==\s*)(.*)/s, rest)
           prefix = prefix <> operator
-          {expected, rest} = parse_code(rest, expected_code)
+          {expected, rest} = parse_code(rest, expected_ast)
           {prefix, expected, rest <> suffix}
-        else
-          {prefix, "", suffix}
         end
 
-      prefix = if expected_code, do: prefix, else: prefix <> " == "
+      prefix = if expected_ast == :_not_present_ do
+        prefix <> " == "
+      else
+        prefix
+      end
 
       {prefix, expected, suffix, indentation}
     rescue
@@ -82,67 +82,68 @@ defmodule AssertValue.Parser do
   # Recursively take one character from source, append it to accumulator, and
   # compare accumulator with code.
   #
-  # NOTE: We are sure that there are no surrounding parens aroung source
+  # Corner Case:
   #
-  # NOTE: There may be differences between AST evaluated from string and
-  # the one from compiler for complex values because of line numbers, etc...
+  # * floats with trailing zeros
+  #   AST for "42.00000" is 42.0
+  #   so we need to check that the rest of the source does not contain 
+  #   leading zeros. They all belong to parsed value
   #
-  #   iex(1)> a = [c: {:<<>>, [line: 1], [1, 2, 2]}]
-  #   iex(2)> b = [c: <<1, 2, 2>>]
-  #
-  #   iex(3)> a == b
-  #   false
-  #
-  # To deal with it compare formatted ASTs
-  #
-  #   iex(4)> Macro.to_string(a) == Macro.to_string(b)
-  #   true
-  #
-  # NOTE: Corner Cases
-  #
-  # * accumulator is empty string and code is "nil":
+  defp parse_code(source, ast, accumulator \\ "") do
+    if compare_ast(accumulator, ast) && !(source =~ ~r/^0+(\s|$)/s) do
+      {accumulator, source}
+    else
+      case String.next_grapheme(source) do
+        {first_grapheme, rest} ->
+          parse_code(rest, ast, accumulator <> first_grapheme)
+        nil ->
+          raise AssertValue.Parser.ParseError
+      end
+    end
+  end
+
+  # Returns true if str compiles to the same AST as second parameter
+  # There is a corner case for empty string in Elixir < 1.6.0
   #
   #   # Elixir 1.5.3
   #   iex(1)> Code.string_to_quoted(nil)
   #   {:ok, nil}
   #   iex(1)> Code.string_to_quoted("")
   #   {:ok, nil}
-  #   iex(2)> Macro.to_string(nil)
-  #   "nil"
   #
   #   # Elixir 1.6.0-rc.0
   #   iex(1)> Code.string_to_quoted(nil)
   #   {:ok, nil}
   #   iex(1)> Code.string_to_quoted("")
   #   {:ok, {:__block__, [], []}}
-  #   iex(2)> Macro.to_string({:__block__, [], []})
-  #   "(\n  \n)"
   #
-  # * floats with trailing zeros
-  #   Since 42.0 is equal 42.0000 we should always
-  #   check that the rest of the source does not contain leading
-  #   zeros. They all belong to parsed value
-  #
-  defp parse_code(source, code, accumulator \\ "") do
-    {_, value} = Code.string_to_quoted(accumulator)
-    value = if is_binary(value) do
-      # In quoted code newlines are quoted
-      String.replace(value, "<NOEOL>\\n", "")
-    else
-      value
+  # We are sure that when AST is nil it is really nil because we have
+  # special :_not_present_ token for empty ASTs
+  defp compare_ast(str, ast) do
+    case Code.string_to_quoted(str) do
+      {:ok, quoted} ->
+        quoted = if is_binary(quoted) do
+          String.replace(quoted, "<NOEOL>\\n", "")
+        else
+          quoted
+        end
+        if remove_lines_meta(quoted) == remove_lines_meta(ast) &&
+            !(str == "" && ast == nil) do
+          true
+        else
+          false
+        end
+      _ ->
+        false
     end
-    if Macro.to_string(value) == code &&
-        !(accumulator == "" && code == "nil") &&
-        !(source =~ ~r/^0+(\s|$)/s) do
-      {accumulator, source}
-    else
-      case String.next_grapheme(source) do
-        {first_grapheme, rest} ->
-          parse_code(rest, code, accumulator <> first_grapheme)
-        nil ->
-          raise AssertValue.Parser.ParseError
-      end
-    end
+  end
+
+  # recursively delete meta information about line from AST
+  # iex> remove_lines_meta({:foo, [line: 10], []})
+  # {:foo, [], []}
+  defp remove_lines_meta(ast) do
+    cleaner = &Keyword.delete(&1, :line)
+    Macro.prewalk(ast, &Macro.update_meta(&1, cleaner))
   end
 
   # Try to trim parens and whitespace recursively

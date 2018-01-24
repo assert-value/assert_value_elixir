@@ -339,7 +339,7 @@ defmodule ParserTest do
     assert_value "foo\\nbar\" \" \t \r %{}" == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo\\nbar\" \" \t \r %{}" == "foo"
+    assert_value "foo" == "foo\\nbar\" \" \t \r %{}"
   end
 
   test "float trailing zeros" do
