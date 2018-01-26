@@ -52,11 +52,12 @@ defmodule AssertValue do
         case decision do
           {:ok, value} ->
             true
+          {:error, :ex_unit_assertion_error, error_attrs} ->
+            raise ExUnit.AssertionError, error_attrs
           {:error, :parse_error} ->
-            # reraise ParseError raised in genserver
+            # raise ParseError in test instead of genserver
+            # to show readable error message and stacktrace
             raise AssertValue.Parser.ParseError
-          {:error, :ex_unit_assertion_error, error} ->
-            raise ExUnit.AssertionError, error
         end
       else
         true
@@ -86,11 +87,12 @@ defmodule AssertValue do
       case decision do
         {:ok, value} ->
           true
+        {:error, :ex_unit_assertion_error,  error_attrs} ->
+          raise ExUnit.AssertionError, error_attrs
         {:error, :parse_error} ->
-          # reraise ParseError raised in genserver
+          # raise ParseError in test instead of genserver
+          # to show readable error message and stacktrace
           raise AssertValue.Parser.ParseError
-        {:error, :ex_unit_assertion_error,  error} ->
-          raise ExUnit.AssertionError, error
       end
     end
   end
