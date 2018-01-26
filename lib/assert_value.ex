@@ -51,7 +51,7 @@ defmodule AssertValue do
           expected_file: expected_file)
         case decision do
           {:ok, value} ->
-            value
+            true
           {:error, :parse_error} ->
             # reraise ParseError raised in genserver
             raise AssertValue.Parser.ParseError
@@ -59,7 +59,7 @@ defmodule AssertValue do
             raise ExUnit.AssertionError, error
         end
       else
-        {:ok, actual_value}
+        true
       end
     end
   end
@@ -85,7 +85,7 @@ defmodule AssertValue do
         expected_ast: :_not_present_)
       case decision do
         {:ok, value} ->
-          value
+          true
         {:error, :parse_error} ->
           # reraise ParseError raised in genserver
           raise AssertValue.Parser.ParseError
