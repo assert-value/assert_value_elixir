@@ -18,6 +18,8 @@ defmodule AssertValue.Server do
       env_settings == "n" ->
         "N"
       env_settings == "reformat" ->
+        # Store this recurring_answer as atom to make it impossible
+        # for user to enter it on asking about diff
         :reformat
       env_settings == "ask" ->
         nil
