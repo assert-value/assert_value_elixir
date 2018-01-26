@@ -112,10 +112,11 @@ defmodule AssertValue do
   end
   def check_serializable(_), do: :ok
 
-  def check_string_and_file_read(arg, _expected_type = :file) when is_binary(arg), do: :ok
-  def check_string_and_file_read(arg, _expected_type = :file) do
+  def check_string_and_file_read(actual_value, _expected_type = :file)
+    when is_binary(actual_value), do: :ok
+  def check_string_and_file_read(actual_value, _expected_type = :file) do
     raise AssertValue.ArgumentError,
-      message: "Unable to compare ##{get_type(arg)} with File.read!\n" <>
+      message: "Unable to compare ##{get_type(actual_value)} with File.read!\n" <>
         "You might want to use inspect/1 for that"
   end
   def check_string_and_file_read(_, _), do: :ok
