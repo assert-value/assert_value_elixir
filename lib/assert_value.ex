@@ -32,7 +32,7 @@ defmodule AssertValue do
         end
       check_serializable(actual_value)
       check_string_and_file_read(actual_value, expected_type)
-      # We need to check for regenerate_expected? first to disable
+      # We need to check for reformat_expected? first to disable
       # "this check/guard will always yield the same result" warnings
       if AssertValue.Server.reformat_expected? ||
           (actual_value != expected_value) do
