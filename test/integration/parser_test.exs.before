@@ -334,6 +334,26 @@ defmodule ParserTest do
 
   # Corner cases
 
+  test "spaces around equation" do
+    # prompt: y
+    assert_value "foo"== "bar"
+
+    # prompt: y
+    assert_value "foo" =="bar"
+
+    # prompt: y
+    assert_value "foo"=="bar"
+
+    # prompt: y
+    assert_value "foo"   == "bar"
+
+    # prompt: y
+    assert_value "foo" ==   "bar"
+
+    # prompt: y
+    assert_value "foo"   ==   "bar"
+  end
+
   test "string escaping" do
     # prompt: y
     assert_value "foo\\nbar\" \" \t \r %{}" == "foo"

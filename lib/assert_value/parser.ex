@@ -51,7 +51,7 @@ defmodule AssertValue.Parser do
         if expected_ast == :_not_present_ do
           {prefix <> " == ", "", suffix}
         else
-          [_, operator, _, rest] = Regex.run(~r/((\)|\s)+==\s*)(.*)/s, rest)
+          [_, operator, _, rest] = Regex.run(~r/((\)|\s)*==\s*)(.*)/s, rest)
           {expected, rest} = find_ast_in_string(rest, expected_ast)
           {prefix <> operator, expected, rest <> suffix}
         end

@@ -544,6 +544,42 @@ parser_test.exs:##:"test update file" assert_value "aaa\nbbb\nccc\n" == File.rea
  ccc
 
 Accept new value? [y,n,?] .
+parser_test.exs:##:"test spaces around equation" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test spaces around equation" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test spaces around equation" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test spaces around equation" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test spaces around equation" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test spaces around equation" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] .
 parser_test.exs:##:"test string escaping" assert_value "foo\\nbar\" \" \t \r %{}" == "foo" failed
 
 -foo
@@ -766,4 +802,4 @@ parser_test.exs:##:"test repeatable expressions" assert_value 5 == 2 + 2 - 2 + 2
 +5
 
 Accept new value? [y,n,?] .
-15 tests, 0 failures
+16 tests, 0 failures
