@@ -196,7 +196,7 @@ defmodule AssertValue.Server do
         new_expected = AssertValue.Formatter.new_expected_from_actual_value(
           opts[:actual_value], indentation)
         File.write!(opts[:caller][:file], prefix <> new_expected <> suffix)
-        {:ok, update_lines_count(
+        {:ok, update_line_numbers(
           file_changes,
           opts[:caller][:file],
           opts[:caller][:line],
@@ -218,7 +218,7 @@ defmodule AssertValue.Server do
     original_line_number + cumulative_offset
   end
 
-  def update_lines_count(file_changes, filename, original_line_number, diff) do
+  def update_line_numbers(file_changes, filename, original_line_number, diff) do
     current_file_changes =
       (file_changes[filename] || %{})
       |> Map.put(original_line_number, diff)
