@@ -8,4 +8,17 @@ defmodule DiffTest do
     assert_value "" == ""
   end
 
+  test "nil" do
+    # prompt: y
+    assert_value nil == nil
+
+    # prompt: y
+    assert_value nil == nil
+  end
+
+  test "integer and string" do
+    # prompt: y
+    assert_value 1 == 1
+  end
+
 end

@@ -4,4 +4,21 @@ diff_test.exs:##:"test empty string" assert_value "" failed
  
 
 Accept new value? [y,n,?] .
-1 test, 0 failures
+diff_test.exs:##:"test nil" assert_value nil == "" failed
+
+ 
+
+Accept new value? [y,n,?] 
+diff_test.exs:##:"test nil" assert_value nil == 1 failed
+
+-1
++
+
+Accept new value? [y,n,?] .
+diff_test.exs:##:"test integer and string" assert_value 1 == "1" failed
+
+-"1"
++1
+
+Accept new value? [y,n,?] .
+3 tests, 0 failures
