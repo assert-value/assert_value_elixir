@@ -34,7 +34,7 @@ defmodule AssertValue.Parser do
     # Erlang error messages so it is better to pass theese exceptions outside
     # genserver and reraise them to show readable Elixir error messages
     try do
-      {assertion, suffix} = find_ast_in_string(rest, assertion_ast)
+      {assertion, suffix} = find_ast_in_code(rest, assertion_ast)
       {assertion, left_parens, right_parens} = trim_parens(assertion)
       prefix = prefix <> left_parens
       suffix = right_parens <> suffix
@@ -43,7 +43,7 @@ defmodule AssertValue.Parser do
         if actual_ast == :_not_present_ do
           {prefix <> assertion, "", suffix}
         else
-          {actual, rest} = find_ast_in_string(assertion, actual_ast)
+          {actual, rest} = find_ast_in_code(assertion, actual_ast)
           {prefix <> actual, rest, suffix}
         end
 
@@ -52,7 +52,7 @@ defmodule AssertValue.Parser do
           {prefix <> " == ", "", suffix}
         else
           [_, operator, _, rest] = Regex.run(~r/((\)|\s)*==\s*)(.*)/s, rest)
-          {expected, rest} = find_ast_in_string(rest, expected_ast)
+          {expected, rest} = find_ast_in_code(rest, expected_ast)
           {prefix <> operator, expected, rest <> suffix}
         end
 
@@ -65,29 +65,29 @@ defmodule AssertValue.Parser do
 
   # Private
 
-  # Finds the part of the source with the same AST as second parameter
+  # Finds the part of the code with the same AST as second parameter
   # Return pair {accumulator, rest}
   #
-  #   iex(1) find_ast_in_string("(1 + 2) == 3", {:+, [], [1, 2]})
+  #   iex(1) find_ast_in_code("(1 + 2) == 3", {:+, [], [1, 2]})
   #   #=> {"(1 + 2)", "== 3"}
   #
-  # Recursively take one character from source, append it to accumulator, and
-  # compare accumulator with code.
+  # Recursively take one character from code, append it to accumulator, and
+  # compare accumulator's AST with reference
   #
   # Corner Case:
   #
   # * floats with trailing zeros
   #   AST for "42.00000" is 42.0
-  #   so we need to check that the rest of the source does not contain
+  #   so we need to check that the rest of the code does not contain
   #   leading zeros. They all belong to parsed value
   #
-  defp find_ast_in_string(source, ast, accumulator \\ "") do
-    if string_match_ast?(accumulator, ast) && (String.at(source, 0) != "0") do
-      {accumulator, source}
+  defp find_ast_in_code(code, ast, accumulator \\ "") do
+    if code_match_ast?(accumulator, ast) && (String.at(code, 0) != "0") do
+      {accumulator, code}
     else
-      case String.next_grapheme(source) do
+      case String.next_grapheme(code) do
         {first_grapheme, rest} ->
-          find_ast_in_string(rest, ast, accumulator <> first_grapheme)
+          find_ast_in_code(rest, ast, accumulator <> first_grapheme)
         nil ->
           # No more characters left and still not match?
           raise AssertValue.Parser.ParseError
@@ -95,8 +95,8 @@ defmodule AssertValue.Parser do
     end
   end
 
-  # Compare string with ast
-  # Returns true if str's AST match the second parameter
+  # Compare code string with ast
+  # Returns true if code's AST match the second parameter
   # There is a corner case for empty string in Elixir < 1.6.0
   #
   #   # Elixir 1.5.3
@@ -113,15 +113,15 @@ defmodule AssertValue.Parser do
   #
   # We are sure that when AST is nil it is really nil because we have
   # special :_not_present_ token for empty ASTs
-  defp string_match_ast?(str, ast) do
-    case Code.string_to_quoted(str) do
+  defp code_match_ast?(code, ast) do
+    case Code.string_to_quoted(code) do
       {:ok, quoted} ->
         quoted = if is_binary(quoted) do
           String.replace(quoted, "<NOEOL>\\n", "")
         else
           quoted
         end
-        ast_match?(quoted, ast) and !(str == "" and ast == nil)
+        ast_match?(quoted, ast) and !(code == "" and ast == nil)
       _ ->
         false
     end
@@ -139,24 +139,24 @@ defmodule AssertValue.Parser do
     Macro.prewalk(ast, &Macro.update_meta(&1, cleaner))
   end
 
-  # Try to trim parens and whitespaces around the string recursively
-  # while string's AST remains the same
+  # Try to trim parens and whitespaces around the code recursively
+  # while code's AST remains the same
   #
-  # Return {trimmed_string, left_parens_acc, right_parens_acc)
+  # Return {trimmed_code, left_parens_acc, right_parens_acc)
   #
   #   trim_parens("  ( (foo  ) ) ")
   #   => {"foo", "  ( (", "  ) ) "}
   #
-  defp trim_parens(str, left_parens_acc \\ "", right_parens_acc \\ "") do
+  defp trim_parens(code, left_parens_acc \\ "", right_parens_acc \\ "") do
     with [_, lp, trimmed, rp] <-
-        Regex.run(~r/^(\s*\(\s*)(.*)(\s*\)\s*)$/s, str),
-      {:ok, original_str_ast} <- Code.string_to_quoted(str),
-      {:ok, trimmed_str_ast} <- Code.string_to_quoted(trimmed),
-      true <- ast_match?(trimmed_str_ast, original_str_ast) do
+        Regex.run(~r/^(\s*\(\s*)(.*)(\s*\)\s*)$/s, code),
+      {:ok, original_code_ast} <- Code.string_to_quoted(code),
+      {:ok, trimmed_code_ast} <- Code.string_to_quoted(trimmed),
+      true <- ast_match?(trimmed_code_ast, original_code_ast) do
         trim_parens(trimmed, left_parens_acc <> lp, rp <> right_parens_acc)
     else
       _ ->
-        {str, left_parens_acc, right_parens_acc}
+        {code, left_parens_acc, right_parens_acc}
     end
   end
 
