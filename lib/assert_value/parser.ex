@@ -95,24 +95,9 @@ defmodule AssertValue.Parser do
     end
   end
 
-  # Compare code string with ast
   # Returns true if code's AST match the second parameter
-  # There is a corner case for empty string in Elixir < 1.6.0
-  #
-  #   # Elixir 1.5.3
-  #   iex(1)> Code.string_to_quoted(nil)
-  #   {:ok, nil}
-  #   iex(1)> Code.string_to_quoted("")
-  #   {:ok, nil}
-  #
-  #   # Elixir 1.6.0-rc.0
-  #   iex(1)> Code.string_to_quoted(nil)
-  #   {:ok, nil}
-  #   iex(1)> Code.string_to_quoted("")
-  #   {:ok, {:__block__, [], []}}
-  #
-  # We are sure that when AST is nil it is really nil because we have
-  # special :_not_present_ token for empty ASTs
+  # Empty code does not match anything
+  defp code_match_ast?("", _ast), do: false
   defp code_match_ast?(code, ast) do
     case Code.string_to_quoted(code) do
       {:ok, quoted} ->
@@ -121,7 +106,7 @@ defmodule AssertValue.Parser do
         else
           quoted
         end
-        ast_match?(quoted, ast) and !(code == "" and ast == nil)
+        ast_match?(quoted, ast)
       _ ->
         false
     end
