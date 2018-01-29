@@ -64,8 +64,6 @@ defmodule AssertValue.Server do
     {:reply, state.recurring_answer == :reformat, state}
   end
 
-  # This a synchronous call
-  # No other AssertValue diffs will be shown until user give answer
   def handle_call({:ask_user_about_diff, opts}, _from, state) do
     # Hack: We try to wait until previous test asking about diff (and fail) will
     # output test results. Otherwise user will get previous failed test result
