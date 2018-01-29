@@ -200,14 +200,15 @@ defmodule AssertValue.Server do
           file_changes,
           opts[:caller][:file],
           opts[:caller][:line],
-          length(to_lines(new_expected)) - length(to_lines(old_expected))
+          old_expected,
+          new_expected
         )}
       {:error, :parse_error} ->
         {:error, :parse_error}
     end
   end
 
-  # File tracking
+  # Helpers to keep changes we make to files on updating expected values
 
   def current_line_number(file_changes, filename, original_line_number) do
     current_file_changes = file_changes[filename] || %{}
@@ -218,10 +219,11 @@ defmodule AssertValue.Server do
     original_line_number + cumulative_offset
   end
 
-  def update_line_numbers(file_changes, filename, original_line_number, diff) do
+  def update_line_numbers(file_changes, filename, original_line_number, old_expected, new_expected) do
+    offset = length(to_lines(new_expected)) - length(to_lines(old_expected))
     current_file_changes =
       (file_changes[filename] || %{})
-      |> Map.put(original_line_number, diff)
+      |> Map.put(original_line_number, offset)
     Map.put(file_changes, filename, current_file_changes)
   end
 
