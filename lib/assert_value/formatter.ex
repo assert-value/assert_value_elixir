@@ -36,10 +36,11 @@ defmodule AssertValue.Formatter do
   end
 
   # Inspect protocol for String has the best implementation
-  # of string escaping. Use it, but remove leading and trailing ?"
+  # of string escaping. Use it, but remove surrounding quotes
   # https://github.com/elixir-lang/elixir/blob/master/lib/elixir/lib/inspect.ex
   defp escape_heredoc_line(s) do
-    String.slice(inspect(s), 1..-2)
+    inspect(s)
+    |> String.replace(~r/(\A"|"\Z)/, "")
   end
 
   # to work as a heredoc a string must end with a newline.  For
