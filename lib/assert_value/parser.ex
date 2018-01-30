@@ -78,8 +78,11 @@ defmodule AssertValue.Parser do
   #
   # * floats with trailing zeros
   #   AST for "42.00000" is 42.0
-  #   so we need to check that the rest of the code does not contain
-  #   leading zeros. They all belong to parsed value
+  #   when we parse "42.00000" from code we will get mathing ast for "42.0"
+  #   and there wil be "0000" left in the code.
+  #   Since valid Elixir code cannot start with "0" we should check the
+  #   rest of the code and if it starts with "0" then we did not finish
+  #   and should continue parsing
   #
   defp find_ast_in_code(code, ast, accumulator \\ "") do
     if code_match_ast?(accumulator, ast) && (String.at(code, 0) != "0") do
