@@ -108,7 +108,7 @@ defmodule AssertValue do
         when is_function(arg) do
     raise AssertValue.ArgumentError,
       message: """
-      Unable to serialize ##{get_value_type(arg)}
+      Unable to serialize #{get_value_type(arg)}
       You might want to use inspect/1 to use it in assert_value
       """
   end
@@ -119,8 +119,14 @@ defmodule AssertValue do
   def check_string_and_file_read(actual_value, _expected_type = :file) do
     raise AssertValue.ArgumentError,
       message: """
-      Unable to compare ##{get_value_type(actual_value)} with File.read!
-      You might want to use inspect/1 for that
+      Unable to compare #{get_value_type(actual_value)} with File.read!
+
+      File.read! always return binary result and requires left argument
+      in assert_value to be binary. You might want to use to_string/1 or
+      inspect/1 to compare other types with File.read!
+
+         assert_value to_string(:foo) == File.read!("foo.log")
+         assert_value inspect(:foo) == File.read!("foo.log")
       """
   end
   def check_string_and_file_read(_, _), do: :ok
