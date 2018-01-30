@@ -107,8 +107,10 @@ defmodule AssertValue do
         when is_reference(arg)
         when is_function(arg) do
     raise AssertValue.ArgumentError,
-      message: "Unable to serialize ##{get_type(arg)}\n" <>
-        "You might want to use inspect/1 to use it in assert_value"
+      message: """
+      Unable to serialize ##{get_value_type(arg)}
+      You might want to use inspect/1 to use it in assert_value
+      """
   end
   def check_serializable(_), do: :ok
 
@@ -116,12 +118,14 @@ defmodule AssertValue do
     when is_binary(actual_value), do: :ok
   def check_string_and_file_read(actual_value, _expected_type = :file) do
     raise AssertValue.ArgumentError,
-      message: "Unable to compare ##{get_type(actual_value)} with File.read!\n" <>
-        "You might want to use inspect/1 for that"
+      message: """
+      Unable to compare ##{get_value_type(actual_value)} with File.read!
+      You might want to use inspect/1 for that
+      """
   end
   def check_string_and_file_read(_, _), do: :ok
 
-  defp get_type(arg) do
+  defp get_value_type(arg) do
     [h | _t] = IEx.Info.info(arg)
     case h do
       # Elixir < 1.6
