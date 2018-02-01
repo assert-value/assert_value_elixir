@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.8.0 - #TODO
+## v0.8.0 - February 1, 2018
 
  * Upgrade Instructions
    * Run `mix test`. You may get diffs because assert_value no longer converts

@@ -49,7 +49,7 @@ Add this to mix.exs:
 ```elixir
 defp deps do
   [
-    {:assert_value, "~> 0.7", only: :test}
+    {:assert_value, "~> 0.8", only: :test}
   ]
 end
 ```
