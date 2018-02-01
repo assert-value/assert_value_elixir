@@ -4,13 +4,13 @@ defmodule NonInteractiveAcceptTest do
   import AssertValue
 
   test "update" do
-    assert_value "foo" == """
+    assert_value "foo\nbar" == """
     bar<NOEOL>
     """
   end
 
   test "update again" do
-    assert_value "foo" == """
+    assert_value "foo\nbaz" == """
     baz<NOEOL>
     """
   end

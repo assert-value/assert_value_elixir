@@ -1,5 +1,5 @@
 
-decline_all_test.exs:9:"test all fail" assert_value "foo" == "bar<NOEOL>\n" failed
+decline_all_test.exs:##:"test all fail" assert_value "foo" == "bar<NOEOL>\n" failed
 
 -bar
 +foo
@@ -7,24 +7,24 @@ decline_all_test.exs:9:"test all fail" assert_value "foo" == "bar<NOEOL>\n" fail
 Accept new value? [y,n,?] 
 
   1) test all fail (DeclineAllTest)
-     decline_all_test.exs:8
+     decline_all_test.exs:##
      AssertValue assertion failed
      code:  "foo" == "bar<NOEOL>\n"
      left: "foo"
      right: "bar"
      stacktrace:
-       decline_all_test.exs:9: (test)
+       decline_all_test.exs:##: (test)
 
 .
 
   2) test all fail again (DeclineAllTest)
-     decline_all_test.exs:26
+     decline_all_test.exs:##
      AssertValue assertion failed
      code:  "foo" == "bar<NOEOL>\n"
      left: "foo"
      right: "bar"
      stacktrace:
-       decline_all_test.exs:27: (test)
+       decline_all_test.exs:##: (test)
 
 
 3 tests, 2 failures

@@ -1,68 +1,66 @@
 defmodule AssertValue do
 
-  defmodule ArgumentError do
-    defexception [message: ~S{Expected should be in the form of string heredoc (""") or File.read!}]
-  end
-
   # Assertions with right argument like "assert_value actual == expected"
   defmacro assert_value({:==, _, [left, right]} = assertion) do
     {expected_type, expected_file} = case right do
-      # File.read!("/path/to/file")
       {{:., _, [{:__aliases__, _, [:File]}, :read!]}, _, [filename]} ->
         {:file, filename}
-      # string, hopefully heredoc
-      str when is_binary(str) -> {:source, nil}
-      # any other expression, we don't support.  But we want to wait
-      # till runtime to report it, otherwise it's confusing.  TODO: or
-      # maybe not confusing, may want to just put here:
-      # _ -> raise AssertValue.ArgumentError
-      _ -> {:unsupported_value, nil}
+      str when is_binary(str) ->
+        {:string, nil}
+      _ ->
+        {:other, nil}
     end
-
     quote do
-      assertion_code = unquote(Macro.to_string(assertion))
+      assertion_ast = unquote(Macro.escape(assertion))
+      actual_ast = unquote(Macro.escape(left))
       actual_value = unquote(left)
       expected_type = unquote(expected_type)
       expected_file = unquote(expected_file)
+      expected_ast = unquote(Macro.escape(right))
       expected_value =
         case expected_type do
-          :source -> unquote(right) |>
+          :string ->
+              unquote(right) |>
               String.replace(~r/<NOEOL>\n\Z/, "", global: false)
           # TODO: should deal with a no-bang File.read instead, may
           # want to deal with different errors differently
           :file -> File.exists?(expected_file)
             && File.read!(expected_file)
             || ""
-          :unsupported_value -> raise AssertValue.ArgumentError
+          :other ->
+              unquote(right)
         end
-
-      assertion_result = (actual_value == expected_value)
-
-      if assertion_result do
-        assertion_result
-      else
+      check_serializable(actual_value)
+      check_string_and_file_read(actual_value, expected_type)
+      # We need to check for reformat_expected? first to disable
+      # "this check/guard will always yield the same result" warnings
+      if AssertValue.Server.reformat_expected? ||
+          (actual_value != expected_value) do
         decision = AssertValue.Server.ask_user_about_diff(
           caller: [
             file: unquote(__CALLER__.file),
             line: unquote(__CALLER__.line),
             function: unquote(__CALLER__.function),
           ],
-          assertion_code: assertion_code,
+          assertion_ast: assertion_ast,
+          actual_ast: actual_ast,
           actual_value: actual_value,
           expected_type: expected_type,
-          expected_action: :update,
+          expected_ast: expected_ast,
           expected_value: expected_value,
           expected_file: expected_file)
-
         case decision do
           {:ok, value} ->
-            value
-          {:error, :unsupported_value} ->
-            raise AssertValue.ArgumentError
-          {:error, :ex_unit_assertion_error, error} ->
-            raise ExUnit.AssertionError, error
+            true
+          {:error, :ex_unit_assertion_error, error_attrs} ->
+            raise ExUnit.AssertionError, error_attrs
+          {:error, :parse_error} ->
+            # raise ParseError in test instead of genserver
+            # to show readable error message and stacktrace
+            raise AssertValue.Parser.ParseError
         end
-
+      else
+        true
       end
     end
   end
@@ -70,26 +68,79 @@ defmodule AssertValue do
   # Assertions without right argument like (assert_value "foo")
   defmacro assert_value(assertion) do
     quote do
-      assertion_code = unquote(Macro.to_string(assertion))
-      actual_value = unquote(assertion) # in this case
+      assertion_ast = unquote(Macro.escape(assertion))
+      actual_value = unquote(assertion)
+      check_serializable(actual_value)
       decision = AssertValue.Server.ask_user_about_diff(
         caller: [
           file: unquote(__CALLER__.file),
           line: unquote(__CALLER__.line),
           function: unquote(__CALLER__.function),
         ],
+        assertion_ast: assertion_ast,
+        # :_not_present_ is to show the difference between
+        # nil and actually not present actual/expected
+        actual_ast: :_not_present_,
         actual_value: actual_value,
-        assertion_code: assertion_code,
         expected_type: :source,
-        expected_action: :create,
-        expected_value: nil)
-
+        expected_ast: :_not_present_)
       case decision do
         {:ok, value} ->
-          value
-        {:error, :ex_unit_assertion_error,  error} ->
-          raise ExUnit.AssertionError, error
+          true
+        {:error, :ex_unit_assertion_error,  error_attrs} ->
+          raise ExUnit.AssertionError, error_attrs
+        {:error, :parse_error} ->
+          # raise ParseError in test instead of genserver
+          # to show readable error message and stacktrace
+          raise AssertValue.Parser.ParseError
       end
+    end
+  end
+
+  defmodule ArgumentError do
+    defexception [:message]
+  end
+
+  def check_serializable(arg)
+        when is_pid(arg)
+        when is_port(arg)
+        when is_reference(arg)
+        when is_function(arg) do
+    raise AssertValue.ArgumentError,
+      message: """
+      Unable to serialize #{get_value_type(arg)}
+      You might want to use inspect/1 to use it in assert_value
+      """
+  end
+  def check_serializable(_), do: :ok
+
+  def check_string_and_file_read(actual_value, _expected_type = :file)
+    when is_binary(actual_value), do: :ok
+  def check_string_and_file_read(actual_value, _expected_type = :file) do
+    raise AssertValue.ArgumentError,
+      message: """
+      Unable to compare #{get_value_type(actual_value)} with File.read!
+
+      File.read! always return binary result and requires left argument
+      in assert_value to be binary. You might want to use to_string/1 or
+      inspect/1 to compare other types with File.read!
+
+         assert_value to_string(:foo) == File.read!("foo.log")
+         assert_value inspect(:foo) == File.read!("foo.log")
+      """
+  end
+  def check_string_and_file_read(_, _), do: :ok
+
+  defp get_value_type(arg) do
+    [h | _t] = IEx.Info.info(arg)
+    case h do
+      # Elixir < 1.6
+      {:"Data type", type} ->
+        type
+      # Elixir 1.6
+      {"Data type", type} ->
+        type
+      # else CaseClauseError
     end
   end
 

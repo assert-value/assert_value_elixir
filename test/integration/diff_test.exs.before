@@ -1,0 +1,24 @@
+defmodule DiffTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "empty string" do
+    # prompt: y
+    assert_value ""
+  end
+
+  test "nil" do
+    # prompt: y
+    assert_value nil == ""
+
+    # prompt: y
+    assert_value nil == 1
+  end
+
+  test "integer and string" do
+    # prompt: y
+    assert_value 1 == "1"
+  end
+
+end

@@ -5,3 +5,7 @@ mix.lock
 erl_crash.dump
 *.ez
 *.swp
+.tool-versions
+
+# File used in development
+/test/dev_test.exs

@@ -1,0 +1,2 @@
+# Show all tests output diffs
+*.exs.output diff

@@ -1,0 +1,71 @@
+defmodule MiscTest do
+  use ExUnit.Case
+
+  import AssertValue
+
+  test "simple pass" do
+    assert_value 1 == 1
+  end
+
+  test "reprompt context" do
+    actual = String.duplicate("line\n", 38)
+    # prompt: y
+    assert_value actual == """
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    line
+    """
+  end
+
+  # tests with prompt answer n go below here
+
+  test "simple fail" do
+    actual = """
+    aaa
+    bbb
+    ccc
+    """
+    # prompt: n
+    assert_value actual == """
+    aaa
+    bBb
+    ccc
+    """
+  end
+
+end

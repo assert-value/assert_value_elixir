@@ -13,18 +13,16 @@
 
 ## Screencast
 
-![Screencast](https://github.com/assert-value/assert_value_screencasts/raw/master/elixir/screencast.gif)
+![Screencast](https://github.com/assert-value/assert_value_screencasts/raw/master/elixir-0.8.0/screencast.gif)
 
 ## Usage
 
 ```elixir
-assert_value "foo\n"
+assert_value :foo
 
-assert_value "foo\n" == """
-foo
-"""
+assert_value 2 + 2 == 4
 
-assert_value "foo\n" == File.read!("test/log/foo.log")
+assert_value "foo" == File.read!("test/log/foo.log")
 ```
 
 You can use `assert_value` instead of ExUnit's `assert`. When writing a new test
@@ -437,29 +435,25 @@ assert_value "foo"
 When you run it the first time `assert_value` will generate it, show it to us,
 and will automatically update test source if we accept it.
 
-assert_value requires left argument to implement String.Chars protocol.
-String, Atom, BitString, Charlist, Integer, Float. Otherwise It will raise
-AssertValue.ArgumentError.
-
 ### Expected Value in the Source Code
 
 ```elixir
-assert_value "foo" == """
-foo<NOEOL>
-"""
+assert_value 2 + 2 == 4
 ```
-Note, `assert_value` needs expected to be in the form of string heredoc starting
-and ending with """. Otherwise it will raise AssertValue.ArgumentError.
-Heredocs in Elixir always end with a new line character. When actual value does not
-end with a new line character this is indicated with ```<NOEOL>``` string.
+`assert_value` will update expected values for you in the source code.
+`assert_value` supports all Elixir types except not serializable (Function,
+PID, Port, Reference).
 
-Usually you will let `assert_value` to create and update expected values for
-you in the source code, so you don't have to worry about this.
+When expected is a multi-line string `assert_value` will format it as a heredoc
+for better code diff readability. Heredocs in Elixir always end with a newline
+character. When expected value does not end with a newline `assert_value` will
+append a special ```<NOEOL>``` string to indicate that last newline should be
+ignored.
 
 ### Expected Value in a File
 
-Sometimes test string is too large to be inlined into the test source.
-Put it into the file instead.
+Sometimes test values are too large to be inlined into the test source.
+Put them into the file instead.
 
 ```elixir
 assert_value "foo" == File.read!("test/log/reference.txt")
@@ -507,10 +501,24 @@ ASSERT_VALUE_ACCEPT_DIFFS=n mix test
 
 # Accept all diffs. Useful to update all expected values after a refactoring.
 ASSERT_VALUE_ACCEPT_DIFFS=y mix test
+
+# Automatically reformat all expected values. Useful to reformat all tests
+# when a new assert_value version improves formatter.
+ASSERT_VALUE_ACCEPT_DIFFS=reformat mix test
 ```
 
 ## Notes and Known Issues
 
+  * assert_value supports all Elixir types except not serializable (Function,
+    PID, Port, Reference). To compare values of theese types use ```inspect```
+    and [Serialization](#serialization) techniques.
+  * assert_value's formatter is primitive and does not understand operator
+    precedence. When creating a new expected value from scratch it simply
+    appends "== <expected_value>" to the expression. This usually works but can
+    produce incorrect source code in unusual cases. For example
+    `assert_value foo = 1` will become `assert_value foo = 1 == 1` instead of
+    `assert_value (foo = 1) == 1`.  To workaround this wrap actual expression
+    in parentheses.  In practice you are unlikely to run into this problem.
   * assert_value works only with the default ExUnit formatter (ExUnit.CLIFormatter).
     Chances are that it is what you are using.
 

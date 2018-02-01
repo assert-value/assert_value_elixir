@@ -95,29 +95,45 @@ defmodule AssertValue.Test.IntegrationTest do
       |> String.replace(~r{\/tmp\/assert-value-\d+-\d+-\w+/}, "")
       |> String.replace(~r/\nFinished in.*\n/m, "")
       |> String.replace(~r/\nRandomized with seed.*\n/m, "")
+      # mask line numbers
+      |> String.replace(~r/(_test.exs:)\d+/, "\\1##")
       # canonicalize ExUnit error formatting:
       # - remove fancy spacing
       |> String.replace(~r/\s{5}code:\s+actual/m,   "     code: actual")
       |> String.replace(~r/\s{5}(left):\s+"/m,  "     left: \"")
       |> String.replace(~r/\s{5}(right):\s+"/m, "     right: \"")
-      # canonicalize messages about raised AssertValue.ArgumentError exceptions
+      # canonicalize messages about raised exceptions
       # ExUnit in Elixir 1.5 has "code:" line in message:
       #
-      #   ** (AssertValue.ArgumentError) ...
-      #   code: assert_value "foo" = "bar"
+      #   ** (RuntimeError) Error!
+      #   code: raise "Error!"
       #   stacktrace:
       #     integration_test.exs:82: (test)
       #
       # ExUnit in Elixir 1.4 does not
       #
-      #   ** (AssertValue.ArgumentError) ...
+      #   ** (RuntimeError) Error!
       #   stacktrace:
       #     integration_test.exs:82: (test)
       #
       |> String.replace(
-        ~r/(\(AssertValue.ArgumentError\).*?)\n\s{5}code:.*?\n/, "\\1\n")
+        ~r/(\*\* \(.*?Error\).*?)\n\s{5}code:.*?\n/,
+        "\\1\n"
+      )
 
     {output, exit_code}
+  end
+
+  def prepare_expected_files(filenames) do
+    Enum.map(filenames, fn(filename) ->
+      before_path = Path.expand(filename <> ".before", @integration_test_dir)
+      after_path = Path.expand(filename <> ".after", @integration_test_dir)
+      runnable_path = Path.expand(filename, @runnable_test_dir)
+      if File.exists?(before_path) do
+        File.cp!(before_path, runnable_path)
+      end
+      [runnable_path, after_path]
+    end)
   end
 
   # Integration tests flow:
@@ -129,16 +145,28 @@ defmodule AssertValue.Test.IntegrationTest do
 
   # integration_test "accept all (Y)", "accept_all_test.exs", exit_code: 1
   defmacro integration_test(test_name, test_filename, opts \\ []) do
+    expected_files = Keyword.get(opts, :expected_files, [])
+    expected_exit_code = Keyword.get(opts, :expected_exit_code, 0)
     quote do
       test unquote(test_name) do
         {runnable_path, after_path, output_path} =
           prepare_runnable_test(unquote(test_filename))
 
-        {output, exit_code} = run_tests(runnable_path, unquote(opts[:env]))
-        assert exit_code == unquote(opts[:expected_exit_code] || 0)
+        expected_files = prepare_expected_files(unquote(expected_files))
 
-        assert_value File.read!(runnable_path) == File.read!(after_path)
+        {output, exit_code} = run_tests(runnable_path, unquote(opts[:env]))
+        assert exit_code == unquote(expected_exit_code)
+
+        test_source_result = File.read!(runnable_path)
+        # Make sure resulting test file is valid Elixir code
+        # Will raise SyntaxError or TokenMissingError otherwise
+        Code.string_to_quoted!(test_source_result)
+        assert_value test_source_result == File.read!(after_path)
         assert_value output == File.read!(output_path)
+
+        Enum.each(expected_files, fn([runnable_path, after_path]) ->
+          assert_value(File.read!(runnable_path) == File.read!(after_path))
+        end)
       end
     end
   end

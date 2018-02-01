@@ -31,14 +31,15 @@
         # Turn off function complexity check. It always fail on
         # assert_value macro because it is complex.
         {Credo.Check.Refactor.CyclomaticComplexity, false},
-        # Increase max function arity. We have function with 7 params.
-        {Credo.Check.Refactor.FunctionArity, max_arity: 7},
+        {Credo.Check.Refactor.FunctionArity, false},
         # Long lines are not ok, Exit with status code
         {Credo.Check.Readability.MaxLineLength, priority: :high,
           max_length: 80, exit_status: 2},
         # Do not suggest to write large numbers with underscore
         # We have GitHub data maps in tests with big ids and bytes sizes
-        {Credo.Check.Readability.LargeNumbers, false}
+        {Credo.Check.Readability.LargeNumbers, false},
+        # We have a lot of assert_value "foo" == "foo" in tests
+        {Credo.Check.Warning.OperationOnSameValues, false}
       ]
     }
   ]

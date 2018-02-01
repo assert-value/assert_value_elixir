@@ -1,0 +1,805 @@
+
+parser_test.exs:##:"test actual literals" assert_value nil failed
+
+-
++nil
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value true failed
+
+-
++true
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value false failed
+
+-
++false
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value :foo failed
+
+-
++:foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value "forty-two" failed
+
+-
++forty-two
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value "forty-two\nсорок два\n四十二\nquarante deu... failed
+
+-
++forty-two
++сорок два
++四十二
++quarante deux
++cuarenta y dos
++zweiundvierzig
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value ~S"forty-two" failed
+
+-
++forty-two
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value ~s"forty-two" failed
+
+-
++forty-two
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value <<65, 66, 67>> failed
+
+-
++ABC
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value <<256::utf8>> failed
+
+-
++Ā
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value 'forty-two' failed
+
+-
++'forty-two'
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value [102, 111, 114, 116, 121, 45, 116, 119, ... failed
+
+-
++[102, 111, 114, 116, 121, 45, 116, 119, 111, 10, 1089, 1086, 1088, 1086, 1082, 32, 1076, 1074, 1072, 10]
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value ~C"forty-two" failed
+
+-
++'forty-two'
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value ~c"forty-two" failed
+
+-
++'forty-two'
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value ~D"2018-01-01" failed
+
+-
++~D[2018-01-01]
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value 0.42 failed
+
+-
++0.42
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value -0.42 failed
+
+-
++-0.42
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value 42 failed
+
+-
++42
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value [4, 2, true, nil, "42"] failed
+
+-
++[4, 2, true, nil, "42"]
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value %{a: "forty", b: 2, c: nil} failed
+
+-
++%{a: "forty", b: 2, c: nil}
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value ~N"2018-01-01 21:01:50" failed
+
+-
++~N[2018-01-01 21:01:50]
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value ~r"foo" failed
+
+-
++~r/foo/
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value ~T"23:00:07" failed
+
+-
++~T[23:00:07]
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value {:ok, 42} failed
+
+-
++{:ok, 42}
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value %User{} failed
+
+-
++%ParserTest.User{age: 27, name: "John"}
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value %User{age: 43} failed
+
+-
++%ParserTest.User{age: 43, name: "John"}
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value %{__struct__: ParserTest.User, age: 21, ... failed
+
+-
++%ParserTest.User{age: 21, name: "Peter"}
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value ~W"foo bar" failed
+
+-
++["foo", "bar"]
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual literals" assert_value [%{a: 42, b: {:left, :light}, c: [%User{... failed
+
+-
++[%{a: 42, b: {:left, :light}, c: [%ParserTest.User{age: 27, name: "John"}, 1]}, nil]
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test actual and expected literals" assert_value nil == false failed
+
+-false
++
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value true == false failed
+
+-false
++true
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value :foo == :bar failed
+
+-:bar
++:foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value "forty-two" == "forty-three" failed
+
+-forty-three
++forty-two
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value "forty-two\nсорок два\n四十二\nquarante deu... failed
+
+-forty-three
++forty-two
+ сорок два
++四十二
+ quarante deux
+ cuarenta y dos
++zweiundvierzig
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value ~S"forty-two" == ~S"forty-three" failed
+
+-forty-three
++forty-two
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value ~s"forty-two" == ~s"forty-three" failed
+
+-forty-three
++forty-two
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value <<65, 66, 67>> == <<65, 66, 68>> failed
+
+-ABD
++ABC
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value <<256::utf8>> == <<267::utf8>> failed
+
+-ċ
++Ā
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value 'forty-two' == 'forty-three' failed
+
+-'forty-three'
++'forty-two'
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value [102, 111, 114, 116, 121, 45, 116, 119, ... failed
+
+-[102, 111, 114, 116, 121, 45, 116, 104, 114, 101, 101, 10, 1089, 1086, 1088, 1086, 1082, 32, 1090, 1088, 1080, 10]
++[102, 111, 114, 116, 121, 45, 116, 119, 111, 10, 1089, 1086, 1088, 1086, 1082, 32, 1076, 1074, 1072, 10]
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value ~C"forty-two" == ~C"forty-three" failed
+
+-'forty-three'
++'forty-two'
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value ~c"forty-two" == ~c"forty-three" failed
+
+-'forty-three'
++'forty-two'
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value ~D"2018-01-01" == ~D"2018-01-02" failed
+
+-~D[2018-01-02]
++~D[2018-01-01]
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value 0.42 == 0.43 failed
+
+-0.43
++0.42
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value -0.42 == -0.43 failed
+
+--0.43
++-0.42
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value 42 == 43 failed
+
+-43
++42
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value -42 == 42 failed
+
+-42
++-42
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value [4, 2, true, nil, "42"] == [4, 3, true, ... failed
+
+-[4, 3, true, nil, "42"]
++[4, 2, true, nil, "42"]
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value %{a: "forty", b: 2, c: nil} == %{a: "for... failed
+
+-%{a: "forty", b: 2, c: true}
++%{a: "forty", b: 2, c: nil}
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value ~N"2018-01-01 21:01:50" == ~N"2018-01-02... failed
+
+-~N[2018-01-02 21:01:51]
++~N[2018-01-01 21:01:50]
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value ~T"23:00:07" == ~T"23:00:07.001004" failed
+
+-~T[23:00:07.001004]
++~T[23:00:07]
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value {:ok, 42} == {:error, 42} failed
+
+-{:error, 42}
++{:ok, 42}
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value %User{} == %User{age: 42} failed
+
+-%ParserTest.User{age: 42, name: "John"}
++%ParserTest.User{age: 27, name: "John"}
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value %User{age: 42} == %User{age: 43} failed
+
+-%ParserTest.User{age: 43, name: "John"}
++%ParserTest.User{age: 42, name: "John"}
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value %{__struct__: ParserTest.User, age: 21, ... failed
+
+-%ParserTest.User{age: 25, name: "James"}
++%ParserTest.User{age: 21, name: "Peter"}
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value ~W"foo bar" == ~W"foo baz" failed
+
+-["foo", "baz"]
++["foo", "bar"]
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test actual and expected literals" assert_value [%{a: 42, b: {:left, :light}, c: [%User{... failed
+
+-[%{a: 42, b: {:left, :light}, c: [%ParserTest.User{age: 27, name: "John"}, 2]}, nil]
++[%{a: 42, b: {:left, :light}, c: [%ParserTest.User{age: 27, name: "John"}, 1]}, nil]
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test expected literal" assert_value "foo" == nil failed
+
+-
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == true failed
+
+-true
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == false failed
+
+-false
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == :foo failed
+
+-:foo
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == "forty-two" failed
+
+-forty-two
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == "forty-three\nсорок два\nquaran... failed
+
+-forty-three
+-сорок два
+-quarante deux
+-cuarenta y dos
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == ~S"forty-two" failed
+
+-forty-two
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == ~s"forty-two" failed
+
+-forty-two
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == <<65, 66, 67>> failed
+
+-ABC
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == <<256::utf8>> failed
+
+-Ā
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == 'forty-three' failed
+
+-'forty-three'
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == [102, 111, 114, 116, 121, 45, 1... failed
+
+-[102, 111, 114, 116, 121, 45, 116, 104, 114, 101, 101, 10, 1089, 1086, 1088, 1086, 1082, 32, 1090, 1088, 1080, 10]
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == ~C"forty-two" failed
+
+-'forty-two'
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == ~c"forty-two" failed
+
+-'forty-two'
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == ~D"2018-01-01" failed
+
+-~D[2018-01-01]
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == 0.42 failed
+
+-0.42
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == -0.42 failed
+
+--0.42
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == 42 failed
+
+-42
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == -42 failed
+
+--42
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == [4, 3, true, nil, "42"] failed
+
+-[4, 3, true, nil, "42"]
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == %{a: "forty", b: 2, c: nil} failed
+
+-%{a: "forty", b: 2, c: nil}
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == ~N"2018-01-01 21:01:50" failed
+
+-~N[2018-01-01 21:01:50]
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == ~r"foo" failed
+
+-~r/foo/
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == ~T"23:00:07" failed
+
+-~T[23:00:07]
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == {:ok, 42} failed
+
+-{:ok, 42}
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == %User{} failed
+
+-%ParserTest.User{age: 27, name: "John"}
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == %User{age: 43} failed
+
+-%ParserTest.User{age: 43, name: "John"}
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == ~W"foo bar" failed
+
+-["foo", "bar"]
++"foo"
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test expected literal" assert_value "foo" == [%{a: 42, b: {:left, :light}, c... failed
+
+-[%{a: 42, b: {:left, :light}, c: [%ParserTest.User{age: 27, name: "John"}, 2]}, nil]
++"foo"
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test create file" assert_value "aaa\nbbb\nccc\n" == File.read!(Path.exp... failed
+
+-
++aaa
++bbb
++ccc
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test update file" assert_value "aaa\nbbb\nccc\n" == File.read!(Path.exp... failed
+
+ aaa
+-bBb
++bbb
+ ccc
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test spaces around equation" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test spaces around equation" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test spaces around equation" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test spaces around equation" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test spaces around equation" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test spaces around equation" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test string escaping" assert_value "foo\\nbar\" \" \t \r %{}" == "foo" failed
+
+-foo
++foo\nbar" " 	  %{}
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test string escaping" assert_value "foo" == "foo\\nbar\" \" \t \r %{}" failed
+
+-foo\nbar" " 	  %{}
++foo
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test float trailing zeros" assert_value 42.0001 == 42.0002001 failed
+
+-42.0002001
++42.0001
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test float trailing zeros" assert_value -42.0001 == -42.0002001 failed
+
+--42.0002001
++-42.0001
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test bitstring and string" assert_value <<66>> == "A" failed
+
+-A
++B
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test bitstring and string" assert_value "B" == <<65>> failed
+
+-A
++B
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test variable" assert_value foo failed
+
+-
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test variable" assert_value foo == bar failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test module attributes" assert_value @foo failed
+
+-
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test module attributes" assert_value @foo == @bar failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test parens" assert_value "foo" failed
+
+-
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test parens" assert_value "foo" failed
+
+-
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test parens" assert_value "foo" failed
+
+-
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test parens" assert_value "foo" failed
+
+-
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test parens" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test parens" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test parens" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test parens" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test parens" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test parens" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test parens" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test parens" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test parens" assert_value "foo" == "bar" failed
+
+-bar
++foo
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test left/right expressions" assert_value foo <> "bar" failed
+
+-
++foobar
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test left/right expressions" assert_value foo <> "bar" == bar <> "baz" failed
+
+-barbaz
++foobar
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test left/right expressions" assert_value foo <> "bar" failed
+
+-
++foobar
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test left/right expressions" assert_value foo <> "bar" == bar <> "baz" failed
+
+-barbaz
++foobar
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test functions" assert_value String.upcase("foo") failed
+
+-
++FOO
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test functions" assert_value hello.("World") failed
+
+-
++Hello World!
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test functions" assert_value String.upcase("foo") == String.upcase("b... failed
+
+-BAR
++FOO
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test functions" assert_value hello.("World") == hello.("Elixir") failed
+
+-Hello Elixir!
++Hello World!
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test functions" assert_value String.upcase("foo") == String.upcase("b... failed
+
+-BAR
++FOO
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test pipes" assert_value String.upcase("foo") |> String.reverse()... failed
+
+-RAB
++OOF
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test pipes" assert_value String.upcase("foo") |> String.reverse()... failed
+
+-RAB
++OOF
+
+Accept new value? [y,n,?] .
+parser_test.exs:##:"test repeatable expressions" assert_value 2 + 2 - 2 + 2 - 2 + 2 failed
+
+-
++4
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test repeatable expressions" assert_value 2 + 2 - 2 + 2 - 2 + 2 == 5 failed
+
+-5
++4
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test repeatable expressions" assert_value 5 == 2 + 2 - 2 + 2 - 2 + 2 failed
+
+-4
++5
+
+Accept new value? [y,n,?] .
+16 tests, 0 failures

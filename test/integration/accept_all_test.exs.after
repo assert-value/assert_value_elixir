@@ -6,19 +6,23 @@ defmodule AcceptAllTest do
   # prompt: Y
 
   test "all pass" do
-    assert_value "foo" == """
-    foo<NOEOL>
+    assert_value "foo\nbar" == """
+    foo
+    bar<NOEOL>
     """
-    assert_value "foo" == """
-    foo<NOEOL>
+    assert_value "foo\nbaz" == """
+    foo
+    baz<NOEOL>
     """
   end
 
   test "all pass again" do
-    assert_value "foo" == """
+    assert_value "foo\nfoo" == """
+    foo
     foo<NOEOL>
     """
-    assert_value "bar" == """
+    assert_value "bar\nbar" == """
+    bar
     bar<NOEOL>
     """
   end
