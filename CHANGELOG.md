@@ -4,7 +4,7 @@
 
  * Upgrade Instructions
    * Run `mix test`. You may get diffs because assert_value no longer converts
-     eveything to a string
+     everything to a string
    * Run `ASSERT_VALUE_ACCEPT_DIFFS=reformat mix test` to take advantage of
      improved formatter
  * Feature
