@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.8.1 - February 8, 2018
+
+ * Bugfixes
+   * Fix parser for code producing AST with hygienic counters
+
 ## v0.8.0 - February 1, 2018
 
  * Upgrade Instructions
