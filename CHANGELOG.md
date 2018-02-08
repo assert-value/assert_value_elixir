@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.8.2 - February 19, 2018
+
+ * Bugfixes
+   * Fix parser to correctly parse calls to functions without arguments
+ * Enhancements
+   * Better check and error message for not-serializable values
+
 ## v0.8.1 - February 8, 2018
 
  * Bugfixes
@@ -12,9 +19,16 @@
      everything to a string
    * Run `ASSERT_VALUE_ACCEPT_DIFFS=reformat mix test` to take advantage of
      improved formatter
- * Feature
-   * Support all Elixir types except not serializable (Function, PID,
-     Reference, etc.)
+   * Add this to .formatter.exs to make Elixir formatter not to add parens to
+     assert_value
+     ```elixir
+     [
+       import_deps: [:assert_value]
+     ]
+     ```
+ * Features
+   * Support all argument types (e.g. Integer, List, Map) except not
+     serializable (e.g. Function, PID, Reference)
    * Add ASSERT_VALUE_ACCEPT_DIFFS=reformat to automatically reformat all
      expected values
  * Enhancements
