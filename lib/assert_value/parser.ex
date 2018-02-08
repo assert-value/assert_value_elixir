@@ -116,14 +116,15 @@ defmodule AssertValue.Parser do
   end
 
   defp ast_match?(a, b) do
-    remove_lines_meta(a) == remove_lines_meta(b)
+    remove_ast_meta(a) == remove_ast_meta(b)
   end
 
-  # recursively delete meta information about line numbers from AST
-  # iex> remove_lines_meta({:foo, [line: 10], []})
+  # recursively delete meta information about line numbers and
+  # hygienic counters from AST
+  # iex> remove_ast_meta({:foo, [line: 10, counter: 6], []})
   # {:foo, [], []}
-  defp remove_lines_meta(ast) do
-    cleaner = &Keyword.delete(&1, :line)
+  defp remove_ast_meta(ast) do
+    cleaner = &Keyword.drop(&1, [:line, :counter])
     Macro.prewalk(ast, &Macro.update_meta(&1, cleaner))
   end
 
