@@ -521,4 +521,20 @@ defmodule ParserTest do
     assert_value 5 == 2 + 2 - 2 + 2 - 2 + 2
   end
 
+  test "AST cleanup" do
+    # Macro.expand below produces AST with hygienic counter
+    # Check that we can correctly parse it
+    # Last String.replace is to produce the same result code
+    # from different Elixirs. 1.6.0 has slightly different
+    # "if" macro.
+
+    assert_value quote(do: Kernel.||(1, false))
+      |> Macro.expand(__ENV__)
+      |> Macro.to_string
+      |> String.replace(
+        "when x in [false, nil]",
+        "when Kernel.in(x, [false, nil])"
+      )
+  end
+
 end
