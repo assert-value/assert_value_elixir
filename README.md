@@ -63,6 +63,14 @@ config :my_app, MyApp.Repo,
   ownership_timeout: :infinity
 ```
 
+Add this to .formatter.exs to make Elixir formatter not to add parens
+to assert_value
+```elixir
+[
+  import_deps: [:assert_value]
+]
+```
+
 ## HOWTO
 
 Tests are code. They should be readable, maintainable, and reusable.
