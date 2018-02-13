@@ -84,8 +84,14 @@ defmodule AssertValue.Parser do
   #   rest of the code and if it starts with "0" then we did not finish
   #   and should continue parsing
   #
+  # * function without arguments
+  #   For defined function with no args "foo" and "foo()" have the same AST
+  #   We shoul check that the rest of the code does not start with "()"
+  #   "()" without function name is invalid code in Elixir. It works but
+  #   emits "invalid expression" warning
+  #
   defp find_ast_in_code(code, ast, accumulator \\ "") do
-    if code_match_ast?(accumulator, ast) && (String.at(code, 0) != "0") do
+    if code_match_ast?(accumulator, ast) && !(code =~ ~r/^(0|\(\))/) do
       {accumulator, code}
     else
       case String.next_grapheme(code) do

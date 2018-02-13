@@ -815,4 +815,16 @@ end |> ... failed
 +end
 
 Accept new value? [y,n,?] .
-17 tests, 0 failures
+parser_test.exs:##:"test function without arguments" assert_value Foo.foo() failed
+
+-
++foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test function without arguments" assert_value Foo.foo() failed
+
+-
++foo
+
+Accept new value? [y,n,?] .
+18 tests, 0 failures

@@ -8,6 +8,10 @@ defmodule ParserTest do
     defstruct name: "John", age: 27
   end
 
+  defmodule Foo do
+    def foo, do: "foo"
+  end
+
   import AssertValue
 
   # Literals
@@ -534,6 +538,14 @@ defmodule ParserTest do
         x
     end<NOEOL>
     """
+  end
+
+  test "function without arguments" do
+    # prompt: y
+    assert_value Foo.foo == "foo"
+
+    # prompt: y
+    assert_value Foo.foo() == "foo"
   end
 
 end
