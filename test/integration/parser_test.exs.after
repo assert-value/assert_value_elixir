@@ -548,4 +548,11 @@ defmodule ParserTest do
     assert_value Foo.foo() == "foo"
   end
 
+  test "not-serializable expected" do
+    # This should pass. We can successfully parse expected and replace
+    # it with serialized value
+    # prompt: y
+    assert_value :foo == :foo
+  end
+
 end

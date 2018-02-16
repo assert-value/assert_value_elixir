@@ -91,4 +91,16 @@ defmodule AssertValue.BadArgumentsTest do
     end
   end
 
+  test "nested not-serializable type" do
+    f = fn -> true end
+
+    assert_raise AssertValue.ArgumentError, fn ->
+      assert_value %{f: f}
+    end
+
+    assert_raise AssertValue.ArgumentError, fn ->
+      assert_value %{f: f} == :foo
+    end
+  end
+
 end

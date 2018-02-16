@@ -101,18 +101,56 @@ defmodule AssertValue do
     defexception [:message]
   end
 
-  def check_serializable(arg)
-        when is_pid(arg)
-        when is_port(arg)
-        when is_reference(arg)
-        when is_function(arg) do
-    raise AssertValue.ArgumentError,
-      message: """
-      Unable to serialize #{get_value_type(arg)}
-      You might want to use inspect/1 to use it in assert_value
-      """
+  def check_serializable(value) do
+    # Some types like Function, PID, Decimal, etc don't have literal
+    # representation and cannot be used as expected
+    #
+    #    #Decimal<18.98>
+    #
+    # To check this we format actual value and try to parse it back with
+    # Code.eval_string. If evaluated value is the same as it was before
+    # formatting then value is serialized correctly
+    {res, evaluated_value} =
+      try do
+        {evaluated_value, _} =
+          value
+          |> AssertValue.Formatter.new_expected_from_actual_value("")
+          |> Code.eval_string
+
+        evaluated_value = if is_binary(evaluated_value) do
+          String.replace(evaluated_value, ~r/<NOEOL>\n\Z/, "", global: false)
+        else
+          evaluated_value
+        end
+
+        {:ok, evaluated_value}
+      rescue
+        _ -> {:error, nil}
+      end
+
+    unless res == :ok and value == evaluated_value do
+        raise AssertValue.ArgumentError,
+        message: """
+        Unable to serialize #{inspect(value)}
+
+        assert_value needs to be able to take actual value and update expected
+        in source code so they are equal. To do this it needs to serialize
+        Elixir value as valid Elixir source code.
+
+        Some types like Function, PID, Decimal don't have literal
+        representation and cannot be serialized. Same goes for data structures
+        that include these values.
+
+        assert_value tried to serialize this expected value, and it did not
+        work.
+
+        One way to fix this is to write your own serializer and convert
+        this actual value to a string before passing it to assert_value.
+        For example you can wrap actual value in inspect/1
+        """
+    end
+    :ok
   end
-  def check_serializable(_), do: :ok
 
   def check_string_and_file_read(actual_value, _expected_type = :file)
     when is_binary(actual_value), do: :ok

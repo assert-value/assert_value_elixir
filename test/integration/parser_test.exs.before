@@ -549,4 +549,11 @@ defmodule ParserTest do
     assert_value Foo.foo()
   end
 
+  test "not-serializable expected" do
+    # This should pass. We can successfully parse expected and replace
+    # it with serialized value
+    # prompt: y
+    assert_value :foo == Port.list() |> List.first
+  end
+
 end

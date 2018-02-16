@@ -827,4 +827,10 @@ parser_test.exs:##:"test function without arguments" assert_value Foo.foo() fail
 +foo
 
 Accept new value? [y,n,?] .
-18 tests, 0 failures
+parser_test.exs:##:"test not-serializable expected" assert_value :foo == Port.list() |> List.first() failed
+
+-#Port<0.0>
++:foo
+
+Accept new value? [y,n,?] .
+19 tests, 0 failures
