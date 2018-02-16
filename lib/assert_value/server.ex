@@ -130,7 +130,8 @@ defmodule AssertValue.Server do
     #   grouped with the diff
     {function, _} = opts[:caller][:function]
     code = opts[:assertion_ast] |> Macro.to_string |> smart_truncate(40)
-    diff_context = "#{file}:#{line}:\"#{Atom.to_string function}\" assert_value #{code} failed"
+    diff_context =
+      "#{file}:#{line}:\"#{function}\" assert_value #{code} failed"
     diff = AssertValue.Diff.diff(opts[:expected_value], opts[:actual_value])
     diff_lines_count = String.split(diff, "\n") |> Enum.count()
     IO.puts "\n" <> diff_context <> "\n"
@@ -219,7 +220,9 @@ defmodule AssertValue.Server do
     original_line_number + cumulative_offset
   end
 
-  def update_line_numbers(file_changes, filename, original_line_number, old_expected, new_expected) do
+  def update_line_numbers(
+    file_changes, filename, original_line_number, old_expected, new_expected
+  ) do
     offset = length(to_lines(new_expected)) - length(to_lines(old_expected))
     current_file_changes =
       (file_changes[filename] || %{})

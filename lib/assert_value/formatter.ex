@@ -3,7 +3,8 @@ defmodule AssertValue.Formatter do
   import AssertValue.StringTools
 
   # Return new expected value and its length in lines
-  def new_expected_from_actual_value(actual, indentation) when is_binary(actual) do
+  def new_expected_from_actual_value(actual, indentation)
+      when is_binary(actual) do
     if length(to_lines(actual)) <= 1 do
       Macro.to_string(actual)
     else

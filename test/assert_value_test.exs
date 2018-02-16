@@ -150,7 +150,8 @@ defmodule AssertValueTest do
     env: [{'ASSERT_VALUE_ACCEPT_DIFFS', 'ask'}],
     expected_exit_code: 0 # No failed tests
 
-  integration_test "accept all with errors (Y)", "accept_all_with_error_test.exs",
+  integration_test "accept all with errors (Y)",
+    "accept_all_with_error_test.exs",
     env: [{'ASSERT_VALUE_ACCEPT_DIFFS', 'ask'}],
     expected_exit_code: 1
 

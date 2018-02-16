@@ -33,8 +33,9 @@
         {Credo.Check.Refactor.CyclomaticComplexity, false},
         {Credo.Check.Refactor.FunctionArity, false},
         # Long lines are not ok, Exit with status code
-        {Credo.Check.Readability.MaxLineLength, priority: :high,
-          max_length: 80, exit_status: 2},
+        {Credo.Check.Readability.MaxLineLength,
+          ignore_strings: false, ignore_definitions: false,
+          priority: :high, exit_status: 2},
         # Do not suggest to write large numbers with underscore
         # We have GitHub data maps in tests with big ids and bytes sizes
         {Credo.Check.Readability.LargeNumbers, false},

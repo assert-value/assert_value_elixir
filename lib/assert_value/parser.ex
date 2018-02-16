@@ -15,7 +15,9 @@ defmodule AssertValue.Parser do
   #
   #   code == prefix <> expected <> suffix
   #
-  def parse_expected(filename, line_num, assertion_ast, actual_ast, expected_ast) do
+  def parse_expected(
+    filename, line_num, assertion_ast, actual_ast, expected_ast
+  ) do
     {prefix, suffix} =
       File.read!(filename)
       |> String.split("\n")
