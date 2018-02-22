@@ -857,4 +857,130 @@ parser_test.exs:##:"test strict equality" assert_value 1.0 === 1 failed
 +1.0
 
 Accept new value? [y,n,?] .
-21 tests, 0 failures
+parser_test.exs:##:"test match and comparison operators" assert_value _ = :foo failed
+
+-
++:foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value _ = :foo failed
+
+-
++:foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value _ = :foo failed
+
+-
++:foo
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value 2 != 1 failed
+
+-
++true
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value 2 != 1 failed
+
+-
++true
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value 2 != 1 failed
+
+-
++true
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value 2 > 1 failed
+
+-
++true
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value 2 > 1 failed
+
+-
++true
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value 2 > 1 failed
+
+-
++true
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value 2 >= 1 failed
+
+-
++true
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value 2 >= 1 failed
+
+-
++true
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value 2 >= 1 failed
+
+-
++true
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value 2 < 1 failed
+
+-
++false
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value 2 < 1 failed
+
+-
++false
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value 2 < 1 failed
+
+-
++false
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value 2 <= 1 failed
+
+-
++false
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value 2 <= 1 failed
+
+-
++false
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value 2 <= 1 failed
+
+-
++false
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value "foobar" =~ ~r"foo" failed
+
+-
++true
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value "foobar" =~ ~r"foo" failed
+
+-
++true
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test match and comparison operators" assert_value "foobar" =~ ~r"foo" failed
+
+-
++true
+
+Accept new value? [y,n,?] .
+22 tests, 0 failures

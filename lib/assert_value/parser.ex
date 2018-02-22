@@ -43,7 +43,16 @@ defmodule AssertValue.Parser do
 
       {prefix, rest, suffix} =
         if actual_ast == :_not_present_ do
-          {prefix <> assertion, "", suffix}
+          # If assertion is comparison operator (except == and ===)
+          # then wrap it in parens before appending "== <expected>"
+          # This will produce code with correct operation precedence
+          case assertion_ast do
+            {operator, _, _}
+                when operator in [:=, :!=, :>, :<, :>=, :<=, :=~] ->
+              {prefix <> "(" <> assertion <> ")", "", suffix}
+            _ ->
+              {prefix <> assertion, "", suffix}
+          end
         else
           {actual, rest} = find_ast_in_code(assertion, actual_ast)
           {prefix <> actual, rest, suffix}

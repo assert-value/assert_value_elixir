@@ -571,4 +571,60 @@ defmodule ParserTest do
     assert_value 1.0 === 1.0
   end
 
+  test "match and comparison operators" do
+    # prompt: y
+    assert_value (_ = :foo) == :foo
+    # prompt: y
+    assert_value((_ = :foo) == :foo)
+    # prompt: y
+    assert_value ((_ = :foo) == :foo)
+
+
+    # prompt: y
+    assert_value (2 != 1) == true
+    # prompt: y
+    assert_value((2 != 1) == true)
+    # prompt: y
+    assert_value ((2 != 1) == true)
+
+
+    # prompt: y
+    assert_value (2 > 1) == true
+    # prompt: y
+    assert_value((2 > 1) == true)
+    # prompt: y
+    assert_value ((2 > 1) == true)
+
+    # prompt: y
+    assert_value (2 >= 1) == true
+    # prompt: y
+    assert_value((2 >= 1) == true)
+    # prompt: y
+    assert_value ((2 >= 1) == true)
+
+
+    # prompt: y
+    assert_value (2 < 1) == false
+    # prompt: y
+    assert_value((2 < 1) == false)
+    # prompt: y
+    assert_value ((2 < 1) == false)
+
+
+    # prompt: y
+    assert_value (2 <= 1) == false
+    # prompt: y
+    assert_value((2 <= 1) == false)
+    # prompt: y
+    assert_value ((2 <= 1) == false)
+
+
+    # prompt: y
+    assert_value ("foobar" =~ ~r/foo/) == true
+    # prompt: y
+    assert_value(("foobar" =~ ~r/foo/) == true)
+    # prompt: y
+    assert_value (("foobar" =~ ~r/foo/) == true)
+  end
+
 end
