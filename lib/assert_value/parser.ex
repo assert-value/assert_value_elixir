@@ -124,7 +124,9 @@ defmodule AssertValue.Parser do
   end
 
   defp ast_match?(a, b) do
-    remove_ast_meta(a) == remove_ast_meta(b)
+    # Use === to correctly match floats
+    # In Elixir 1.0 == 1 so we should continue parsing until 1.0 === 1.0
+    remove_ast_meta(a) === remove_ast_meta(b)
   end
 
   # recursively delete meta information about line numbers and

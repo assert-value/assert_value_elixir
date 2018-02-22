@@ -833,4 +833,16 @@ parser_test.exs:##:"test not-serializable expected" assert_value :foo == Port.li
 +:foo
 
 Accept new value? [y,n,?] .
-19 tests, 0 failures
+parser_test.exs:##:"test integer floats" assert_value 2 == 1.0 failed
+
+-1.0
++2
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test integer floats" assert_value 1.0 == 2 failed
+
+-2
++1.0
+
+Accept new value? [y,n,?] .
+20 tests, 0 failures

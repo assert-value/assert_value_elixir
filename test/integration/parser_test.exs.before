@@ -556,4 +556,12 @@ defmodule ParserTest do
     assert_value :foo == Port.list() |> List.first
   end
 
+  test "integer floats" do
+    # prompt: y
+    assert_value 2 == 1.0
+
+    # prompt: y
+    assert_value 1.0 == 2
+  end
+
 end

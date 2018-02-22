@@ -555,4 +555,12 @@ defmodule ParserTest do
     assert_value :foo == :foo
   end
 
+  test "integer floats" do
+    # prompt: y
+    assert_value 2 == 2
+
+    # prompt: y
+    assert_value 1.0 == 1.0
+  end
+
 end
