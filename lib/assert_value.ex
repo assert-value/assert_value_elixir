@@ -1,7 +1,8 @@
 defmodule AssertValue do
 
   # Assertions with right argument like "assert_value actual == expected"
-  defmacro assert_value({:==, _, [left, right]} = assertion) do
+  defmacro assert_value({operator, _, [left, right]} = assertion)
+           when operator in [:==, :===] do
     {expected_type, expected_file} = case right do
       {{:., _, [{:__aliases__, _, [:File]}, :read!]}, _, [filename]} ->
         {:file, filename}
@@ -11,6 +12,7 @@ defmodule AssertValue do
         {:other, nil}
     end
     quote do
+      operator = unquote(operator)
       assertion_ast = unquote(Macro.escape(assertion))
       actual_ast = unquote(Macro.escape(left))
       actual_value = unquote(left)
@@ -35,7 +37,7 @@ defmodule AssertValue do
       # We need to check for reformat_expected? first to disable
       # "this check/guard will always yield the same result" warnings
       if AssertValue.Server.reformat_expected? ||
-          (actual_value != expected_value) do
+          !apply(Kernel, operator, [actual_value, expected_value]) do
         decision = AssertValue.Server.ask_user_about_diff(
           caller: [
             file: unquote(__CALLER__.file),

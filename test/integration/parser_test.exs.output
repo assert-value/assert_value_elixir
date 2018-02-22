@@ -845,4 +845,16 @@ parser_test.exs:##:"test integer floats" assert_value 1.0 == 2 failed
 +1.0
 
 Accept new value? [y,n,?] .
-20 tests, 0 failures
+parser_test.exs:##:"test strict equality" assert_value 1 === 1.0 failed
+
+-1.0
++1
+
+Accept new value? [y,n,?] 
+parser_test.exs:##:"test strict equality" assert_value 1.0 === 1 failed
+
+-1
++1.0
+
+Accept new value? [y,n,?] .
+21 tests, 0 failures
