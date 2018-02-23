@@ -71,6 +71,90 @@ to assert_value
 ]
 ```
 
+## API
+
+### No Expected Value
+
+It is better to start with no expected value
+
+```elixir
+assert_value "foo"
+```
+When you run it the first time `assert_value` will generate it, show it to us,
+and will automatically update test source if we accept it.
+
+### Expected Value in the Source Code
+
+```elixir
+assert_value 2 + 2 == 4
+```
+`assert_value` will update expected values for you in the source code.
+`assert_value` supports all Elixir types except not serializable (Function,
+PID, Port, Reference).
+
+When expected is a multi-line string `assert_value` will format it as a heredoc
+for better code diff readability. Heredocs in Elixir always end with a newline
+character. When expected value does not end with a newline `assert_value` will
+append a special ```<NOEOL>``` string to indicate that last newline should be
+ignored.
+
+### Expected Value in a File
+
+Sometimes test values are too large to be inlined into the test source.
+Put them into the file instead.
+
+```elixir
+assert_value "foo" == File.read!("test/log/reference.txt")
+```
+assert_value is smart enough to recognize File.read! and will update file contents
+instead of test source. If file does not exists it will be created and no error
+will be raised despite default File.read! behaviour.
+
+### Running Tests Interactively
+
+assert_value will autodetect whether it is running interactively (in a
+terminal), or non-interactively (e.g. continuous integration).
+When running interactively it will ask about each diff.
+
+You can accept or reject new value with ```y``` or ```n```. If you use ```Y```
+and ```N``` (uppercase) assert_value will remember the answer and will not ask
+again during this test run. ```?``` will show help with all available actions.
+```
+Accept new value? [y,n,?] ?
+
+    y - Accept new value as correct. Will update expected value. Test will pass
+    n - Reject new value. Test will fail
+    Y - Accept all. Will accept this and all following new values in this run
+    N - Reject all. Will reject this and all following new values in this run
+    d - Show diff between actual and expected values
+    ? - This help
+
+```
+
+### Running Tests Non-interactively
+
+When running non-interactively assert_value will reject all diffs by default, and will
+work like default ExUnit's assert.
+
+To override autodetection use ASSERT_VALUE_ACCEPT_DIFFS environment variable
+with one of three values: "ask", "y", "n"
+```
+# Ask about each diff. Useful to force interactive behavior despite
+# autodetection.
+ASSERT_VALUE_ACCEPT_DIFFS=ask mix test
+
+# Reject all diffs. Useful to force default non-interactive mode when running
+# in an interactive terminal.
+ASSERT_VALUE_ACCEPT_DIFFS=n mix test
+
+# Accept all diffs. Useful to update all expected values after a refactoring.
+ASSERT_VALUE_ACCEPT_DIFFS=y mix test
+
+# Automatically reformat all expected values. Useful to reformat all tests
+# when a new assert_value version improves formatter.
+ASSERT_VALUE_ACCEPT_DIFFS=reformat mix test
+```
+
 ## HOWTO
 
 Tests are code. They should be readable, maintainable, and reusable.
@@ -429,90 +513,6 @@ Accept new value? [y,n,?] y
 
 Finished in 10.0 seconds
 5 tests, 0 failure
-```
-
-## API
-
-### No Expected Value
-
-It is better to start with no expected value
-
-```elixir
-assert_value "foo"
-```
-When you run it the first time `assert_value` will generate it, show it to us,
-and will automatically update test source if we accept it.
-
-### Expected Value in the Source Code
-
-```elixir
-assert_value 2 + 2 == 4
-```
-`assert_value` will update expected values for you in the source code.
-`assert_value` supports all Elixir types except not serializable (Function,
-PID, Port, Reference).
-
-When expected is a multi-line string `assert_value` will format it as a heredoc
-for better code diff readability. Heredocs in Elixir always end with a newline
-character. When expected value does not end with a newline `assert_value` will
-append a special ```<NOEOL>``` string to indicate that last newline should be
-ignored.
-
-### Expected Value in a File
-
-Sometimes test values are too large to be inlined into the test source.
-Put them into the file instead.
-
-```elixir
-assert_value "foo" == File.read!("test/log/reference.txt")
-```
-assert_value is smart enough to recognize File.read! and will update file contents
-instead of test source. If file does not exists it will be created and no error
-will be raised despite default File.read! behaviour.
-
-### Running Tests Interactively
-
-assert_value will autodetect whether it is running interactively (in a
-terminal), or non-interactively (e.g. continuous integration).
-When running interactively it will ask about each diff.
-
-You can accept or reject new value with ```y``` or ```n```. If you use ```Y```
-and ```N``` (uppercase) assert_value will remember the answer and will not ask
-again during this test run. ```?``` will show help with all available actions.
-```
-Accept new value? [y,n,?] ?
-
-    y - Accept new value as correct. Will update expected value. Test will pass
-    n - Reject new value. Test will fail
-    Y - Accept all. Will accept this and all following new values in this run
-    N - Reject all. Will reject this and all following new values in this run
-    d - Show diff between actual and expected values
-    ? - This help
-
-```
-
-### Running Tests Non-interactively
-
-When running non-interactively assert_value will reject all diffs by default, and will
-work like default ExUnit's assert.
-
-To override autodetection use ASSERT_VALUE_ACCEPT_DIFFS environment variable
-with one of three values: "ask", "y", "n"
-```
-# Ask about each diff. Useful to force interactive behavior despite
-# autodetection.
-ASSERT_VALUE_ACCEPT_DIFFS=ask mix test
-
-# Reject all diffs. Useful to force default non-interactive mode when running
-# in an interactive terminal.
-ASSERT_VALUE_ACCEPT_DIFFS=n mix test
-
-# Accept all diffs. Useful to update all expected values after a refactoring.
-ASSERT_VALUE_ACCEPT_DIFFS=y mix test
-
-# Automatically reformat all expected values. Useful to reformat all tests
-# when a new assert_value version improves formatter.
-ASSERT_VALUE_ACCEPT_DIFFS=reformat mix test
 ```
 
 ## Notes and Known Issues
