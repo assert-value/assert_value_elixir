@@ -155,7 +155,7 @@ ASSERT_VALUE_ACCEPT_DIFFS=y mix test
 ASSERT_VALUE_ACCEPT_DIFFS=reformat mix test
 ```
 
-## HOWTO
+## Best Practices
 
 Tests are code. They should be readable, maintainable, and reusable.
 Tests should break when behaviour changes and should not break randomly.
