@@ -1,5 +1,5 @@
 defmodule AssertValue.BadArgumentsTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   defmodule User do
     defstruct name: "John", age: 27

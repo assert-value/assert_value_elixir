@@ -1,5 +1,5 @@
 defmodule AssertValue.DiffTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   import AssertValue.Diff
 

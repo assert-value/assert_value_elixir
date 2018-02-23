@@ -1,5 +1,5 @@
 defmodule AssertValue.FileTrackerTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   import AssertValue.Server, only: [current_line_number: 3,
     update_line_numbers: 5]
