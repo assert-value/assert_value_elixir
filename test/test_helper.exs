@@ -1,6 +1,7 @@
 ExUnit.start([timeout: :infinity])
 
-defmodule AssertValue.Test.Support do
+defmodule AssertValue.IntegrationTest.Support do
+
   def mktemp_dir(prefix \\ "", suffix \\ "") do
     name = Path.expand(generate_tmpname(prefix, suffix), System.tmp_dir!)
     File.mkdir_p!(name)
@@ -51,28 +52,16 @@ defmodule AssertValue.Test.Support do
         {output, exit_code}
     end
   end
-end
-
-defmodule AssertValue.Test.IntegrationTest do
 
   @integration_test_dir Path.expand("integration", __DIR__)
-  @runnable_test_dir AssertValue.Test.Support.mktemp_dir("assert-value-")
 
-  def integration_test_dir do
-    @integration_test_dir
-  end
-
-  def runnable_test_dir do
-    @runnable_test_dir
-  end
-
-  def prepare_runnable_test(basename) do
+  def prepare_runnable_test(basename, runnable_test_dir) do
     before_path = Path.expand(basename <> ".before", @integration_test_dir)
     after_path = Path.expand(basename <> ".after", @integration_test_dir)
     output_path = Path.expand(basename <> ".output", @integration_test_dir)
 
     # copy the test to a temp dir for running
-    runnable_path = Path.expand(basename, @runnable_test_dir)
+    runnable_path = Path.expand(basename, runnable_test_dir)
     File.cp!(before_path, runnable_path)
     {runnable_path, after_path, output_path}
   end
@@ -86,7 +75,7 @@ defmodule AssertValue.Test.IntegrationTest do
       |> Enum.join("\n")
       |> Kernel.<>("\n")
 
-    {output, exit_code} = AssertValue.Test.Support.exec("mix",
+    {output, exit_code} = AssertValue.IntegrationTest.Support.exec("mix",
       ["test", "--seed", "0", filename], env, input: prompt_responses)
 
     # Canonicalize output
@@ -124,11 +113,11 @@ defmodule AssertValue.Test.IntegrationTest do
     {output, exit_code}
   end
 
-  def prepare_expected_files(filenames) do
+  def prepare_expected_files(filenames, runnable_test_dir) do
     Enum.map(filenames, fn(filename) ->
       before_path = Path.expand(filename <> ".before", @integration_test_dir)
       after_path = Path.expand(filename <> ".after", @integration_test_dir)
-      runnable_path = Path.expand(filename, @runnable_test_dir)
+      runnable_path = Path.expand(filename, runnable_test_dir)
       if File.exists?(before_path) do
         File.cp!(before_path, runnable_path)
       end
@@ -136,39 +125,68 @@ defmodule AssertValue.Test.IntegrationTest do
     end)
   end
 
-  # Integration tests flow:
-  # * Copy integration_test.exs.before to @runnable_test_dir
+  # Integration test flow:
+  # * Copy integration_test.exs.before to runnable_test_dir
   # * launch a child `mix test integration_test.exs`
   # * accept or reject assert_value changes when prompted
   # * compare test source file itself after the run with a reference copy
   # * compare test output with a reference copy
-
-  # integration_test "accept all (Y)", "accept_all_test.exs", exit_code: 1
-  defmacro integration_test(test_name, test_filename, opts \\ []) do
+  #
+  # Usage:
+  #
+  # import AssertValue.IntegrationTest.Support, only: [build_test_module: 3]
+  # build_test_module :ParserTest, "parser_test.exs",
+  #   env: [{'ASSERT_VALUE_ACCEPT_DIFFS', 'ask'}],
+  #   expected_exit_code: 0,
+  #   expected_files: ["file_to_create", "file_to_update"]
+  #
+  defmacro build_test_module(module_name, test_filename, opts \\ []) do
     expected_files = Keyword.get(opts, :expected_files, [])
     expected_exit_code = Keyword.get(opts, :expected_exit_code, 0)
+    runnable_test_dir =
+      AssertValue.IntegrationTest.Support.mktemp_dir("assert-value-")
+    test_name = "running integration #{module_name}"
+
     quote do
-      test unquote(test_name) do
-        {runnable_path, after_path, output_path} =
-          prepare_runnable_test(unquote(test_filename))
 
-        expected_files = prepare_expected_files(unquote(expected_files))
+      defmodule unquote(module_name) do
+        use ExUnit.Case, async: true
 
-        {output, exit_code} = run_tests(runnable_path, unquote(opts[:env]))
-        assert exit_code == unquote(expected_exit_code)
+        import AssertValue
+        import AssertValue.IntegrationTest.Support, only: [
+          prepare_runnable_test: 2, prepare_expected_files: 2, run_tests: 2
+        ]
 
-        test_source_result = File.read!(runnable_path)
-        # Make sure resulting test file is valid Elixir code
-        # Will raise SyntaxError or TokenMissingError otherwise
-        Code.string_to_quoted!(test_source_result)
-        assert_value test_source_result == File.read!(after_path)
-        assert_value output == File.read!(output_path)
+        setup_all do
+          # Make sure we delete temporary dir even if tests fail
+          on_exit fn ->
+            File.rm_rf!(unquote(runnable_test_dir))
+          end
+          :ok
+        end
 
-        Enum.each(expected_files, fn([runnable_path, after_path]) ->
-          assert_value(File.read!(runnable_path) == File.read!(after_path))
-        end)
+        test unquote(test_name) do
+          {runnable_path, after_path, output_path} = prepare_runnable_test(
+            unquote(test_filename), unquote(runnable_test_dir)
+          )
+          expected_files = prepare_expected_files(
+            unquote(expected_files), unquote(runnable_test_dir)
+          )
+          {output, exit_code} = run_tests(runnable_path, unquote(opts[:env]))
+          assert exit_code == unquote(expected_exit_code)
+          test_source_result = File.read!(runnable_path)
+          # Make sure resulting test file is valid Elixir code
+          # Will raise SyntaxError or TokenMissingError otherwise
+          Code.string_to_quoted!(test_source_result)
+          assert_value test_source_result == File.read!(after_path)
+          assert_value output == File.read!(output_path)
+          Enum.each(expected_files, fn([runnable_path, after_path]) ->
+            assert_value(File.read!(runnable_path) == File.read!(after_path))
+          end)
+        end
       end
-    end
-  end
+
+    end # quote do
+  end # defmacro
 
 end
