@@ -132,6 +132,9 @@ defmodule AssertValue.IntegrationTest.Support do
   # * compare test source file itself after the run with a reference copy
   # * compare test output with a reference copy
   #
+  # We build the integration test module instead of just test to run
+  # integration tests async
+  #
   # Usage:
   #
   # import AssertValue.IntegrationTest.Support, only: [build_test_module: 3]
