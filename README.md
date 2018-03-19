@@ -10,6 +10,7 @@
   * Makes Elixir tests interactive and lets you to create and update expected values
     with a single key press
   * Improves test readability
+  * Asynchronous. When it waits for user input other tests continue to run.
 
 ## Screencast
 
