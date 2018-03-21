@@ -52,7 +52,7 @@ defmodule AssertValue do
           expected_value: expected_value,
           expected_file: expected_file)
         case decision do
-          {:ok, value} ->
+          :ok ->
             true
           {:error, :ex_unit_assertion_error, error_attrs} ->
             raise ExUnit.AssertionError, error_attrs
@@ -87,7 +87,7 @@ defmodule AssertValue do
         expected_type: :source,
         expected_ast: :_not_present_)
       case decision do
-        {:ok, value} ->
+        :ok ->
           true
         {:error, :ex_unit_assertion_error,  error_attrs} ->
           raise ExUnit.AssertionError, error_attrs

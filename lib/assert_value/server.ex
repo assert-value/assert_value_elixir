@@ -76,8 +76,7 @@ defmodule AssertValue.Server do
     if answer in ["y", "Y", :reformat] do
       case update_expected(state.file_changes, opts[:expected_type], opts) do
         {:ok, file_changes} ->
-          {:reply, {:ok, opts[:actual_value]},
-            %{state | file_changes: file_changes}}
+          {:reply, :ok, %{state | file_changes: file_changes}}
         {:error, :parse_error} ->
           {:reply, {:error, :parse_error}, state}
       end
