@@ -185,23 +185,26 @@ defmodule AssertValue.Server do
       opts[:caller][:file],
       opts[:caller][:line]
     )
-    case AssertValue.Parser.parse_expected(
+    case AssertValue.Parser.parse_assert_value(
       opts[:caller][:file],
       current_line_number,
-      opts[:assertion_ast],
-      opts[:actual_ast],
-      opts[:expected_ast]
+      opts[:assertion_ast]
     ) do
-      {prefix, old_expected, suffix, indentation} ->
-        new_expected = AssertValue.Formatter.new_expected_from_actual_value(
-          opts[:actual_value], indentation)
-        File.write!(opts[:caller][:file], prefix <> new_expected <> suffix)
+      {prefix, old_assert_value, suffix, indentation} ->
+
+        new_assert_value =  AssertValue.Formatter.update_and_format(
+          old_assert_value, opts[:actual_value], indentation
+        )
+
+        code = Enum.join([prefix, new_assert_value, suffix], "\n")
+        File.write!(opts[:caller][:file], code)
+
         {:ok, update_line_numbers(
           file_changes,
           opts[:caller][:file],
           opts[:caller][:line],
-          old_expected,
-          new_expected
+          old_assert_value,
+          new_assert_value
         )}
       {:error, :parse_error} ->
         {:error, :parse_error}

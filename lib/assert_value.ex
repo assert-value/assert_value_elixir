@@ -103,6 +103,27 @@ defmodule AssertValue do
     defexception [:message]
   end
 
+
+  # There is a problem with Macro.to_string() and big strings
+  # Strings > 4095 symbols are truncated by Inspect module and
+  # get "<> ..." at the end
+  #
+  # iex> String.duplicate("a", 4095) |> Macro.to_string()
+  # "\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  # aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa   # lots of lines
+  # aaaaaaa" <> ...
+  #
+  # So we cannot check big strings for serialization we check them
+  # just by type. And why not to check other types we sure?
+  #
+  def check_serializable(value)
+    when is_atom(value)      # boolean, atom, nil
+    when is_binary(value) # string, bitstring
+    when is_number(value)    # integer, float
+  do
+    :ok
+  end
+
   def check_serializable(value) do
     # Some types like Function, PID, Decimal, etc don't have literal
     # representation and cannot be used as expected
@@ -116,14 +137,8 @@ defmodule AssertValue do
       try do
         {evaluated_value, _} =
           value
-          |> AssertValue.Formatter.new_expected_from_actual_value("")
-          |> Code.eval_string
-
-        evaluated_value = if is_binary(evaluated_value) do
-          String.replace(evaluated_value, ~r/<NOEOL>\n\Z/, "", global: false)
-        else
-          evaluated_value
-        end
+          |> Macro.to_string()
+          |> Code.eval_string()
 
         {:ok, evaluated_value}
       rescue

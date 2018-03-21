@@ -8,34 +8,34 @@ defmodule AcceptAllWithErrorTest do
   test "all pass" do
     assert_value "foo" == "foo"
     assert_value "foo\nbar" == """
-    foo
-    bar<NOEOL>
-    """
+                 foo
+                 bar<NOEOL>
+                 """
     assert_value "foo\nbaz" == """
-    foo
-    baz<NOEOL>
-    """
+                 foo
+                 baz<NOEOL>
+                 """
   end
 
   test "one fail with error" do
     assert_value "foo" == "foo"
     assert_value "foo" == "foo"
     assert_value "foo\nbaz" == """
-    foo
-    baz<NOEOL>
-    """
+                 foo
+                 baz<NOEOL>
+                 """
     raise "Error!"
   end
 
   test "all pass again" do
     assert_value "foo\nfoo" == """
-    foo
-    foo<NOEOL>
-    """
+                 foo
+                 foo<NOEOL>
+                 """
     assert_value "bar\nbar" == """
-    bar
-    bar<NOEOL>
-    """
+                 bar
+                 bar<NOEOL>
+                 """
   end
 
 end

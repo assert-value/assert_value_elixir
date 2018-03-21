@@ -5,16 +5,16 @@ defmodule NonInteractiveAcceptTest do
 
   test "update" do
     assert_value "foo\nbar" == """
-    foo
-    bar<NOEOL>
-    """
+                 foo
+                 bar<NOEOL>
+                 """
   end
 
   test "update again" do
     assert_value "foo\nbaz" == """
-    foo
-    baz<NOEOL>
-    """
+                 foo
+                 baz<NOEOL>
+                 """
   end
 
 end

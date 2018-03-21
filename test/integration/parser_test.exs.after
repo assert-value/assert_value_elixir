@@ -34,20 +34,20 @@ defmodule ParserTest do
 
     # prompt: y
     assert_value """
-    forty-two
-    сорок два
-    四十二
-    quarante deux
-    cuarenta y dos
-    zweiundvierzig
-    """ == """
-    forty-two
-    сорок два
-    四十二
-    quarante deux
-    cuarenta y dos
-    zweiundvierzig
-    """
+                 forty-two
+                 сорок два
+                 四十二
+                 quarante deux
+                 cuarenta y dos
+                 zweiundvierzig
+                 """ == """
+                 forty-two
+                 сорок два
+                 四十二
+                 quarante deux
+                 cuarenta y dos
+                 zweiundvierzig
+                 """
 
     # prompt: y
     assert_value ~S(forty-two) == "forty-two"
@@ -59,16 +59,37 @@ defmodule ParserTest do
     assert_value <<65, 66, 67>> == "ABC"
 
     # prompt: y
-    assert_value <<256 :: utf8>> == "Ā"
+    assert_value <<256::utf8>> == "Ā"
 
     # prompt: y
     assert_value 'forty-two' == 'forty-two'
 
     # prompt: y
     assert_value '''
-    forty-two
-    сорок два
-    ''' == [102, 111, 114, 116, 121, 45, 116, 119, 111, 10, 1089, 1086, 1088, 1086, 1082, 32, 1076, 1074, 1072, 10]
+                 forty-two
+                 сорок два
+                 ''' == [
+                   102,
+                   111,
+                   114,
+                   116,
+                   121,
+                   45,
+                   116,
+                   119,
+                   111,
+                   10,
+                   1089,
+                   1086,
+                   1088,
+                   1086,
+                   1082,
+                   32,
+                   1076,
+                   1074,
+                   1072,
+                   10
+                 ]
     # prompt: y
     assert_value ~C(forty-two) == 'forty-two'
 
@@ -112,13 +133,21 @@ defmodule ParserTest do
     assert_value %User{age: 43} == %ParserTest.User{age: 43, name: "John"}
 
     # prompt: y
-    assert_value %{__struct__: ParserTest.User, age: 21, name: "Peter"} == %ParserTest.User{age: 21, name: "Peter"}
+    assert_value %{__struct__: ParserTest.User, age: 21, name: "Peter"} ==
+                   %ParserTest.User{age: 21, name: "Peter"}
 
     # prompt: y
     assert_value ~W(foo bar) == ["foo", "bar"]
 
     # prompt: y
-    assert_value  [%{a: 42, b: {:left, :light}, c: [%User{}, 1]}, nil] == [%{a: 42, b: {:left, :light}, c: [%ParserTest.User{age: 27, name: "John"}, 1]}, nil]
+    assert_value [%{a: 42, b: {:left, :light}, c: [%User{}, 1]}, nil] == [
+                   %{
+                     a: 42,
+                     b: {:left, :light},
+                     c: [%ParserTest.User{age: 27, name: "John"}, 1]
+                   },
+                   nil
+                 ]
   end
 
   test "actual and expected literals" do
@@ -136,20 +165,20 @@ defmodule ParserTest do
 
     # prompt: y
     assert_value """
-    forty-two
-    сорок два
-    四十二
-    quarante deux
-    cuarenta y dos
-    zweiundvierzig
-    """ == """
-    forty-two
-    сорок два
-    四十二
-    quarante deux
-    cuarenta y dos
-    zweiundvierzig
-    """
+                 forty-two
+                 сорок два
+                 四十二
+                 quarante deux
+                 cuarenta y dos
+                 zweiundvierzig
+                 """ == """
+                 forty-two
+                 сорок два
+                 四十二
+                 quarante deux
+                 cuarenta y dos
+                 zweiundvierzig
+                 """
 
     # prompt: y
     assert_value ~S(forty-two) == "forty-two"
@@ -161,16 +190,37 @@ defmodule ParserTest do
     assert_value <<65, 66, 67>> == "ABC"
 
     # prompt: y
-    assert_value <<256 :: utf8>> == "Ā"
+    assert_value <<256::utf8>> == "Ā"
 
     # prompt: y
     assert_value 'forty-two' == 'forty-two'
 
     # prompt: y
     assert_value '''
-    forty-two
-    сорок два
-    ''' == [102, 111, 114, 116, 121, 45, 116, 119, 111, 10, 1089, 1086, 1088, 1086, 1082, 32, 1076, 1074, 1072, 10]
+                 forty-two
+                 сорок два
+                 ''' == [
+                   102,
+                   111,
+                   114,
+                   116,
+                   121,
+                   45,
+                   116,
+                   119,
+                   111,
+                   10,
+                   1089,
+                   1086,
+                   1088,
+                   1086,
+                   1082,
+                   32,
+                   1076,
+                   1074,
+                   1072,
+                   10
+                 ]
 
     # prompt: y
     assert_value ~C(forty-two) == 'forty-two'
@@ -218,13 +268,21 @@ defmodule ParserTest do
     assert_value %{__struct__: ParserTest.User, age: 21, name: "Peter"} == %User{age: 21, name: "Peter"}
 
     # prompt: y
-    assert_value %{__struct__: ParserTest.User, age: 21, name: "Peter"} == %ParserTest.User{age: 21, name: "Peter"}
+    assert_value %{__struct__: ParserTest.User, age: 21, name: "Peter"} ==
+                   %ParserTest.User{age: 21, name: "Peter"}
 
     # prompt: y
     assert_value ~W(foo bar) == ["foo", "bar"]
 
     # prompt: y
-    assert_value  [%{a: 42, b: {:left, :light}, c: [%User{}, 1]}, nil] == [%{a: 42, b: {:left, :light}, c: [%ParserTest.User{age: 27, name: "John"}, 1]}, nil]
+    assert_value [%{a: 42, b: {:left, :light}, c: [%User{}, 1]}, nil] == [
+                   %{
+                     a: 42,
+                     b: {:left, :light},
+                     c: [%ParserTest.User{age: 27, name: "John"}, 1]
+                   },
+                   nil
+                 ]
   end
 
   test "expected literal" do
@@ -338,22 +396,22 @@ defmodule ParserTest do
 
   test "spaces around equation" do
     # prompt: y
-    assert_value "foo"== "foo"
+    assert_value "foo" == "foo"
 
     # prompt: y
-    assert_value "foo" =="foo"
+    assert_value "foo" == "foo"
 
     # prompt: y
-    assert_value "foo"=="foo"
+    assert_value "foo" == "foo"
 
     # prompt: y
-    assert_value "foo"   == "foo"
+    assert_value "foo" == "foo"
 
     # prompt: y
-    assert_value "foo" ==   "foo"
+    assert_value "foo" == "foo"
 
     # prompt: y
-    assert_value "foo"   ==   "foo"
+    assert_value "foo" == "foo"
   end
 
   test "string escaping" do
@@ -408,47 +466,43 @@ defmodule ParserTest do
 
   test "parens" do
     # prompt: y
-    assert_value("foo" == "foo")
+    assert_value "foo" == "foo"
 
     # prompt: y
-    assert_value ("foo" == "foo")
+    assert_value "foo" == "foo"
 
     # prompt: y
-    assert_value(("foo" == "foo"))
+    assert_value "foo" == "foo"
 
     # prompt: y
-    assert_value (("foo" == "foo"))
+    assert_value "foo" == "foo"
 
     # prompt: y
-    assert_value("foo" == "foo")
+    assert_value "foo" == "foo"
 
     # prompt: y
-    assert_value ("foo" == "foo")
+    assert_value "foo" == "foo"
 
     # prompt: y
-    assert_value(("foo" == "foo"))
+    assert_value "foo" == "foo"
 
     # prompt: y
-    assert_value (("foo" == "foo"))
+    assert_value "foo" == "foo"
 
     # prompt: y
-    assert_value ("foo") == "foo"
+    assert_value "foo" == "foo"
 
     # prompt: y
-    assert_value (("foo")) == "foo"
+    assert_value "foo" == "foo"
 
     # prompt: y
-    assert_value((("foo")) == "foo")
+    assert_value "foo" == "foo"
 
     # prompt: y
-    assert_value ((("foo")) == "foo")
+    assert_value "foo" == "foo"
 
     # prompt: y
-    assert_value(
-      (
-        ("foo")
-      ) == "foo"
-    )
+    assert_value "foo" == "foo"
   end
 
   test "left/right expressions" do
@@ -462,13 +516,10 @@ defmodule ParserTest do
     assert_value foo <> "bar" == "foobar"
 
     # prompt: y
-    assert_value foo <>
-      "bar" == "foobar"
+    assert_value foo <> "bar" == "foobar"
 
     # prompt: y
-    assert_value foo <>
-      "bar" ==
-      "foobar"
+    assert_value foo <> "bar" == "foobar"
   end
 
   test "functions" do
@@ -489,21 +540,16 @@ defmodule ParserTest do
     assert_value hello.("World") == "Hello World!"
 
     # prompt: y
-    assert_value String.upcase(
-      "foo"
-    ) == "FOO"
+    assert_value String.upcase("foo") == "FOO"
   end
 
   test "pipes" do
     # prompt: y
-    assert_value String.upcase("foo") |> String.reverse ==
-        "OOF"
+    assert_value String.upcase("foo") |> String.reverse() == "OOF"
 
     # prompt: y
     assert_value String.upcase("foo")
-                 |> String.reverse
-                 ==
-                 "OOF"
+                 |> String.reverse() == "OOF"
   end
 
   test "repeatable expressions" do
@@ -525,24 +571,24 @@ defmodule ParserTest do
     # "if" macro.
 
     assert_value quote(do: Kernel.||(1, false))
-      |> Macro.expand(__ENV__)
-      |> Macro.to_string
-      |> String.replace(
-        "when x in [false, nil]",
-        "when Kernel.in(x, [false, nil])"
-      ) == """
-    case(1) do
-      x when Kernel.in(x, [false, nil]) ->
-        false
-      x ->
-        x
-    end<NOEOL>
-    """
+                 |> Macro.expand(__ENV__)
+                 |> Macro.to_string()
+                 |> String.replace(
+                   "when x in [false, nil]",
+                   "when Kernel.in(x, [false, nil])"
+                 ) == """
+                 case(1) do
+                   x when Kernel.in(x, [false, nil]) ->
+                     false
+                   x ->
+                     x
+                 end<NOEOL>
+                 """
   end
 
   test "function without arguments" do
     # prompt: y
-    assert_value Foo.foo == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
     assert_value Foo.foo() == "foo"
