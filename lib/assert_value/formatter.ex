@@ -10,6 +10,24 @@ defmodule AssertValue.Formatter do
     end
   end
 
+  def format_assert_value(code, indentation, formatter_opts) do
+    # 98 is default Elixir line length
+    line_length = Keyword.get(formatter_opts, :line_length, 98)
+    # Reduce line length to indentation
+    # Since we format only assert_value statement, formatter will unindent
+    # it as it is the only statement in all code. When we add indentation
+    # back, line length may exceed limits.
+    line_length = line_length - String.length(indentation)
+    formatter_opts = Keyword.put(formatter_opts, :line_length, line_length)
+
+    code
+    |> Code.format_string!(formatter_opts)
+    |> IO.iodata_to_binary
+    |> to_lines
+    |> Enum.map(&(indentation <> &1))
+    |> Enum.join("\n")
+  end
+
   # Private
 
   defp format_as_elixir_code(actual) do

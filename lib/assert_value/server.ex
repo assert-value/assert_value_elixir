@@ -45,7 +45,8 @@ defmodule AssertValue.Server do
     state = %{
       captured_ex_unit_io_pid: nil,
       file_changes: %{},
-      recurring_answer: recurring_answer
+      recurring_answer: recurring_answer,
+      formatter_options: read_dot_formatter()
     }
     {:ok, state}
   end
@@ -74,7 +75,7 @@ defmodule AssertValue.Server do
     if contents != "", do: IO.write contents
     {answer, state} = prompt_for_action(opts, state)
     if answer in ["y", "Y", :reformat] do
-      case update_expected(state.file_changes, opts[:expected_type], opts) do
+      case update_expected(state, opts[:expected_type], opts) do
         {:ok, file_changes} ->
           {:reply, :ok, %{state | file_changes: file_changes}}
         {:error, :parse_error} ->
@@ -98,12 +99,13 @@ defmodule AssertValue.Server do
     GenServer.cast __MODULE__, {:flush_ex_unit_io}
   end
 
+  # All calls get :infinity timeout because GenServer may wait for user input
+
   def reformat_expected? do
     GenServer.call __MODULE__, {:reformat_expected?}, :infinity
   end
 
   def ask_user_about_diff(opts) do
-    # Wait for user's input forever
     GenServer.call __MODULE__, {:ask_user_about_diff, opts}, :infinity
   end
 
@@ -174,14 +176,14 @@ defmodule AssertValue.Server do
   end
 
   # Update expected when expected is File.read!
-  def update_expected(file_changes, :file, opts) do
+  def update_expected(state, :file, opts) do
     File.write!(opts[:expected_file], opts[:actual_value])
-    {:ok, file_changes}
+    {:ok, state.file_changes}
   end
 
-  def update_expected(file_changes, _any, opts) do
+  def update_expected(state, _any, opts) do
     current_line_number = current_line_number(
-      file_changes,
+      state.file_changes,
       opts[:caller][:file],
       opts[:caller][:line]
     )
@@ -192,16 +194,30 @@ defmodule AssertValue.Server do
       opts[:actual_ast],
       opts[:expected_ast]
     ) do
-      {prefix, old_expected, suffix, indentation} ->
+      {prefix, assert_value_prefix, old_expected,
+          assert_value_suffix, suffix, indentation} ->
+
         new_expected = AssertValue.Formatter.new_expected_from_actual_value(
           opts[:actual_value], indentation)
-        File.write!(opts[:caller][:file], prefix <> new_expected <> suffix)
+
+        old_assert_value =
+          assert_value_prefix <> old_expected <> assert_value_suffix
+
+        new_assert_value =
+          assert_value_prefix <> new_expected <> assert_value_suffix
+          |> AssertValue.Formatter.format_assert_value(
+            indentation, state.formatter_options
+          )
+
+        new_code = prefix <> new_assert_value <> suffix
+
+        File.write!(opts[:caller][:file], new_code)
         {:ok, update_line_numbers(
-          file_changes,
+          state.file_changes,
           opts[:caller][:file],
           opts[:caller][:line],
-          old_expected,
-          new_expected
+          old_assert_value,
+          new_assert_value
         )}
       {:error, :parse_error} ->
         {:error, :parse_error}
@@ -227,6 +243,43 @@ defmodule AssertValue.Server do
       (file_changes[filename] || %{})
       |> Map.put(original_line_number, offset)
     Map.put(file_changes, filename, current_file_changes)
+  end
+
+  # Borrowed partially from Elixir's Mix.Task.Format
+  #
+  # NOTE: We don't recursively search for .formatter.exs in project
+  # dependencies. We format only one assert_value statement and it is not
+  # likely will include some fancy functions from 3rd party libs
+  #
+  # TODO: Elixir master now have public Max.Task.Format.formatter_opts_for_file
+  # with all we need. It is better to use it in future versions
+  defp read_dot_formatter do
+    opts =
+      if File.regular?(".formatter.exs") do
+        {opts, _} = Code.eval_file(".formatter.exs")
+
+        unless Keyword.keyword?(opts) do
+          raise("Expected .formatter.exs to return a keyword list")
+        end
+
+        opts
+      else
+        [] # Use default Elixir formatter options
+      end
+
+    # Force locals_without_parens for assert_value. We don't eval
+    # formatter options from all user dependencies (including assert_value).
+    # Also user may not add "import_deps: [:assert_value]" to .formatter.exs
+    forced_options = MapSet.new([assert_value: :*])
+
+    locals_without_parens =
+        opts
+        |> Keyword.get(:locals_without_parens, [])
+        |> MapSet.new()
+        |> MapSet.union(forced_options)
+        |> MapSet.to_list()
+
+    Keyword.put(opts, :locals_without_parens, locals_without_parens)
   end
 
 end

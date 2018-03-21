@@ -6,14 +6,42 @@ defmodule AssertValue.Parser do
     defexception [message: "Unable to parse assert_value arguments"]
   end
 
-  # Returns {prefix, expected, suffix, indentation}
+  # Parse file with test code and returns {:ok, parsed} on success
+  # where parsed is a map with keys:
   #
-  # Split file contents (code) to three parts:
-  #   * everything before expected (prefix)
-  #   * expected as it is formatted in code include quotes (expected)
-  #   * everything after expected (suffix)
+  # :prefix - code before line with assert_value
+  # :assert_value - whole assert_value call with all arguments as it is
+  #   formatted in the code
+  # :indentation - spaces from the beginning of the line to "assert_value"
+  # :assert_value_prefix - everything in assert_value call before expected
+  #   as it is formatted in the code (including ==)
+  # :expected - expected as it is formatted in the code (including quotes)
+  # :assert_value_suffix - everything left in assert_value after expected
+  #   (closing parens, spaces, etc)
+  # :suffix - code after last line of assert_value call (with all arguments)
   #
-  #   code == prefix <> expected <> suffix
+  # Example:
+  #
+  # defmodule AssertValue.DevTest do ----+
+  #   use ExUnit.Case                    |
+  #                                      | :prefix
+  #   import AssertValue                 |
+  #                                      |
+  #   test "list" do                 ----+
+  #      assert_value "foo" == "bar"       :assert_value
+  #   end                            ----+
+  #                                      | :suffix
+  # end                              ----+
+  #
+  # +---+-- :indentation       +---+------ :expected
+  # |   |                      |   |
+  #      assert_value "foo" == "bar"  \n
+  #      |                    |     |  |
+  #      |                    |     +--+-- :assert_value_suffix
+  #      |                    |
+  #      +--------------------+----------- :assert_value_prefix
+  #
+  # Returns {:error, :parse_error} on failure
   #
   def parse_expected(
     filename, line_num, assertion_ast, actual_ast, expected_ast
@@ -29,7 +57,9 @@ defmodule AssertValue.Parser do
     [_, indentation, assert_value, rest] =
       Regex.run(~r/(^\s*)(assert_value\s*)(.*)/s, suffix)
 
-    prefix = prefix <> "\n" <> indentation <> assert_value
+    prefix = prefix <> "\n"
+    assert_value_prefix = indentation <> assert_value
+    assert_value_suffix = ""
 
     # We enclose parsing in try/rescue because parser code is executed
     # inside genserver. Exceptions raised in genserver produce unreadable
@@ -38,27 +68,36 @@ defmodule AssertValue.Parser do
     try do
       {assertion, suffix} = find_ast_in_code(rest, assertion_ast)
       {assertion, left_parens, right_parens} = trim_parens(assertion)
-      prefix = prefix <> left_parens
-      suffix = right_parens <> suffix
+      assert_value_prefix = assert_value_prefix <> left_parens
+      assert_value_suffix = right_parens <> assert_value_suffix
 
-      {prefix, rest, suffix} =
+      {assert_value_prefix, rest} =
         if actual_ast == :_not_present_ do
-          {prefix <> assertion, "", suffix}
+          {assert_value_prefix <> assertion, ""}
         else
           {actual, rest} = find_ast_in_code(assertion, actual_ast)
-          {prefix <> actual, rest, suffix}
+          {assert_value_prefix <> actual, rest}
         end
 
-      {prefix, expected, suffix} =
+      {assert_value_prefix, expected, assert_value_suffix} =
         if expected_ast == :_not_present_ do
-          {prefix <> " == ", "", suffix}
+          {
+            assert_value_prefix <> " == ",
+            "",
+            assert_value_suffix
+          }
         else
           [_, operator, _, rest] = Regex.run(~r/((\)|\s)*==\s*)(.*)/s, rest)
           {expected, rest} = find_ast_in_code(rest, expected_ast)
-          {prefix <> operator, expected, rest <> suffix}
+          {
+            assert_value_prefix <> operator,
+            expected,
+            rest <> assert_value_suffix
+          }
         end
 
-      {prefix, expected, suffix, indentation}
+      {prefix, assert_value_prefix, expected,
+        assert_value_suffix, suffix, indentation}
     rescue
       AssertValue.Parser.ParseError ->
         {:error, :parse_error}
