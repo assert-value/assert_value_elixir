@@ -1,4 +1,4 @@
-defmodule Code.Formatter do
+defmodule AssertValue.Vendor.Elixir.Code.Formatter do
   @moduledoc false
   import Inspect.Algebra, except: [format: 2, surround: 3, surround: 4]
 
@@ -234,6 +234,17 @@ defmodule Code.Formatter do
       {:error, {line, error, token}} ->
         :elixir_errors.parse_error(line, Keyword.get(opts, :file, "nofile"), error, token)
     end
+  end
+
+  # This is a hack to get to private function
+  def quoted_to_algebra(block) do
+     state = %{
+      locals_without_parens: [assert_value: :*],
+      rename_deprecated_at: "1.6.0",
+      operand_nesting: 2,
+      comments: []
+    }
+    block_to_algebra(block, @min_line, @max_line, state)
   end
 
   defp state(comments, opts) do
