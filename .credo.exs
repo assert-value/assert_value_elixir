@@ -14,7 +14,7 @@
       # This key IS NOT merged with default config
       files: %{
         included: ["lib/", "config/", "test/"],
-        excluded: [~r"/_build/", ~r"/deps/"]
+        excluded: [~r"/_build/", ~r"/deps/", "lib/vendor/"]
       },
       #
       # If you create your own checks, you must specify the source files for

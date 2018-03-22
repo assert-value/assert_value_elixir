@@ -103,7 +103,6 @@ defmodule AssertValue do
     defexception [:message]
   end
 
-
   # There is a problem with Macro.to_string() and big strings
   # Strings > 4095 symbols are truncated by Inspect module and
   # get "<> ..." at the end
