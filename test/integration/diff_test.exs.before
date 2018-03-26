@@ -21,4 +21,39 @@ defmodule DiffTest do
     assert_value 1 == "1"
   end
 
+
+  test "diff" do
+    a = """
+    aaa
+    bbb
+    ccc
+    ddd
+    eee
+    fff
+    """
+    b = """
+    aaa
+    xxx
+    ddd
+    eee
+    fff
+    GGG
+    """
+
+    # prompt: y
+    assert_value a == b
+
+    # prompt: y
+    assert_value nil == b
+
+    # prompt: y
+    assert_value a == nil
+  end
+
+  test "char list diff" do
+    # prompt: y
+    assert_value 'aaa\nbbb\nccc\nddd\neee\nfff\n' ==
+        "aaa\nxxx\nddd\neee\nfff\nGGG\n"
+  end
+
 end

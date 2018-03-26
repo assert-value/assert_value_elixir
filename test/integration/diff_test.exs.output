@@ -21,4 +21,44 @@ diff_test.exs:##:"test integer and string" assert_value 1 == "1" failed
 +1
 
 Accept new value? [y,n,?] .
-3 tests, 0 failures
+diff_test.exs:##:"test diff" assert_value a == b failed
+
+ aaa
+-xxx
++bbb
++ccc
+ ddd
+ eee
+ fff
+-GGG
+
+Accept new value? [y,n,?] 
+diff_test.exs:##:"test diff" assert_value nil == b failed
+
+-aaa
+-xxx
+-ddd
+-eee
+-fff
+-GGG
++
+
+Accept new value? [y,n,?] 
+diff_test.exs:##:"test diff" assert_value a == nil failed
+
+-
++aaa
++bbb
++ccc
++ddd
++eee
++fff
+
+Accept new value? [y,n,?] .
+diff_test.exs:##:"test char list diff" assert_value 'aaa\nbbb\nccc\nddd\neee\nfff\n' == "aaa... failed
+
+-"aaa\nxxx\nddd\neee\nfff\nGGG\n"
++'aaa\nbbb\nccc\nddd\neee\nfff\n'
+
+Accept new value? [y,n,?] .
+5 tests, 0 failures
