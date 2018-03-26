@@ -1,8 +1,10 @@
 
-decline_all_test.exs:##:"test all fail" assert_value "foo" == "bar<NOEOL>\n" failed
+decline_all_test.exs:##:"test all fail" assert_value failed
 
--bar
-+foo
+-    assert_value "foo" == """
+-                 bar<NOEOL>
+-                 """
++    assert_value "foo" == "foo"
 
 Accept new value? [y,n,?] 
 

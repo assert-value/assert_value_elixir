@@ -114,8 +114,8 @@ defmodule AssertValue do
       try do
         {evaluated_value, _} =
           value
-          |> AssertValue.Formatter.new_expected_from_actual_value("")
-          |> Code.eval_string
+          |> AssertValue.Formatter.new_expected_from_actual_value()
+          |> Code.eval_string()
 
         evaluated_value = if is_binary(evaluated_value) do
           String.replace(evaluated_value, ~r/<NOEOL>\n\Z/, "", global: false)

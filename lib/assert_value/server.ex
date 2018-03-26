@@ -73,21 +73,38 @@ defmodule AssertValue.Server do
     Process.sleep(30)
     contents = StringIO.flush(state.captured_ex_unit_io_pid)
     if contents != "", do: IO.write contents
-    {answer, state} = prompt_for_action(opts, state)
-    if answer in ["y", "Y", :reformat] do
-      case update_expected(state, opts[:expected_type], opts) do
-        {:ok, file_changes} ->
+
+    case prepare_formatted_diff_and_new_code(opts, state) do
+      {:ok, prepared} ->
+        {answer, state} = prompt_for_action(prepared.diff, opts, state)
+        if answer in ["y", "Y", :reformat] do
+          file_changes =
+            if opts[:expected_type] == :file do
+              File.write!(opts[:expected_file], opts[:actual_value])
+              state.file_changes
+            else
+              File.write!(opts[:caller][:file], prepared.new_file_content)
+              update_line_numbers(
+                state.file_changes,
+                opts[:caller][:file],
+                opts[:caller][:line],
+                prepared.old_assert_value,
+                prepared.new_assert_value
+              )
+            end
           {:reply, :ok, %{state | file_changes: file_changes}}
-        {:error, :parse_error} ->
-          {:reply, {:error, :parse_error}, state}
-      end
-    else
-      # Fail test. Pass exception up to the caller and throw it there
-      {:reply,  {:error, :ex_unit_assertion_error, [left: opts[:actual_value],
-          right: opts[:expected_value],
-          expr: Macro.to_string(opts[:assertion_ast]),
-          message: "AssertValue assertion failed"]},
-      state}
+        else
+          # Fail test. Pass exception up to the caller and throw it there
+          {:reply,  {:error, :ex_unit_assertion_error, [
+              left: opts[:actual_value],
+              right: opts[:expected_value],
+              expr: Macro.to_string(opts[:assertion_ast]),
+              message: "AssertValue assertion failed"
+          ]},
+          state}
+        end
+      {:error, :parse_error} ->
+        {:reply, {:error, :parse_error}, state}
     end
   end
 
@@ -109,16 +126,71 @@ defmodule AssertValue.Server do
     GenServer.call __MODULE__, {:ask_user_about_diff, opts}, :infinity
   end
 
-  def prompt_for_action(opts, state) do
-    if state.recurring_answer do
-      {state.recurring_answer, state}
+  defp prepare_formatted_diff_and_new_code(opts, state) do
+    if opts[:expected_type] == :file do
+      {:ok, %{
+        diff: AssertValue.Diff.diff(opts[:expected_value], opts[:actual_value])
+      }}
     else
-      print_diff_and_context(opts)
-      get_answer(opts, state)
+      current_line_number = current_line_number(
+        state.file_changes,
+        opts[:caller][:file],
+        opts[:caller][:line]
+      )
+      case AssertValue.Parser.parse_assert_value(
+        opts[:caller][:file],
+        current_line_number,
+        opts[:assertion_ast],
+        opts[:actual_ast],
+        opts[:expected_ast]
+      ) do
+        {:ok, parsed} ->
+           new_expected = AssertValue.Formatter.new_expected_from_actual_value(
+            opts[:actual_value]
+          )
+
+          new_assert_value =
+            parsed.assert_value_prefix <>
+            new_expected <>
+            parsed.assert_value_suffix
+
+          # Format old assert value with formatter to diff it against
+          # new assert_value. This way user will see only expected value
+          # diff without mixing it with formatting diff
+          old_assert_value = AssertValue.Formatter.format_with_indentation(
+            parsed.assert_value, parsed.indentation, state.formatter_options
+          )
+
+          new_assert_value = AssertValue.Formatter.format_with_indentation(
+            new_assert_value, parsed.indentation, state.formatter_options
+          )
+
+          diff = AssertValue.Diff.diff(old_assert_value, new_assert_value)
+
+          new_file_content = parsed.prefix <> new_assert_value <> parsed.suffix
+
+          {:ok, %{
+            diff: diff,
+            new_file_content: new_file_content,
+            old_assert_value: parsed.assert_value,
+            new_assert_value: new_assert_value
+          }}
+        {:error, :parse_error} ->
+          {:error, :parse_error}
+      end
     end
   end
 
-  defp print_diff_and_context(opts) do
+  defp prompt_for_action(diff, opts, state) do
+    if state.recurring_answer do
+      {state.recurring_answer, state}
+    else
+      print_diff_and_context(diff, opts)
+      get_answer(diff, opts, state)
+    end
+  end
+
+  defp print_diff_and_context(diff, opts) do
     file =
       opts[:caller][:file]
       |> Path.relative_to(System.cwd!) # make it shorter
@@ -130,10 +202,17 @@ defmodule AssertValue.Server do
     # * not be unreasonably long, so the user sees it on the screen
     #   grouped with the diff
     {function, _} = opts[:caller][:function]
-    code = opts[:assertion_ast] |> Macro.to_string |> smart_truncate(40)
     diff_context =
-      "#{file}:#{line}:\"#{function}\" assert_value #{code} failed"
-    diff = AssertValue.Diff.diff(opts[:expected_value], opts[:actual_value])
+      # We don't need to print context when showing diff for assert_value
+      # statement because all context is in diff. But we still need to print
+      # context when showing diff for File.read! Because we show only diff
+      # for file contents in that case.
+      if opts[:expected_type] == :file do
+        code = opts[:assertion_ast] |> Macro.to_string |> smart_truncate(40)
+        "#{file}:#{line}:\"#{function}\" assert_value #{code} failed"
+      else
+        "#{file}:#{line}:\"#{function}\" assert_value failed"
+      end
     diff_lines_count = String.split(diff, "\n") |> Enum.count()
     IO.puts "\n" <> diff_context <> "\n"
     IO.puts diff
@@ -142,17 +221,17 @@ defmodule AssertValue.Server do
     if diff_lines_count > 37, do: IO.puts diff_context
   end
 
-  defp get_answer(opts, state) do
+  defp get_answer(diff, opts, state) do
     answer =
       IO.gets("Accept new value? [y,n,?] ")
       |> String.trim_trailing("\n")
     case answer do
       "?" ->
         print_help()
-        get_answer(opts, state)
+        get_answer(diff, opts, state)
       "d" ->
-        print_diff_and_context(opts)
-        get_answer(opts, state)
+        print_diff_and_context(diff, opts)
+        get_answer(diff, opts, state)
       c when c in ["Y", "N"]  ->
         # Save answer in state and use it in future
         {c, %{state | recurring_answer: c}}
@@ -173,55 +252,6 @@ defmodule AssertValue.Server do
     """
     |> String.replace(~r/^/m, "    ") # Indent all lines
     |> IO.puts
-  end
-
-  # Update expected when expected is File.read!
-  def update_expected(state, :file, opts) do
-    File.write!(opts[:expected_file], opts[:actual_value])
-    {:ok, state.file_changes}
-  end
-
-  def update_expected(state, _any, opts) do
-    current_line_number = current_line_number(
-      state.file_changes,
-      opts[:caller][:file],
-      opts[:caller][:line]
-    )
-    case AssertValue.Parser.parse_expected(
-      opts[:caller][:file],
-      current_line_number,
-      opts[:assertion_ast],
-      opts[:actual_ast],
-      opts[:expected_ast]
-    ) do
-      {prefix, assert_value_prefix, old_expected,
-          assert_value_suffix, suffix, indentation} ->
-
-        new_expected = AssertValue.Formatter.new_expected_from_actual_value(
-          opts[:actual_value], indentation)
-
-        old_assert_value =
-          assert_value_prefix <> old_expected <> assert_value_suffix
-
-        new_assert_value =
-          assert_value_prefix <> new_expected <> assert_value_suffix
-          |> AssertValue.Formatter.format_assert_value(
-            indentation, state.formatter_options
-          )
-
-        new_code = prefix <> new_assert_value <> suffix
-
-        File.write!(opts[:caller][:file], new_code)
-        {:ok, update_line_numbers(
-          state.file_changes,
-          opts[:caller][:file],
-          opts[:caller][:line],
-          old_assert_value,
-          new_assert_value
-        )}
-      {:error, :parse_error} ->
-        {:error, :parse_error}
-    end
   end
 
   # Helpers to keep changes we make to files on updating expected values

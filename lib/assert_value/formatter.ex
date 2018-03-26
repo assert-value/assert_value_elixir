@@ -2,15 +2,15 @@ defmodule AssertValue.Formatter do
 
   import AssertValue.StringTools
 
-  def new_expected_from_actual_value(actual, indentation) do
+  def new_expected_from_actual_value(actual) do
     if is_binary(actual) and length(to_lines(actual)) > 1 do
-      format_as_heredoc(actual, indentation)
+      format_as_heredoc(actual)
     else
       format_as_elixir_code(actual)
     end
   end
 
-  def format_assert_value(code, indentation, formatter_opts) do
+  def format_with_indentation(code, indentation, formatter_opts) do
     # 98 is default Elixir line length
     line_length = Keyword.get(formatter_opts, :line_length, 98)
     # Reduce line length to indentation
@@ -46,14 +46,13 @@ defmodule AssertValue.Formatter do
     end)
   end
 
-  defp format_as_heredoc(actual, indentation) do
+  defp format_as_heredoc(actual) do
     actual =
       actual
       |> add_noeol_if_needed
       |> to_lines
-      |> Enum.map(&(indentation <> &1))
       |> Enum.map(&escape_heredoc_line/1)
-    [~s(""")] ++ actual ++ [indentation <> ~s(""")]
+    [~s(""")] ++ actual ++ [~s(""")]
     |> Enum.join("\n")
   end
 

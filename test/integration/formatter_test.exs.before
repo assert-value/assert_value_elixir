@@ -22,6 +22,11 @@ defmodule FormatterTest do
     assert_value "foo\nbar"
   end
 
+  test "long arrays" do
+    # prompt: y
+    assert_value [0,1,2,3,4,5,6,7,8,9,10] == [0,1,2,3,5,5,5,7,8,9,10]
+  end
+
   test "long strings" do
     # prompt: y
     assert_value String.duplicate("a", 5000)

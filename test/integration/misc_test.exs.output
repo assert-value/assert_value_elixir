@@ -1,54 +1,58 @@
 .
-misc_test.exs:##:"test reprompt context" assert_value actual failed
+misc_test.exs:##:"test reprompt context" assert_value failed
 
--
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
-+line
+-    assert_value actual
++    assert_value actual == """
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 line
++                 """
 
-misc_test.exs:##:"test reprompt context" assert_value actual failed
+misc_test.exs:##:"test reprompt context" assert_value failed
 Accept new value? [y,n,?] .
-misc_test.exs:##:"test simple fail" assert_value actual == "aaa\nbBb\nccc\n" failed
+misc_test.exs:##:"test simple fail" assert_value failed
 
- aaa
--bBb
-+bbb
- ccc
+     assert_value actual == """
+                  aaa
+-                 bBb
++                 bbb
+                  ccc
+                  """
 
 Accept new value? [y,n,?] 
 

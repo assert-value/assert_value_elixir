@@ -43,7 +43,7 @@ defmodule AssertValue.Parser do
   #
   # Returns {:error, :parse_error} on failure
   #
-  def parse_expected(
+  def parse_assert_value(
     filename, line_num, assertion_ast, actual_ast, expected_ast
   ) do
     {prefix, suffix} =
@@ -67,6 +67,7 @@ defmodule AssertValue.Parser do
     # genserver and reraise them to show readable Elixir error messages
     try do
       {assertion, suffix} = find_ast_in_code(rest, assertion_ast)
+      assert_value = assert_value_prefix <> assertion
       {assertion, left_parens, right_parens} = trim_parens(assertion)
       assert_value_prefix = assert_value_prefix <> left_parens
       assert_value_suffix = right_parens <> assert_value_suffix
@@ -96,8 +97,15 @@ defmodule AssertValue.Parser do
           }
         end
 
-      {prefix, assert_value_prefix, expected,
-        assert_value_suffix, suffix, indentation}
+      {:ok, %{
+        prefix: prefix,
+        suffix: suffix,
+        assert_value: assert_value,
+        assert_value_prefix: assert_value_prefix,
+        assert_value_suffix: assert_value_suffix,
+        expected: expected,
+        indentation: indentation
+      }}
     rescue
       AssertValue.Parser.ParseError ->
         {:error, :parse_error}
