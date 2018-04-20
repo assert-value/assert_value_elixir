@@ -1,10 +1,15 @@
 # Changelog
 
+## v0.8.4 - April 20, 2018
+
+ * Features
+   * Remove support for strict equality (===)
+
 ## v0.8.3 - April 20, 2018
 
  * Bugfixes
    * Fix long (>4096 symbols) binaries serialization
- * Enhancements
+ * Features
    * Support strict equality operator: `assert_value 1 === 1.0`
 
 ## v0.8.2 - February 19, 2018
