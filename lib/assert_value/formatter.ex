@@ -2,21 +2,31 @@ defmodule AssertValue.Formatter do
 
   import AssertValue.StringTools
 
-  # Return new expected value and its length in lines
-  def new_expected_from_actual_value(actual, indentation)
-      when is_binary(actual) do
-    if length(to_lines(actual)) <= 1 do
-      Macro.to_string(actual)
-    else
+  def new_expected_from_actual_value(actual, indentation) do
+    if is_binary(actual) and length(to_lines(actual)) > 1 do
       format_as_heredoc(actual, indentation)
+    else
+      format_as_elixir_code(actual)
     end
   end
 
-  def new_expected_from_actual_value(actual, _indentation) do
-    Macro.to_string(actual)
-  end
-
   # Private
+
+  defp format_as_elixir_code(actual) do
+    # Temporary (until Elixir 1.6.5) workaround for Macro.to_string()
+    # to make it work with big binaries as suggested on Elixir Forum:
+    # https://elixirforum.com/t/how-to-increase-printable-limit/13613
+    # Without it big binaries (>4096 symbols) are truncated because of bug
+    # in Inspect module.
+    # TODO Change to plain Macro.to_string() when we drop support for
+    # Elixirs < 1.6.5
+    Macro.to_string(actual, fn
+      node, _ when is_binary(node) ->
+        inspect(node, printable_limit: :infinity)
+      _, string ->
+        string
+    end)
+  end
 
   defp format_as_heredoc(actual, indentation) do
     actual =
@@ -33,7 +43,7 @@ defmodule AssertValue.Formatter do
   # of string escaping. Use it, but remove surrounding quotes
   # https://github.com/elixir-lang/elixir/blob/master/lib/elixir/lib/inspect.ex
   defp escape_heredoc_line(s) do
-    inspect(s)
+    inspect(s, printable_limit: :infinity)
     |> String.replace(~r/(\A"|"\Z)/, "")
   end
 

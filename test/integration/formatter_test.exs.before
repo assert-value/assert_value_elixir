@@ -22,4 +22,9 @@ defmodule FormatterTest do
     assert_value "foo\nbar"
   end
 
+  test "long strings" do
+    # prompt: y
+    assert_value String.duplicate("a", 5000)
+  end
+
 end
