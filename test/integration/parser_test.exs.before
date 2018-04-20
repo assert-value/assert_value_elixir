@@ -564,12 +564,4 @@ defmodule ParserTest do
     assert_value 1.0 == 2
   end
 
-  test "strict equality" do
-    # prompt: y
-    assert_value 1 === 1.0
-
-    # prompt: y
-    assert_value 1.0 === 1
-  end
-
 end
