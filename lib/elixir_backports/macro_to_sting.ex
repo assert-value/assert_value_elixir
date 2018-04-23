@@ -10,7 +10,7 @@ defmodule ElixirBackports.MacroToString do
 
   @moduledoc false
 
-  alias Code.Identifier
+  alias ElixirBackports.Code.Identifier
 
   def to_string(tree, fun \\ fn _ast, string -> string end)
 
