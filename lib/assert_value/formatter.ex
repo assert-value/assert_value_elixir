@@ -13,19 +13,12 @@ defmodule AssertValue.Formatter do
   # Private
 
   defp format_as_elixir_code(actual) do
-    # Temporary (until Elixir 1.6.5) workaround for Macro.to_string()
-    # to make it work with big binaries as suggested on Elixir Forum:
-    # https://elixirforum.com/t/how-to-increase-printable-limit/13613
-    # Without it big binaries (>4096 symbols) are truncated because of bug
-    # in Inspect module.
-    # TODO Change to plain Macro.to_string() when we drop support for
-    # Elixirs < 1.6.5
-    Macro.to_string(actual, fn
-      node, _ when is_binary(node) ->
-        inspect(node, printable_limit: :infinity)
-      _, string ->
-        string
-    end)
+    # Backported fixed version of Elixir's Macro.to_string
+    # This version not to truncate big binaries (>4096 symbols), maps
+    # and other big structures
+    #
+    # TODO: Remove when we drop support of Elixirs <= 1.6.4
+    ElixirBackports.MacroToString.to_string(actual)
   end
 
   defp format_as_heredoc(actual, indentation) do
@@ -43,7 +36,7 @@ defmodule AssertValue.Formatter do
   # of string escaping. Use it, but remove surrounding quotes
   # https://github.com/elixir-lang/elixir/blob/master/lib/elixir/lib/inspect.ex
   defp escape_heredoc_line(s) do
-    inspect(s, printable_limit: :infinity)
+    inspect(s, limit: :infinity, printable_limit: :infinity)
     |> String.replace(~r/(\A"|"\Z)/, "")
   end
 
