@@ -27,4 +27,27 @@ defmodule FormatterTest do
     assert_value String.duplicate("a", 5000)
   end
 
+  test "big map" do
+    # prompt: y
+    big_map =
+      1..64
+      |> Enum.reduce(%{}, fn(x, acc) ->
+        Map.put(acc, to_string(x), x)
+      end)
+
+    assert_value big_map
+  end
+
+  test "big keyword list" do
+    # prompt: y
+    big_kw_list =
+      1..64
+      |> Enum.reduce([], fn(x, acc) ->
+        [acc, {String.to_atom("x#{x}"), x}]
+      end)
+      |> List.flatten
+
+    assert_value big_kw_list
+  end
+
 end
