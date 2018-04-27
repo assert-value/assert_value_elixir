@@ -103,4 +103,26 @@ defmodule AssertValue.BadArgumentsTest do
     end
   end
 
+  test "big maps" do
+    big_map =
+      1..64
+      |> Enum.reduce(%{}, fn(x, acc) ->
+        Map.put(acc, to_string(x), x)
+      end)
+
+    # Big map serialization also emits warning
+    stderr_output = ExUnit.CaptureIO.capture_io(:stderr, fn ->
+      assert_raise AssertValue.ArgumentError, fn ->
+        assert_value big_map
+      end
+    end)
+
+    # credo:disable-for-lines:2 Credo.Check.Readability.MaxLineLength
+    assert_value stderr_output == """
+    \e[33mwarning: \e[0mvariable \"...\" does not exist and is being expanded to \"...()\", please use parentheses to remove the ambiguity or change the variable name
+      nofile:1
+    
+    """
+  end
+
 end
