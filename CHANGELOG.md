@@ -1,5 +1,41 @@
 # Changelog
 
+## v0.9.0 - TODO
+
+ * Features
+   * assert_value now uses Elixir Formatter to format values. This improves
+     formatting of big data structures. Previously assert_value formatted
+     expected values other than strings as one line making code unreadable
+     when using big data structures like long arrays and nested maps. Now
+     we use Elixir Formatter and it formats them correctly on multiple lines
+ * Enhancements
+   * assert_value now shows easier to understand diffs (more context)
+     ```
+     # assert_value v0.8.5
+     test/example_test.exs:7:"test expected" assert_value 2 + 2 failed
+     -
+     +4
+
+     # assert_value v0.9.0
+     test/example_test.exs:7:"test example" assert_value failed
+     -    assert_value 2 + 2
+     +    assert_value 2 + 2 == 4
+     ```
+ * Requirements
+   * Elixir >= 1.6
+ * Upgrade Instructions
+   * Add this to .formatter.exs:
+     ```elixir
+     [
+       # don't add parens around assert_value arguments
+       import_deps: [:assert_value],
+       # use this line length when updating expected value
+       line_length: 98 # whatever you prefer, default is 98
+     ]
+     ```
+   * Run `ASSERT_VALUE_ACCEPT_DIFFS=reformat mix test` to take advantage of
+     improved formatter
+
 ## v0.8.5 - April 30, 2018
 
  * Enhancements

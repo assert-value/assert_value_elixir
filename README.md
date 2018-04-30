@@ -63,12 +63,15 @@ config :my_app, MyApp.Repo,
   ownership_timeout: :infinity
 ```
 
-Add this to .formatter.exs to make Elixir formatter not to add parens
-to assert_value
+Add this to .formatter.exs:
 ```elixir
 [
-  import_deps: [:assert_value]
+  # don't add parens around assert_value arguments
+  import_deps: [:assert_value],
+  # use this line length when updating expected value
+  line_length: 98 # whatever you prefer, default is 98
 ]
+
 ```
 
 ## HOWTO
