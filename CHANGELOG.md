@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.8.5 - April 30, 2018
+
+ * Enhancements
+   * Better error messages and README.md
+
 ## v0.8.4 - April 20, 2018
 
  * Features
