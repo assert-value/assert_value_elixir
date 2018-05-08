@@ -13,7 +13,7 @@
 
 ## Screencast
 
-![Screencast](https://github.com/assert-value/assert_value_screencasts/raw/master/elixir-0.8.0/screencast.gif)
+![Screencast](https://github.com/assert-value/assert_value_screencasts/raw/master/elixir-0.9.0/screencast.gif)
 
 ## Usage
 
