@@ -40,7 +40,7 @@ This makes sense for longer values. `assert_value` will create and update file c
 
 ## Requirements
 
-Elixir ~> 1.4
+Elixir ~> 1.6
 
 ## Installation
 
@@ -49,7 +49,7 @@ Add this to mix.exs:
 ```elixir
 defp deps do
   [
-    {:assert_value, "~> 0.8.1", only: :test}
+    {:assert_value, "~> 0.9", only: :test}
   ]
 end
 ```
@@ -150,7 +150,7 @@ parts of the page and presents them in a human readable format:
   defp deps do
     [
       {:floki, "~> 0.7", only: :test},
-      {:assert_value, "~> 0.7", only: :test}
+      {:assert_value, "~> 0.9", only: :test}
     ]
   end
 

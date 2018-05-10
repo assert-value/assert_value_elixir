@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.9.0 - TODO
+## v0.9.0 - May 10, 2018
 
  * Features
    * assert_value now uses Elixir Formatter to format values. This improves
