@@ -42,7 +42,12 @@ defmodule AssertValue.Mixfile do
   end
 
   defp package do
-    [files: ["lib", "mix.exs", "README.md", "LICENSE"],
+    [files: ["lib",
+             ".formatter.exs",
+             "mix.exs",
+             "README.md",
+             "CHANGELOG.md",
+             "LICENSE"],
      maintainers: ["Gleb Arshinov", "Serge Smetana"],
      licenses: ["MIT"],
      links: %{"GitHub" => "https://github.com/assert-value/assert_value_elixir"}]
