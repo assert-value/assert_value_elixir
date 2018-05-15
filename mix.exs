@@ -2,22 +2,26 @@ defmodule AssertValue.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :assert_value,
-     version: "0.9.0",
-     elixir: "~> 1.6",
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     description: description(),
-     package: package(),
-     deps: deps()]
+    [
+      app: :assert_value,
+      version: "0.9.0",
+      elixir: "~> 1.6",
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
+      description: description(),
+      package: package(),
+      deps: deps()
+    ]
   end
 
   # Configuration for the OTP application
   #
   # Type "mix help compile.app" for more information
   def application do
-    [ applications: [],
-      mod: {AssertValue.App, []}]
+    [
+      applications: [],
+      mod: {AssertValue.App, []}
+    ]
   end
 
   # Dependencies can be Hex packages:
@@ -42,14 +46,20 @@ defmodule AssertValue.Mixfile do
   end
 
   defp package do
-    [files: ["lib",
-             ".formatter.exs",
-             "mix.exs",
-             "README.md",
-             "CHANGELOG.md",
-             "LICENSE"],
-     maintainers: ["Gleb Arshinov", "Serge Smetana"],
-     licenses: ["MIT"],
-     links: %{"GitHub" => "https://github.com/assert-value/assert_value_elixir"}]
+    [
+      files: [
+        "lib",
+        ".formatter.exs",
+        "mix.exs",
+        "README.md",
+        "CHANGELOG.md",
+        "LICENSE"
+      ],
+      maintainers: ["Gleb Arshinov", "Serge Smetana"],
+      licenses: ["MIT"],
+      links: %{
+        "GitHub" => "https://github.com/assert-value/assert_value_elixir"
+      }
+    ]
   end
 end
