@@ -49,7 +49,7 @@ Add this to mix.exs:
 ```elixir
 defp deps do
   [
-    {:assert_value, "~> 0.9", only: :test}
+    {:assert_value, ">= 0.0.0", only: [:dev, :test]}
   ]
 end
 ```
@@ -150,7 +150,7 @@ parts of the page and presents them in a human readable format:
   defp deps do
     [
       {:floki, "~> 0.7", only: :test},
-      {:assert_value, "~> 0.9", only: :test}
+      {:assert_value, ">= 0.0.0", only: [:dev, :test]}
     ]
   end
 
