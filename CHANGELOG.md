@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.9.1 - May 18, 2018
+
+ * Bugfixes
+   * Include .formatter.exs in the hex package
+
 ## v0.9.0 - May 10, 2018
 
  * Features
