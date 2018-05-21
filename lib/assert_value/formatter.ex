@@ -24,10 +24,43 @@ defmodule AssertValue.Formatter do
     line_length = line_length - String.length(indentation)
     formatter_opts = Keyword.put(formatter_opts, :line_length, line_length)
 
-    code
-    |> Code.format_string!(formatter_opts)
-    |> IO.iodata_to_binary
-    |> to_lines
+    code =
+      code
+      |> Code.format_string!(formatter_opts)
+      |> IO.iodata_to_binary
+      |> to_lines
+
+    max_line_length =
+      Enum.reduce(code, 0, fn(line, acc) ->
+        len = String.length(line)
+        if len > acc do
+          len
+        else
+          acc
+        end
+      end)
+
+    # Try to save some horizontal space by adding parens
+    if max_line_length > line_length do
+      # Remove assert_value from locals_without_parens formatter options
+      locals_without_parens =
+        formatter_opts
+        |> Keyword.get(:locals_without_parens)
+        |> Keyword.delete(:assert_value)
+
+      formatter_opts =
+        formatter_opts
+        |> Keyword.put(:locals_without_parens, locals_without_parens)
+
+      code
+      |> Enum.join("\n")
+      |> Code.format_string!(formatter_opts)
+      |> IO.iodata_to_binary
+      |> to_lines
+
+    else
+      code
+    end
     |> Enum.map(&(indentation <> &1))
     |> Enum.join("\n")
   end
