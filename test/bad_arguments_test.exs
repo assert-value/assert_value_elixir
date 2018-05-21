@@ -110,19 +110,94 @@ defmodule AssertValue.BadArgumentsTest do
         Map.put(acc, to_string(x), x)
       end)
 
-    # Big map serialization also emits warning
-    stderr_output = ExUnit.CaptureIO.capture_io(:stderr, fn ->
-      assert_raise AssertValue.ArgumentError, fn ->
-        assert_value big_map
-      end
-    end)
+    if Version.match?(System.version, ">= 1.6.5") do
 
-    # credo:disable-for-lines:2 Credo.Check.Readability.MaxLineLength
-    assert_value stderr_output == """
-    \e[33mwarning: \e[0mvariable \"...\" does not exist and is being expanded to \"...()\", please use parentheses to remove the ambiguity or change the variable name
-      nofile:1
-    
-    """
+      # Serialized correctly in Elixirs >= 1.6.5
+      assert_value big_map == %{
+                     "61" => 61,
+                     "58" => 58,
+                     "49" => 49,
+                     "10" => 10,
+                     "37" => 37,
+                     "24" => 24,
+                     "14" => 14,
+                     "12" => 12,
+                     "42" => 42,
+                     "36" => 36,
+                     "16" => 16,
+                     "4" => 4,
+                     "26" => 26,
+                     "64" => 64,
+                     "34" => 34,
+                     "32" => 32,
+                     "46" => 46,
+                     "8" => 8,
+                     "5" => 5,
+                     "3" => 3,
+                     "19" => 19,
+                     "9" => 9,
+                     "7" => 7,
+                     "50" => 50,
+                     "55" => 55,
+                     "13" => 13,
+                     "44" => 44,
+                     "52" => 52,
+                     "57" => 57,
+                     "2" => 2,
+                     "45" => 45,
+                     "11" => 11,
+                     "40" => 40,
+                     "15" => 15,
+                     "29" => 29,
+                     "17" => 17,
+                     "63" => 63,
+                     "25" => 25,
+                     "39" => 39,
+                     "28" => 28,
+                     "54" => 54,
+                     "59" => 59,
+                     "18" => 18,
+                     "27" => 27,
+                     "35" => 35,
+                     "23" => 23,
+                     "31" => 31,
+                     "43" => 43,
+                     "6" => 6,
+                     "41" => 41,
+                     "30" => 30,
+                     "20" => 20,
+                     "22" => 22,
+                     "21" => 21,
+                     "62" => 62,
+                     "56" => 56,
+                     "48" => 48,
+                     "38" => 38,
+                     "51" => 51,
+                     "47" => 47,
+                     "1" => 1,
+                     "60" => 60,
+                     "33" => 33,
+                     "53" => 53
+                   }
+
+    else
+
+      # But not in Elixirs < 1.6.5
+      stderr_output = ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        assert_raise AssertValue.ArgumentError, fn ->
+          assert_value big_map
+        end
+      end)
+
+      # Also emits warning
+      # credo:disable-for-lines:2 Credo.Check.Readability.MaxLineLength
+      assert_value stderr_output == """
+      \e[33mwarning: \e[0mvariable \"...\" does not exist and is being expanded to \"...()\", please use parentheses to remove the ambiguity or change the variable name
+        nofile:1
+      
+      """
+
+    end
   end
 
 end

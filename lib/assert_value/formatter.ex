@@ -6,7 +6,11 @@ defmodule AssertValue.Formatter do
     if is_binary(actual) and length(to_lines(actual)) > 1 do
       format_as_heredoc(actual)
     else
-      format_as_elixir_code(actual)
+      if Version.match?(System.version, ">= 1.6.5") do
+        Macro.to_string(actual)
+      else
+        format_with_inspect_fix(actual)
+      end
     end
   end
 
@@ -30,7 +34,7 @@ defmodule AssertValue.Formatter do
 
   # Private
 
-  defp format_as_elixir_code(actual) do
+  defp format_with_inspect_fix(actual) do
     # Temporary (until Elixir 1.6.5) workaround for Macro.to_string()
     # to make it work with big binaries as suggested on Elixir Forum:
     # https://elixirforum.com/t/how-to-increase-printable-limit/13613
