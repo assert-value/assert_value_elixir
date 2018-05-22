@@ -200,4 +200,34 @@ defmodule AssertValue.BadArgumentsTest do
     end
   end
 
+  test "long bitstring" do
+    bitstring = String.duplicate(<<1>>, 51)
+
+    if Version.match?(System.version, ">= 1.6.5") do
+
+      # Serialized correctly in Elixirs >= 1.6.5
+      assert_value bitstring ==
+                     <<1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1>>
+
+    else
+
+      # But not in Elixirs < 1.6.5
+      stderr_output = ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        assert_raise AssertValue.ArgumentError, fn ->
+          assert_value bitstring
+        end
+      end)
+
+      # Also emits warning
+      # credo:disable-for-lines:2 Credo.Check.Readability.MaxLineLength
+      assert_value stderr_output == """
+      \e[33mwarning: \e[0mvariable \"...\" does not exist and is being expanded to \"...()\", please use parentheses to remove the ambiguity or change the variable name
+        nofile:1
+      
+      """
+    end
+  end
+
 end
