@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.9.2 - May 29, 2018
+
+ * Bugfixes
+   * Fix big data structure serialization using plain Macro.to_string()
+     when running Elixir >= 1.6.5
+
 ## v0.9.1 - May 18, 2018
 
  * Bugfixes
