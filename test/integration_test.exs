@@ -106,6 +106,13 @@ build_test_module :FormatterTest, "formatter_test.exs",
   env: [{'ASSERT_VALUE_ACCEPT_DIFFS', 'ask'}],
   expected_exit_code: 0
 
+build_test_module :AutoParensTest, "auto_parens_test.exs",
+  env: [
+    {'ASSERT_VALUE_ACCEPT_DIFFS', 'ask'},
+    {'ASSERT_VALUE_AUTO_PARENS', 'true'},
+  ],
+  expected_exit_code: 0
+
 build_test_module :DiffTest, "diff_test.exs",
   env: [{'ASSERT_VALUE_ACCEPT_DIFFS', 'ask'}],
   expected_exit_code: 0

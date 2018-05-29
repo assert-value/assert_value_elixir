@@ -1,0 +1,39 @@
+
+auto_parens_test.exs:##:"test auto parens on" assert_value failed
+
+     assert_value [
+-      "foo",
+-      "bar 1234567890 00000000000000 1111111111111 222222222222",
+-      "baz"
+-    ]
++                   "foo",
++                   "bar 1234567890 00000000000000 1111111111111 222222222222",
++                   "baz"
++                 ] == [
++                   "foo",
++                   "bar 1234567890 00000000000000 1111111111111 222222222222",
++                   "baz"
++                 ]
+
+Accept new value? [y,n,?] 
+auto_parens_test.exs:##:"test auto parens on" assert_value failed
+
+-    assert_value [
+-      "foo",
+-      "bar 1234567890 00000000000000 1111111111111 2222222222222 !",
+-      "baz"
+-    ]
++    assert_value(
++      [
++        "foo",
++        "bar 1234567890 00000000000000 1111111111111 2222222222222 !",
++        "baz"
++      ] == [
++        "foo",
++        "bar 1234567890 00000000000000 1111111111111 2222222222222 !",
++        "baz"
++      ]
++    )
+
+Accept new value? [y,n,?] .
+1 test, 0 failures

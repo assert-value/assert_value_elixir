@@ -32,7 +32,7 @@ defmodule FormatterTest do
     assert_value String.duplicate("a", 5000)
   end
 
-  test "auto parens" do
+  test "auto parens off" do
     # No parens. String with max length fit
     # prompt: y
     assert_value [

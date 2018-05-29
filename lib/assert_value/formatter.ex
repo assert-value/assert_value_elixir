@@ -30,18 +30,25 @@ defmodule AssertValue.Formatter do
       |> IO.iodata_to_binary
       |> to_lines
 
-    max_line_length =
-      Enum.reduce(code, 0, fn(line, acc) ->
-        len = String.length(line)
-        if len > acc do
-          len
-        else
-          acc
-        end
-      end)
+    auto_parens =
+      if System.get_env("ASSERT_VALUE_AUTO_PARENS") == "true" ||
+          Keyword.get(formatter_opts, :assert_value_auto_parens, false) do
+        max_line_length =
+          Enum.reduce(code, 0, fn(line, acc) ->
+            len = String.length(line)
+            if len > acc do
+              len
+            else
+              acc
+            end
+          end)
+        max_line_length > line_length
+      else
+        false
+      end
 
     # Try to save some horizontal space by adding parens
-    if max_line_length > line_length do
+    if auto_parens do
       # Remove assert_value from locals_without_parens formatter options
       locals_without_parens =
         formatter_opts
