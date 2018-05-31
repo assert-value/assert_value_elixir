@@ -1,6 +1,7 @@
 
 diff_and_help_prompt_test.exs:##:"test promt help and accept" assert_value failed
 
+@@ -1,1 +1,1 @@
 -    assert_value "foo"
 +    assert_value "foo" == "foo"
 
@@ -15,6 +16,7 @@ Accept new value? [y,n,?]
 Accept new value? [y,n,?] .
 diff_and_help_prompt_test.exs:##:"test promt help then diff then fail" assert_value failed
 
+@@ -1,1 +1,1 @@
 -    assert_value "foo"
 +    assert_value "foo" == "foo"
 
@@ -29,6 +31,7 @@ Accept new value? [y,n,?]
 Accept new value? [y,n,?] 
 diff_and_help_prompt_test.exs:##:"test promt help then diff then fail" assert_value failed
 
+@@ -1,1 +1,1 @@
 -    assert_value "foo"
 +    assert_value "foo" == "foo"
 

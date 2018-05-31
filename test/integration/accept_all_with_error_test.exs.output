@@ -1,6 +1,7 @@
 
 accept_all_with_error_test.exs:##:"test all pass" assert_value failed
 
+@@ -1,1 +1,1 @@
 -    assert_value "foo"
 +    assert_value "foo" == "foo"
 

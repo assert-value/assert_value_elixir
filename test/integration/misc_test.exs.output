@@ -1,6 +1,7 @@
 .
 misc_test.exs:##:"test reprompt context" assert_value failed
 
+@@ -1,1 +1,40 @@
 -    assert_value actual
 +    assert_value actual == """
 +                 line
@@ -47,6 +48,7 @@ misc_test.exs:##:"test reprompt context" assert_value failed
 Accept new value? [y,n,?] .
 misc_test.exs:##:"test simple fail" assert_value failed
 
+@@ -1,5 +1,5 @@
      assert_value actual == """
                   aaa
 -                 bBb
