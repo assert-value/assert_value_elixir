@@ -193,7 +193,7 @@ defmodule AssertValue.Server do
   defp print_diff_and_context(diff, opts) do
     file =
       opts[:caller][:file]
-      |> Path.relative_to(System.cwd!) # make it shorter
+      |> Path.relative_to(File.cwd!) # make it shorter
     line = opts[:caller][:line]
     # the prompt we print here should
     # * let user easily identify which assert failed
