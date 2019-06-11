@@ -43,6 +43,21 @@ defmodule AssertValue.IntegrationTest.Support do
     before_path = Path.expand(basename <> ".before", @integration_test_dir)
     after_path = Path.expand(basename <> ".after", @integration_test_dir)
     output_path = Path.expand(basename <> ".output", @integration_test_dir)
+    # Due to difference in formatter we may need different output
+    # files for different Elixir versions
+    elixir_minor_version =
+      System.version()
+      |> String.split(".")
+      |> Enum.take(2)
+      |> Enum.join(".")
+
+    {after_path, output_path} =
+      if File.exists?("#{after_path}.#{elixir_minor_version}") do
+        {"#{after_path}.#{elixir_minor_version}",
+          "#{output_path}.#{elixir_minor_version}"}
+      else
+        {after_path, output_path}
+      end
 
     # copy the test to a temp dir for running
     runnable_path = Path.expand(basename, runnable_test_dir)
