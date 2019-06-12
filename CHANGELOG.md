@@ -1,4 +1,8 @@
 # Changelog
+## v0.9.3 - June 12, 2019
+
+ * Enhancements
+   * Fix deprecation warnings in Elixir 1.8
 
 ## v0.9.2 - May 29, 2018
 
