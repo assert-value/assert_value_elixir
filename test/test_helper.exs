@@ -45,16 +45,17 @@ defmodule AssertValue.IntegrationTest.Support do
     output_path = Path.expand(basename <> ".output", @integration_test_dir)
     # Due to difference in formatter we may need different output
     # files for different Elixir versions
-    elixir_minor_version =
-      System.version()
-      |> String.split(".")
-      |> Enum.take(2)
-      |> Enum.join(".")
+    formatter_version =
+      if Version.match?(System.version(), "~>1.8") do
+        "1.8"
+      else
+        ""
+      end
 
     {after_path, output_path} =
-      if File.exists?("#{after_path}.#{elixir_minor_version}") do
-        {"#{after_path}.#{elixir_minor_version}",
-          "#{output_path}.#{elixir_minor_version}"}
+      if File.exists?("#{after_path}.#{formatter_version}") do
+        {"#{after_path}.#{formatter_version}",
+          "#{output_path}.#{formatter_version}"}
       else
         {after_path, output_path}
       end
