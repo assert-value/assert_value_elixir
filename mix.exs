@@ -19,7 +19,7 @@ defmodule AssertValue.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     [
-      applications: [],
+      applications: [:iex],
       mod: {AssertValue.App, []}
     ]
   end
