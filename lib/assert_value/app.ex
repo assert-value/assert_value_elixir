@@ -10,7 +10,7 @@ defmodule AssertValue.App do
     Mix.Config.persist(ex_unit: [formatters: [AssertValue.ExUnitFormatter]])
 
     children = [
-      worker(AssertValue.Server, [], restart: :temporary)
+      AssertValue.Server
     ]
 
     opts = [strategy: :one_for_one]
