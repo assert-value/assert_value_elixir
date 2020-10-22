@@ -1,4 +1,10 @@
 # Changelog
+## v0.9.4 - October 22, 2020
+
+ * Enhancements
+   * Fix deprecation warnings in Elixir 1.10 and 1.11
+
+# Changelog
 ## v0.9.3 - June 12, 2019
 
  * Enhancements
