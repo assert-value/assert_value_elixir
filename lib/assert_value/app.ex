@@ -8,7 +8,7 @@ defmodule AssertValue.App do
     # config initialized before this application start.
     Mix.Config.persist(ex_unit: [formatters: [AssertValue.ExUnitFormatter]])
     children = [
-      worker(AssertValue.Server, [], restart: :temporary)
+      AssertValue.Server
     ]
     opts = [strategy: :one_for_one]
     Supervisor.start_link(children, opts)

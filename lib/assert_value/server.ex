@@ -1,10 +1,9 @@
 defmodule AssertValue.Server do
-
-  use GenServer
+  use GenServer, restart: :temporary
   import AssertValue.StringTools
 
-  def start_link do
-    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
+  def start_link(args) do
+    GenServer.start_link(__MODULE__, args, name: __MODULE__)
   end
 
   def init(_) do
