@@ -45,25 +45,36 @@ defmodule AssertValue.IntegrationTest.Support do
     output_path = Path.expand(basename <> ".output", @integration_test_dir)
     # Due to difference in formatter we may need different output
     # files for different Elixir versions
-    formatter_version =
-      if Version.match?(System.version(), "~>1.8") do
-        "1.8"
-      else
-        ""
-      end
-
-    {after_path, output_path} =
-      if File.exists?("#{after_path}.#{formatter_version}") do
-        {"#{after_path}.#{formatter_version}",
-          "#{output_path}.#{formatter_version}"}
-      else
-        {after_path, output_path}
-      end
-
+    after_path = latest_compatible_output_file(System.version(), after_path)
+    output_path = latest_compatible_output_file(System.version(), output_path)
     # copy the test to a temp dir for running
     runnable_path = Path.expand(basename, runnable_test_dir)
     File.cp!(before_path, runnable_path)
     {runnable_path, after_path, output_path}
+  end
+
+  def latest_compatible_output_file(version, path) do
+    versioned_paths = Path.wildcard("#{path}.*")
+    if Enum.empty?(versioned_paths) do
+      path
+    else
+      compatible_versions =
+        versioned_paths
+        # get version from filename "parser_test.exs.output.1.8" => "1.8"
+        |> Enum.map(&(String.replace(&1, "#{path}.", "")))
+        # find compatible versions
+        |> Enum.filter(&(Version.match?(version, "~>#{&1}")))
+
+      if Enum.empty?(compatible_versions) do
+        path
+      else
+        latest_compatible_version =
+          compatible_versions
+          |> Enum.max_by(&(Version.parse("#{&1}.0")))
+
+        "#{path}.#{latest_compatible_version}"
+      end
+    end
   end
 
   def run_tests(filename, env \\ []) do
