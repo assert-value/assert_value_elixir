@@ -190,11 +190,11 @@ defmodule AssertValue.BadArgumentsTest do
       end)
 
       # Also emits warning
-      # credo:disable-for-lines:2 Credo.Check.Readability.MaxLineLength
+      # credo:disable-for-lines:5 Credo.Check.Readability.MaxLineLength
       assert_value stderr_output == """
       \e[33mwarning: \e[0mvariable \"...\" does not exist and is being expanded to \"...()\", please use parentheses to remove the ambiguity or change the variable name
         nofile:1
-      
+
       """
 
     end
@@ -221,11 +221,11 @@ defmodule AssertValue.BadArgumentsTest do
       end)
 
       # Also emits warning
-      # credo:disable-for-lines:2 Credo.Check.Readability.MaxLineLength
+      # credo:disable-for-lines:5 Credo.Check.Readability.MaxLineLength
       assert_value stderr_output == """
       \e[33mwarning: \e[0mvariable \"...\" does not exist and is being expanded to \"...()\", please use parentheses to remove the ambiguity or change the variable name
         nofile:1
-      
+
       """
     end
   end
