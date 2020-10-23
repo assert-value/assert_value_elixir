@@ -10,7 +10,13 @@ defmodule AssertValue.Mixfile do
       start_permanent: Mix.env() == :prod,
       description: description(),
       package: package(),
-      deps: deps()
+      deps: deps(),
+      # Elixir 1.11 checks that all functions used by application belong
+      # to modules listed in deps, applications, or extra_applications,
+      # and emits warnings on compilation if they not.
+      # Since IEx is a part of Elixir and always present we can skip
+      # this check and suppress warning about IEx.Info.info/1
+      xref: [exclude: [{IEx.Info, :info, 1}]]
     ]
   end
 
@@ -19,7 +25,7 @@ defmodule AssertValue.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     [
-      applications: [:iex],
+      applications: [],
       mod: {AssertValue.App, []}
     ]
   end
