@@ -1,4 +1,11 @@
 # Changelog
+## v0.9.5 - October 27, 2020
+
+ * Enhancements
+   * Do not run :iex app when running tests.
+     Add "xref: [exclude: [{IEx.Info, :info, 1}]]" to project
+     to avoid compilation warning
+
 ## v0.9.4 - October 22, 2020
 
  * Enhancements
