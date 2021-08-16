@@ -64,7 +64,9 @@ defmodule AssertValue.Mixfile do
       maintainers: ["Gleb Arshinov", "Serge Smetana"],
       licenses: ["MIT"],
       links: %{
-        "GitHub" => "https://github.com/assert-value/assert_value_elixir"
+        "GitHub" => "https://github.com/assert-value/assert_value_elixir",
+        "Changelog" =>
+          "https://github.com/assert-value/assert_value_elixir/blob/master/CHANGELOG.md"
       }
     ]
   end
