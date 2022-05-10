@@ -7,7 +7,10 @@ defmodule AssertValue.Formatter do
       format_as_heredoc(actual)
     else
       if Version.match?(System.version, ">= 1.6.5") do
-        Macro.to_string(actual)
+        actual
+        |> Kernel.inspect(limit: :infinity, printable_limit: :infinity)
+        |> Code.format_string!()
+        |> IO.iodata_to_binary
       else
         format_with_inspect_fix(actual)
       end
@@ -28,8 +31,7 @@ defmodule AssertValue.Formatter do
     |> Code.format_string!(formatter_opts)
     |> IO.iodata_to_binary
     |> to_lines
-    |> Enum.map(&(indentation <> &1))
-    |> Enum.join("\n")
+    |> Enum.map_join("\n", &(indentation <> &1))
   end
 
   # Private

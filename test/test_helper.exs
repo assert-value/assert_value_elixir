@@ -82,12 +82,25 @@ defmodule AssertValue.IntegrationTest.Support do
     # We look for lines like '# prompt: y'
     prompt_responses =
       Regex.scan(~r/#\s*prompt:\s*(.)/, File.read!(filename))
-      |> Enum.map(fn([_, x]) -> x end)
-      |> Enum.join("\n")
+      |> Enum.map_join("\n", fn([_, x]) -> x end)
       |> Kernel.<>("\n")
 
-    {output, exit_code} = AssertValue.IntegrationTest.Support.exec("mix",
-      ["test", "--seed", "0", filename], env, input: prompt_responses)
+    # Elixir 1.13 changed default failed testcase exit status to 2
+    # and introduced --exit-status param
+    exec_params =
+      if Version.match?(System.version, ">= 1.13.0") do
+        ["test", "--seed", "0", "--exit-status", "1", filename]
+      else
+        ["test", "--seed", "0", filename]
+      end
+
+    {output, exit_code} =
+      AssertValue.IntegrationTest.Support.exec(
+        "mix",
+        exec_params,
+        env,
+        input: prompt_responses
+      )
 
     # Canonicalize output
     output =

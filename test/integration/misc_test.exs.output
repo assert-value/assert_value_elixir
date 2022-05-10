@@ -66,4 +66,21 @@ Accept new value? [y,n,?]
        misc_test.exs:##: (test)
 
 
-3 tests, 1 failure
+misc_test.exs:##:"test escaped string" assert_value failed
+
+-    assert_value actual == "\"bar\""
++    assert_value actual == "\"foo\""
+
+Accept new value? [y,n,?] 
+
+  2) test escaped string (MiscTest)
+     misc_test.exs:##
+     AssertValue assertion failed
+     code: actual == "\"bar\""
+     left: "\"foo\""
+     right: "\"bar\""
+     stacktrace:
+       misc_test.exs:##: (test)
+
+
+4 tests, 2 failures

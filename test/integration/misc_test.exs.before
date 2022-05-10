@@ -29,4 +29,10 @@ defmodule MiscTest do
     """
   end
 
+  test "escaped string" do
+    actual = ~s["foo"]
+    # prompt: n
+    assert_value actual == "\"bar\""
+  end
+
 end

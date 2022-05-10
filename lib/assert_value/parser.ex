@@ -157,23 +157,21 @@ defmodule AssertValue.Parser do
   # Empty code does not match anything
   defp code_match_ast?("", _ast), do: false
   defp code_match_ast?(code, ast) do
+    case Code.string_to_quoted(code) do
+      {:ok, quoted} ->
+        quoted = if is_binary(quoted) do
+          String.replace(quoted, "<NOEOL>\\n", "")
+        else
+          quoted
+        end
+        ast_match?(quoted, ast)
+      _ ->
+        false
+    end
     # Elixir 1.13 raises MatchError on some escape characters
     # https://github.com/elixir-lang/elixir/issues/11813
-    try do
-      case Code.string_to_quoted(code) do
-        {:ok, quoted} ->
-          quoted = if is_binary(quoted) do
-            String.replace(quoted, "<NOEOL>\\n", "")
-          else
-            quoted
-          end
-          ast_match?(quoted, ast)
-        _ ->
-          false
-      end
-    rescue
-      _ -> false
-    end
+  rescue
+    _ -> false
   end
 
   defp ast_match?(a, b) do

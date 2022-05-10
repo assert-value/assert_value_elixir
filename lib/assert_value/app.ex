@@ -4,9 +4,11 @@ defmodule AssertValue.App do
     import Supervisor.Spec, warn: false
     # We use custom formatter to temporarily capture and
     # suppress async tests output while interacting with user.
-    # Config.persist is used because we may not have ExUnit
-    # config initialized before this application start.
-    Mix.Config.persist(ex_unit: [formatters: [AssertValue.ExUnitFormatter]])
+    # persistent: true is used because we may not have ExUnit
+    # initialized before this application start.
+    Application.put_env(:ex_unit, :formatters, [AssertValue.ExUnitFormatter],
+      persistent: true
+    )
     children = [
       AssertValue.Server
     ]

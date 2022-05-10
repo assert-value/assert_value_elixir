@@ -1,0 +1,615 @@
+defmodule ParserTest do
+  use ExUnit.Case, async: true
+
+  @foo "foo"
+  @bar "bar"
+
+  defmodule User do
+    defstruct name: "John", age: 27
+  end
+
+  defmodule Foo do
+    def foo, do: "foo"
+  end
+
+  import AssertValue
+
+  # Literals
+
+  test "actual literals" do
+    # prompt: y
+    assert_value nil == nil
+
+    # prompt: y
+    assert_value true == true
+
+    # prompt: y
+    assert_value false == false
+
+    # prompt: y
+    assert_value :foo == :foo
+
+    # prompt: y
+    assert_value "forty-two" == "forty-two"
+
+    # prompt: y
+    assert_value """
+                 forty-two
+                 сорок два
+                 四十二
+                 quarante deux
+                 cuarenta y dos
+                 zweiundvierzig
+                 """ == """
+                 forty-two
+                 сорок два
+                 四十二
+                 quarante deux
+                 cuarenta y dos
+                 zweiundvierzig
+                 """
+
+    # prompt: y
+    assert_value ~S(forty-two) == "forty-two"
+
+    # prompt: y
+    assert_value ~s(forty-two) == "forty-two"
+
+    # prompt: y
+    assert_value <<65, 66, 67>> == "ABC"
+
+    # prompt: y
+    assert_value <<256::utf8>> == "Ā"
+
+    # prompt: y
+    assert_value 'forty-two' == 'forty-two'
+
+    # prompt: y
+    assert_value '''
+                 forty-two
+                 сорок два
+                 ''' == [
+                   102,
+                   111,
+                   114,
+                   116,
+                   121,
+                   45,
+                   116,
+                   119,
+                   111,
+                   10,
+                   1089,
+                   1086,
+                   1088,
+                   1086,
+                   1082,
+                   32,
+                   1076,
+                   1074,
+                   1072,
+                   10
+                 ]
+    # prompt: y
+    assert_value ~C(forty-two) == 'forty-two'
+
+    # prompt: y
+    assert_value ~c(forty-two) == 'forty-two'
+
+    # prompt: y
+    assert_value ~D[2018-01-01] == ~D[2018-01-01]
+
+    # prompt: y
+    assert_value 0.42 == 0.42
+
+    # prompt: y
+    assert_value -0.42 == -0.42
+
+    # prompt: y
+    assert_value 42 == 42
+
+    # prompt: y
+    assert_value [4, 2, true, nil, "42"] == [4, 2, true, nil, "42"]
+
+    # prompt: y
+    assert_value %{a: "forty", b: 2, c: nil} == %{a: "forty", b: 2, c: nil}
+
+    # prompt: y
+    assert_value ~N[2018-01-01 21:01:50] == ~N[2018-01-01 21:01:50]
+
+    # prompt: y
+    assert_value ~r/foo/ == ~r/foo/
+
+    # prompt: y
+    assert_value ~T[23:00:07] == ~T[23:00:07]
+
+    # prompt: y
+    assert_value {:ok, 42} == {:ok, 42}
+
+    # prompt: y
+    assert_value %User{} == %ParserTest.User{age: 27, name: "John"}
+
+    # prompt: y
+    assert_value %User{age: 43} == %ParserTest.User{age: 43, name: "John"}
+
+    # prompt: y
+    assert_value %{__struct__: ParserTest.User, age: 21, name: "Peter"} ==
+                   %ParserTest.User{age: 21, name: "Peter"}
+
+    # prompt: y
+    assert_value ~W(foo bar) == ["foo", "bar"]
+
+    # prompt: y
+    assert_value [%{a: 42, b: {:left, :light}, c: [%User{}, 1]}, nil] == [
+                   %{
+                     a: 42,
+                     b: {:left, :light},
+                     c: [%ParserTest.User{age: 27, name: "John"}, 1]
+                   },
+                   nil
+                 ]
+  end
+
+  test "actual and expected literals" do
+    # prompt: y
+    assert_value nil == nil
+
+    # prompt: y
+    assert_value true == true
+
+    # prompt: y
+    assert_value :foo == :foo
+
+    # prompt: y
+    assert_value "forty-two" == "forty-two"
+
+    # prompt: y
+    assert_value """
+                 forty-two
+                 сорок два
+                 四十二
+                 quarante deux
+                 cuarenta y dos
+                 zweiundvierzig
+                 """ == """
+                 forty-two
+                 сорок два
+                 四十二
+                 quarante deux
+                 cuarenta y dos
+                 zweiundvierzig
+                 """
+
+    # prompt: y
+    assert_value ~S(forty-two) == "forty-two"
+
+    # prompt: y
+    assert_value ~s(forty-two) == "forty-two"
+
+    # prompt: y
+    assert_value <<65, 66, 67>> == "ABC"
+
+    # prompt: y
+    assert_value <<256::utf8>> == "Ā"
+
+    # prompt: y
+    assert_value 'forty-two' == 'forty-two'
+
+    # prompt: y
+    assert_value '''
+                 forty-two
+                 сорок два
+                 ''' == [
+                   102,
+                   111,
+                   114,
+                   116,
+                   121,
+                   45,
+                   116,
+                   119,
+                   111,
+                   10,
+                   1089,
+                   1086,
+                   1088,
+                   1086,
+                   1082,
+                   32,
+                   1076,
+                   1074,
+                   1072,
+                   10
+                 ]
+
+    # prompt: y
+    assert_value ~C(forty-two) == 'forty-two'
+
+    # prompt: y
+    assert_value ~c(forty-two) == 'forty-two'
+
+    # prompt: y
+    assert_value ~D[2018-01-01] == ~D[2018-01-01]
+
+    # prompt: y
+    assert_value 0.42 == 0.42
+
+    # prompt: y
+    assert_value -0.42 == -0.42
+
+    # prompt: y
+    assert_value 42 == 42
+
+    # prompt: y
+    assert_value -42 == -42
+
+    # prompt: y
+    assert_value [4, 2, true, nil, "42"] == [4, 2, true, nil, "42"]
+
+    # prompt: y
+    assert_value %{a: "forty", b: 2, c: nil} == %{a: "forty", b: 2, c: nil}
+
+    # prompt: y
+    assert_value ~N[2018-01-01 21:01:50] == ~N[2018-01-01 21:01:50]
+
+    # prompt: y
+    assert_value ~T[23:00:07] == ~T[23:00:07]
+
+    # prompt: y
+    assert_value {:ok, 42} == {:ok, 42}
+
+    # prompt: y
+    assert_value %User{} == %ParserTest.User{age: 27, name: "John"}
+
+    # prompt: y
+    assert_value %User{age: 42} == %ParserTest.User{age: 42, name: "John"}
+
+    # This should pass
+    assert_value %{__struct__: ParserTest.User, age: 21, name: "Peter"} == %User{age: 21, name: "Peter"}
+
+    # prompt: y
+    assert_value %{__struct__: ParserTest.User, age: 21, name: "Peter"} ==
+                   %ParserTest.User{age: 21, name: "Peter"}
+
+    # prompt: y
+    assert_value ~W(foo bar) == ["foo", "bar"]
+
+    # prompt: y
+    assert_value [%{a: 42, b: {:left, :light}, c: [%User{}, 1]}, nil] == [
+                   %{
+                     a: 42,
+                     b: {:left, :light},
+                     c: [%ParserTest.User{age: 27, name: "John"}, 1]
+                   },
+                   nil
+                 ]
+  end
+
+  test "expected literal" do
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+  end
+
+  test "create file" do
+    # prompt: y
+    assert_value """
+    aaa
+    bbb
+    ccc
+    """ == File.read!(Path.expand("file_to_create", __DIR__))
+  end
+
+  test "update file" do
+    # prompt: y
+    assert_value """
+    aaa
+    bbb
+    ccc
+    """ == File.read!(Path.expand("file_to_update", __DIR__))
+  end
+
+  # Corner cases
+
+  test "spaces around equation" do
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+  end
+
+  test "string escaping" do
+    # prompt: y
+    assert_value "foo\\nbar\" \" \t \r %{}" == "foo\\nbar\" \" \t \r %{}"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+  end
+
+  test "float trailing zeros" do
+    # prompt: y
+    assert_value 42.0001000 == 42.0001
+
+    # prompt: y
+    assert_value -42.0001000 == -42.0001
+  end
+
+  test "bitstring and string" do
+    assert_value <<65>> == "A"
+    # prompt: y
+    assert_value <<66>> == "B"
+
+    assert_value "A" == <<65>>
+    # prompt: y
+    assert_value "B" == "B"
+  end
+
+  # Expressions
+
+  test "variable" do
+    foo = "foo"
+    bar = "bar"
+
+    # prompt: y
+    assert_value foo == "foo"
+
+    # prompt: y
+    assert_value foo == "foo"
+  end
+
+  test "module attributes" do
+    # prompt: y
+    assert_value @foo == "foo"
+
+    # prompt: y
+    assert_value @foo == "foo"
+
+    # prompt: y
+    assert_value "foo" == @foo
+  end
+
+  test "parens" do
+    # prompt: y
+    assert_value("foo" == "foo")
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value("foo" == "foo")
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value("foo" == "foo")
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value("foo" == "foo")
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value("foo" == "foo")
+
+    # prompt: y
+    assert_value "foo" == "foo"
+
+    # prompt: y
+    assert_value("foo" == "foo")
+  end
+
+  test "left/right expressions" do
+    foo = "foo"
+    bar = "bar"
+
+    # prompt: y
+    assert_value foo <> "bar" == "foobar"
+
+    # prompt: y
+    assert_value foo <> "bar" == "foobar"
+
+    # prompt: y
+    assert_value foo <>
+                   "bar" == "foobar"
+
+    # prompt: y
+    assert_value foo <>
+                   "bar" ==
+                   "foobar"
+  end
+
+  test "functions" do
+    hello = fn(x) ->
+        "Hello " <> x <> "!"
+    end
+
+    # prompt: y
+    assert_value String.upcase("foo") == "FOO"
+
+    # prompt: y
+    assert_value hello.("World") == "Hello World!"
+
+    # prompt: y
+    assert_value String.upcase("foo") == "FOO"
+
+    # prompt: y
+    assert_value hello.("World") == "Hello World!"
+
+    # prompt: y
+    assert_value String.upcase("foo") == "FOO"
+  end
+
+  test "pipes" do
+    # prompt: y
+    assert_value String.upcase("foo") |> String.reverse() ==
+                   "OOF"
+
+    # prompt: y
+    assert_value String.upcase("foo")
+                 |> String.reverse() ==
+                   "OOF"
+  end
+
+  test "repeatable expressions" do
+    # prompt: y
+    assert_value 2 + 2 - 2 + 2 - 2 + 2 == 4
+
+    # prompt: y
+    assert_value 2 + 2 - 2 + 2 - 2 + 2 == 4
+
+    # prompt: y
+    assert_value 5 == 5
+  end
+
+  test "AST cleanup" do
+    # Macro.expand below produces AST with hygienic counter
+    # Check that we can correctly parse it
+    # Last String.replace is to produce the same result code
+    # from different Elixirs. 1.6.0 has slightly different
+    # "if" macro.
+
+    assert_value quote(do: Kernel.||(1, false))
+                 |> Macro.expand(__ENV__)
+                 |> Macro.to_string()
+                 |> String.replace(
+                   "when x in [false, nil]",
+                   "when Kernel.in(x, [false, nil])"
+                 ) == """
+                 case 1 do
+                   x when Kernel.in(x, [false, nil]) -> false
+                   x -> x
+                 end<NOEOL>
+                 """
+  end
+
+  test "function without arguments" do
+    # prompt: y
+    assert_value Foo.foo() == "foo"
+
+    # prompt: y
+    assert_value Foo.foo() == "foo"
+  end
+
+  test "not-serializable expected" do
+    # This should pass. We can successfully parse expected and replace
+    # it with serialized value
+    # prompt: y
+    assert_value :foo == :foo
+  end
+
+  test "integer floats" do
+    # prompt: y
+    assert_value 2 == 2
+
+    # prompt: y
+    assert_value 1.0 == 1.0
+  end
+
+end
