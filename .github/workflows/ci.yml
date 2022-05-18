@@ -30,8 +30,6 @@ jobs:
             otp: 22
           - elixir: 1.7.x
             otp: 21
-          - elixir: 1.6.x
-            otp: 20
     env:
       MIX_ENV: test
     steps:

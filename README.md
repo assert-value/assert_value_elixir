@@ -40,7 +40,7 @@ This makes sense for longer values. `assert_value` will create and update file c
 
 ## Requirements
 
-Elixir ~> 1.6
+Elixir ~> 1.7
 
 ## Installation
 
@@ -523,15 +523,6 @@ ASSERT_VALUE_ACCEPT_DIFFS=reformat mix test
   * assert_value supports all Elixir types except not serializable (Function,
     PID, Port, Reference). To compare values of theese types use ```inspect```
     and [Serialization](#serialization) techniques.
-  * There is a bug in Macro.to_string() in all Elixirs <= 1.6.4 making them
-    unable to serialize big maps
-    https://github.com/elixir-lang/elixir/issues/7545
-    One way to fix this is to serialize values with big maps using
-    `Kernel.inspect/1` with `:limit` and `:printable_limit` options set to
-    `:infinity` before passing them to assert_value
-    ```elixir
-    inspect(value, limit: :infinity, printable_limit: :infinity)
-    ```
   * assert_value's formatter is primitive and does not understand operator
     precedence. When creating a new expected value from scratch it simply
     appends "== <expected_value>" to the expression. This usually works but can

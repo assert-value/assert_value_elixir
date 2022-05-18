@@ -140,25 +140,13 @@ defmodule AssertValue do
         assert_value tried to serialize this expected value, and it did not
         work.
 
-        We know about two possible reasons this can happen:
+        Some types like Function, PID, Decimal don't have literal
+        representation and cannot be serialized. Same goes for data
+        structures that include these values.
 
-          * Some types like Function, PID, Decimal don't have literal
-            representation and cannot be serialized. Same goes for data
-            structures that include these values.
-
-            One way to fix this is to write your own serializer and convert
-            this actual value to a string before passing it to assert_value.
-            For example you can wrap actual value in Kernel.inspect/1
-
-          * There is a bug in Macro.to_string() in all Elixirs <= 1.6.4 making
-            them unable to serialize big maps
-            https://github.com/elixir-lang/elixir/issues/7545
-
-            One way to fix this is to serialize values with big maps using
-            Kernel.inspect/1 with :limit and :printable_limit options set to
-            :infinity before passing them to assert_value:
-
-              inspect(value, limit: :infinity, printable_limit: :infinity)
+        One way to fix this is to write your own serializer and convert
+        this actual value to a string before passing it to assert_value.
+        For example you can wrap actual value in Kernel.inspect/1
         """
     end
     :ok
@@ -182,16 +170,8 @@ defmodule AssertValue do
   def check_string_and_file_read(_, _), do: :ok
 
   defp get_value_type(arg) do
-    [h | _t] = IEx.Info.info(arg)
-    case h do
-      # Elixir < 1.6
-      {:"Data type", type} ->
-        type
-      # Elixir 1.6
-      {"Data type", type} ->
-        type
-      # else CaseClauseError
-    end
+    [{"Data type", type} | _t] = IEx.Info.info(arg)
+    type
   end
 
 end

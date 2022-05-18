@@ -5,7 +5,7 @@ defmodule AssertValue.Mixfile do
     [
       app: :assert_value,
       version: "0.9.5",
-      elixir: "~> 1.6",
+      elixir: "~> 1.7",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       description: description(),

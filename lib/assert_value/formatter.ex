@@ -6,14 +6,10 @@ defmodule AssertValue.Formatter do
     if is_binary(actual) and length(to_lines(actual)) > 1 do
       format_as_heredoc(actual)
     else
-      if Version.match?(System.version, ">= 1.6.5") do
-        actual
-        |> Kernel.inspect(limit: :infinity, printable_limit: :infinity)
-        |> Code.format_string!()
-        |> IO.iodata_to_binary
-      else
-        format_with_inspect_fix(actual)
-      end
+      actual
+      |> Kernel.inspect(limit: :infinity, printable_limit: :infinity)
+      |> Code.format_string!()
+      |> IO.iodata_to_binary
     end
   end
 
@@ -35,22 +31,6 @@ defmodule AssertValue.Formatter do
   end
 
   # Private
-
-  defp format_with_inspect_fix(actual) do
-    # Temporary (until Elixir 1.6.5) workaround for Macro.to_string()
-    # to make it work with big binaries as suggested on Elixir Forum:
-    # https://elixirforum.com/t/how-to-increase-printable-limit/13613
-    # Without it big binaries (>4096 symbols) are truncated because of bug
-    # in Inspect module.
-    # TODO Change to plain Macro.to_string() when we drop support for
-    # Elixirs < 1.6.5
-    Macro.to_string(actual, fn
-      node, _ when is_binary(node) ->
-        inspect(node, printable_limit: :infinity)
-      _, string ->
-        string
-    end)
-  end
 
   defp format_as_heredoc(actual) do
     actual =
