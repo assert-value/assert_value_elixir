@@ -1,4 +1,19 @@
 # Changelog
+## v0.10 - May XX, 2022
+
+ * Enhancements
+   * Add support for Elixir 1.13. Drop support for Elixir < 1.7
+   * Improve formatter to work the same way as "mix format"
+     in all known cases
+
+ * Requirements
+   * Elixir >= 1.7
+
+ * Upgrade Instructions (optional)
+   * Run `ASSERT_VALUE_ACCEPT_DIFFS=reformat mix test` to take advantage of
+     improved formatter. This will avoid mixing actual test changes with
+     formatting changes in the future.
+
 ## v0.9.5 - October 27, 2020
 
  * Enhancements
