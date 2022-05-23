@@ -18,4 +18,22 @@ defmodule ReformatExpectedTest do
     assert_value 2 + 2 == 4
   end
 
+  test "reformat heredoc with empty lines" do
+    # first line has leading spaces
+    doc = """
+    
+    bar
+
+    baz
+    """
+
+    # empty lines will not have leading spaces after reformatting
+    assert_value doc == """
+
+                 bar
+
+                 baz
+                 """
+  end
+
 end

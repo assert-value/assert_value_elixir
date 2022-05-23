@@ -27,7 +27,7 @@ defmodule AssertValue.Formatter do
     |> Code.format_string!(formatter_opts)
     |> IO.iodata_to_binary
     |> to_lines
-    |> Enum.map_join("\n", &(indentation <> &1))
+    |> Enum.map_join("\n", &(indent_heredoc_line(&1, indentation)))
   end
 
   # Private
@@ -48,6 +48,11 @@ defmodule AssertValue.Formatter do
   defp escape_heredoc_line(s) do
     inspect(s, printable_limit: :infinity)
     |> String.replace(~r/(\A"|"\Z)/, "")
+  end
+
+  # "mix format" does not indent empty lines in heredocs
+  defp indent_heredoc_line(s, indentation) do
+    if(s == "", do: s, else: indentation <> s)
   end
 
   # to work as a heredoc a string must end with a newline.  For
