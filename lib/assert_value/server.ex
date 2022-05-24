@@ -44,8 +44,7 @@ defmodule AssertValue.Server do
     state = %{
       captured_ex_unit_io_pid: nil,
       file_changes: %{},
-      recurring_answer: recurring_answer,
-      formatter_options: read_dot_formatter()
+      recurring_answer: recurring_answer
     }
     {:ok, state}
   end
@@ -144,7 +143,9 @@ defmodule AssertValue.Server do
         opts[:expected_ast]
       ) do
         {:ok, parsed} ->
-           new_expected = AssertValue.Formatter.new_expected_from_actual_value(
+          formatter_options = formatter_options_for_file(opts[:caller][:file])
+
+          new_expected = AssertValue.Formatter.new_expected_from_actual_value(
             opts[:actual_value]
           )
 
@@ -157,11 +158,11 @@ defmodule AssertValue.Server do
           # new assert_value. This way user will see only expected value
           # diff without mixing it with formatting diff
           old_assert_value = AssertValue.Formatter.format_with_indentation(
-            parsed.assert_value, parsed.indentation, state.formatter_options
+            parsed.assert_value, parsed.indentation, formatter_options
           )
 
           new_assert_value = AssertValue.Formatter.format_with_indentation(
-            new_assert_value, parsed.indentation, state.formatter_options
+            new_assert_value, parsed.indentation, formatter_options
           )
 
           diff = AssertValue.Diff.diff(old_assert_value, new_assert_value)
@@ -274,27 +275,11 @@ defmodule AssertValue.Server do
     Map.put(file_changes, filename, current_file_changes)
   end
 
-  # Borrowed partially from Elixir's Mix.Task.Format
-  #
-  # NOTE: We don't recursively search for .formatter.exs in project
-  # dependencies. We format only one assert_value statement and it is not
-  # likely will include some fancy functions from 3rd party libs
-  #
-  # TODO: Elixir master now have public Max.Task.Format.formatter_opts_for_file
-  # with all we need. It is better to use it in future versions
-  defp read_dot_formatter do
-    opts =
-      if File.regular?(".formatter.exs") do
-        {opts, _} = Code.eval_file(".formatter.exs")
-
-        unless Keyword.keyword?(opts) do
-          raise("Expected .formatter.exs to return a keyword list")
-        end
-
-        opts
-      else
-        [] # Use default Elixir formatter options
-      end
+  # Use user's formatter options but force locals_without_parens
+  # for assert_value
+  defp formatter_options_for_file(file) do
+    # TODO This method will be deprecated in Elixir 1.17
+    opts = Mix.Tasks.Format.formatter_opts_for_file(file)
 
     # Force locals_without_parens for assert_value. We don't eval
     # formatter options from all user dependencies (including assert_value).
