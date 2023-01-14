@@ -1,0 +1,9 @@
+
+accept_all_test.exs:##:"test all pass" assert_value failed
+
+     assert_value "foo\nbar" == """
++                 foo
+                  bar<NOEOL>
+                  """
+
+Accept new value? [y,n,?] ..2 tests, 0 failures

@@ -1,0 +1,23 @@
+
+
+  1) test fail (NonInteractiveRejectTest)
+     non_interactive_reject_test.exs:##
+     AssertValue assertion failed
+     code:  "\"foo\\nbar\" == \"bar<NOEOL>\\n\""
+     left: "foo\nbar"
+     right: "bar"
+     stacktrace:
+       non_interactive_reject_test.exs:##: (test)
+
+
+
+  2) test fail again (NonInteractiveRejectTest)
+     non_interactive_reject_test.exs:##
+     AssertValue assertion failed
+     code:  "\"foo\\nbaz\" == \"baz<NOEOL>\\n\""
+     left: "foo\nbaz"
+     right: "baz"
+     stacktrace:
+       non_interactive_reject_test.exs:##: (test)
+
+2 tests, 2 failures
