@@ -1,5 +1,4 @@
 defmodule AssertValue.Formatter do
-
   import AssertValue.StringTools
 
   def new_expected_from_actual_value(actual) do
@@ -9,7 +8,7 @@ defmodule AssertValue.Formatter do
       actual
       |> Kernel.inspect(limit: :infinity, printable_limit: :infinity)
       |> Code.format_string!()
-      |> IO.iodata_to_binary
+      |> IO.iodata_to_binary()
     end
   end
 
@@ -25,9 +24,9 @@ defmodule AssertValue.Formatter do
 
     code
     |> Code.format_string!(formatter_opts)
-    |> IO.iodata_to_binary
+    |> IO.iodata_to_binary()
     |> to_lines
-    |> Enum.map_join("\n", &(indent_heredoc_line(&1, indentation)))
+    |> Enum.map_join("\n", &indent_heredoc_line(&1, indentation))
   end
 
   # Private
@@ -38,7 +37,8 @@ defmodule AssertValue.Formatter do
       |> add_noeol_if_needed
       |> to_lines
       |> Enum.map(&escape_heredoc_line/1)
-    [~s(""")] ++ actual ++ [~s(""")]
+
+    ([~s(""")] ++ actual ++ [~s(""")])
     |> Enum.join("\n")
   end
 
@@ -66,5 +66,4 @@ defmodule AssertValue.Formatter do
       arg <> "<NOEOL>\n"
     end
   end
-
 end

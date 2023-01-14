@@ -1,15 +1,18 @@
 defmodule AssertValue do
-
   # Assertions with right argument like "assert_value actual == expected"
   defmacro assert_value({:==, _, [left, right]} = assertion) do
-    {expected_type, expected_file} = case right do
-      {{:., _, [{:__aliases__, _, [:File]}, :read!]}, _, [filename]} ->
-        {:file, filename}
-      str when is_binary(str) ->
-        {:string, nil}
-      _ ->
-        {:other, nil}
-    end
+    {expected_type, expected_file} =
+      case right do
+        {{:., _, [{:__aliases__, _, [:File]}, :read!]}, _, [filename]} ->
+          {:file, filename}
+
+        str when is_binary(str) ->
+          {:string, nil}
+
+        _ ->
+          {:other, nil}
+      end
+
     quote do
       assertion_ast = unquote(Macro.escape(assertion))
       actual_ast = unquote(Macro.escape(left))
@@ -17,43 +20,53 @@ defmodule AssertValue do
       expected_type = unquote(expected_type)
       expected_file = unquote(expected_file)
       expected_ast = unquote(Macro.escape(right))
+
       expected_value =
         case expected_type do
           :string ->
-              unquote(right) |>
-              String.replace(~r/<NOEOL>\n\Z/, "", global: false)
+            unquote(right)
+            |> String.replace(~r/<NOEOL>\n\Z/, "", global: false)
+
           # TODO: should deal with a no-bang File.read instead, may
           # want to deal with different errors differently
-          :file -> File.exists?(expected_file)
-            && File.read!(expected_file)
-            || ""
+          :file ->
+            (File.exists?(expected_file) &&
+               File.read!(expected_file)) ||
+              ""
+
           :other ->
-              unquote(right)
+            unquote(right)
         end
+
       check_serializable(actual_value)
       check_string_and_file_read(actual_value, expected_type)
       # We need to check for reformat_expected? first to disable
       # "this check/guard will always yield the same result" warnings
-      if AssertValue.Server.reformat_expected? ||
-          (actual_value != expected_value) do
-        decision = AssertValue.Server.ask_user_about_diff(
-          caller: [
-            file: unquote(__CALLER__.file),
-            line: unquote(__CALLER__.line),
-            function: unquote(__CALLER__.function),
-          ],
-          assertion_ast: assertion_ast,
-          actual_ast: actual_ast,
-          actual_value: actual_value,
-          expected_type: expected_type,
-          expected_ast: expected_ast,
-          expected_value: expected_value,
-          expected_file: expected_file)
+      if AssertValue.Server.reformat_expected?() ||
+           actual_value != expected_value do
+        decision =
+          AssertValue.Server.ask_user_about_diff(
+            caller: [
+              file: unquote(__CALLER__.file),
+              line: unquote(__CALLER__.line),
+              function: unquote(__CALLER__.function)
+            ],
+            assertion_ast: assertion_ast,
+            actual_ast: actual_ast,
+            actual_value: actual_value,
+            expected_type: expected_type,
+            expected_ast: expected_ast,
+            expected_value: expected_value,
+            expected_file: expected_file
+          )
+
         case decision do
           :ok ->
             true
+
           {:error, :ex_unit_assertion_error, error_attrs} ->
             raise ExUnit.AssertionError, error_attrs
+
           {:error, :parse_error} ->
             # raise ParseError in test instead of genserver
             # to show readable error message and stacktrace
@@ -71,24 +84,30 @@ defmodule AssertValue do
       assertion_ast = unquote(Macro.escape(assertion))
       actual_value = unquote(assertion)
       check_serializable(actual_value)
-      decision = AssertValue.Server.ask_user_about_diff(
-        caller: [
-          file: unquote(__CALLER__.file),
-          line: unquote(__CALLER__.line),
-          function: unquote(__CALLER__.function),
-        ],
-        assertion_ast: assertion_ast,
-        # :_not_present_ is to show the difference between
-        # nil and actually not present actual/expected
-        actual_ast: :_not_present_,
-        actual_value: actual_value,
-        expected_type: :source,
-        expected_ast: :_not_present_)
+
+      decision =
+        AssertValue.Server.ask_user_about_diff(
+          caller: [
+            file: unquote(__CALLER__.file),
+            line: unquote(__CALLER__.line),
+            function: unquote(__CALLER__.function)
+          ],
+          assertion_ast: assertion_ast,
+          # :_not_present_ is to show the difference between
+          # nil and actually not present actual/expected
+          actual_ast: :_not_present_,
+          actual_value: actual_value,
+          expected_type: :source,
+          expected_ast: :_not_present_
+        )
+
       case decision do
         :ok ->
           true
-        {:error, :ex_unit_assertion_error,  error_attrs} ->
+
+        {:error, :ex_unit_assertion_error, error_attrs} ->
           raise ExUnit.AssertionError, error_attrs
+
         {:error, :parse_error} ->
           # raise ParseError in test instead of genserver
           # to show readable error message and stacktrace
@@ -117,11 +136,12 @@ defmodule AssertValue do
           |> AssertValue.Formatter.new_expected_from_actual_value()
           |> Code.eval_string()
 
-        evaluated_value = if is_binary(evaluated_value) do
-          String.replace(evaluated_value, ~r/<NOEOL>\n\Z/, "", global: false)
-        else
-          evaluated_value
-        end
+        evaluated_value =
+          if is_binary(evaluated_value) do
+            String.replace(evaluated_value, ~r/<NOEOL>\n\Z/, "", global: false)
+          else
+            evaluated_value
+          end
 
         {:ok, evaluated_value}
       rescue
@@ -129,7 +149,7 @@ defmodule AssertValue do
       end
 
     unless res == :ok and value == evaluated_value do
-        raise AssertValue.ArgumentError,
+      raise AssertValue.ArgumentError,
         message: """
         Unable to serialize #{inspect(value)}
 
@@ -149,11 +169,14 @@ defmodule AssertValue do
         For example you can wrap actual value in Kernel.inspect/1
         """
     end
+
     :ok
   end
 
   def check_string_and_file_read(actual_value, _expected_type = :file)
-    when is_binary(actual_value), do: :ok
+      when is_binary(actual_value),
+      do: :ok
+
   def check_string_and_file_read(actual_value, _expected_type = :file) do
     raise AssertValue.ArgumentError,
       message: """
@@ -167,11 +190,11 @@ defmodule AssertValue do
          assert_value inspect(:foo) == File.read!("foo.log")
       """
   end
+
   def check_string_and_file_read(_, _), do: :ok
 
   defp get_value_type(arg) do
     [{"Data type", type} | _t] = IEx.Info.info(arg)
     type
   end
-
 end

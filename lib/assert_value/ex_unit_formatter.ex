@@ -28,5 +28,4 @@ defmodule AssertValue.ExUnitFormatter do
     AssertValue.Server.flush_ex_unit_io()
     {:noreply, config}
   end
-
 end

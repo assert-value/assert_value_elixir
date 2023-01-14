@@ -1,5 +1,4 @@
 defmodule AssertValue.StringTools do
-
   def to_lines(arg) do
     arg
     # remove trailing newline otherwise String.split will give us an
@@ -13,9 +12,8 @@ defmodule AssertValue.StringTools do
       s
     else
       s
-      |> String.slice(0..length - 1)
+      |> String.slice(0..(length - 1))
       |> Kernel.<>("...")
     end
   end
-
 end
