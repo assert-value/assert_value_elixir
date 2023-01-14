@@ -1,7 +1,6 @@
 /_build
 /cover
 /deps
-mix.lock
 erl_crash.dump
 *.ez
 *.swp
