@@ -4,12 +4,14 @@ on:
   pull_request:
   push:
     branches:
-      - master
+      - '**'
 
 jobs:
-  mix_test:
+  test:
     name: mix test (Elixir ${{matrix.elixir}} | OTP ${{matrix.otp}})
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
+    env:
+      MIX_ENV: test
     strategy:
       fail-fast: false
       matrix:
@@ -30,23 +32,31 @@ jobs:
             otp: 22
           - elixir: 1.7.x
             otp: 21
-    env:
-      MIX_ENV: test
     steps:
-      - uses: actions/checkout@v2
-      - uses: erlef/setup-beam@v1
+      - uses: actions/checkout@v3
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
         with:
           otp-version: ${{matrix.otp}}
           elixir-version: ${{matrix.elixir}}
-      - name: Install Dependencies
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: deps
+          key: mix-deps-${{ hashFiles('**/mix.lock') }}
+
+      - name: Install dependencies
         run: |
           mix local.hex --force
           mix local.rebar --force
-          mix deps.get --only test
-      - run: mix compile --warnings-as-errors
-        if: matrix.warnings_as_errors
+          mix deps.get
+
+      - if: matrix.warnings_as_errors
+        run: mix compile --warnings-as-errors
+
       - run: mix test
-      - run: |
-          mix deps.get --only dev
-          MIX_ENV=dev mix credo --format=oneline
-        if: matrix.lint
+
+      - if: matrix.lint
+        run: MIX_ENV=dev mix credo --format=oneline
