@@ -9,15 +9,18 @@ on:
 jobs:
   mix_test:
     name: mix test (Elixir ${{matrix.elixir}} | OTP ${{matrix.otp}})
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
         include:
-          - elixir: 1.13.x
-            otp: 24
+          # We run linter only for last Elixir version
+          - elixir: 1.14.x
+            otp: 25
             warnings_as_errors: true
             lint: true
+          - elixir: 1.13.x
+            otp: 24
           - elixir: 1.12.x
             otp: 24
           - elixir: 1.11.x
@@ -33,7 +36,7 @@ jobs:
     env:
       MIX_ENV: test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: erlef/setup-beam@v1
         with:
           otp-version: ${{matrix.otp}}
