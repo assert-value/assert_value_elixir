@@ -31,6 +31,8 @@
         # Turn off function complexity check. It always fail on
         # assert_value macro because it is complex.
         {Credo.Check.Refactor.CyclomaticComplexity, false},
+        # Same for function body nesting
+        {Credo.Check.Refactor.Nesting, max_nesting: 3},
         {Credo.Check.Refactor.FunctionArity, false},
         # Long lines are not ok, Exit with status code
         {Credo.Check.Readability.MaxLineLength,
