@@ -106,7 +106,7 @@ defmodule AssertValue.IntegrationTest.Support do
     output =
       output
       |> String.replace(~r{\/tmp\/assert-value-\d+-\d+-\w+/}, "")
-      |> String.replace(~r/\nFinished in.*\n*/m, "\n")
+      |> String.replace(~r/\n+Finished in[^\n]+\n+/m, "\n")
       |> String.replace(~r/\n+(\d+ tests)/m, "\n\\1")
       |> String.replace(~r/\nRandomized with seed.*\n/m, "")
       # mask line numbers
