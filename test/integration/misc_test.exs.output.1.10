@@ -81,6 +81,4 @@ Accept new value? [y,n,?]
      right: "\"bar\""
      stacktrace:
        misc_test.exs:##: (test)
-
-
 4 tests, 2 failures

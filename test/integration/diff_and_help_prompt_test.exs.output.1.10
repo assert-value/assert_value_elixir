@@ -42,6 +42,4 @@ Accept new value? [y,n,?]
      right: nil
      stacktrace:
        diff_and_help_prompt_test.exs:##: (test)
-
-
 2 tests, 1 failure

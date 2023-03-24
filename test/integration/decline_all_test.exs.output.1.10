@@ -27,6 +27,4 @@ Accept new value? [y,n,?]
      right: "bar"
      stacktrace:
        decline_all_test.exs:##: (test)
-
-
 3 tests, 2 failures

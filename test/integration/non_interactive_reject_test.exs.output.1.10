@@ -19,6 +19,4 @@
      right: "baz"
      stacktrace:
        non_interactive_reject_test.exs:##: (test)
-
-
 2 tests, 2 failures
