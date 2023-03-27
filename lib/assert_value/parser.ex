@@ -1,9 +1,8 @@
 defmodule AssertValue.Parser do
-
   # This is internal parser error
   # In theory we parse any valid Elixir code and should not face it
   defmodule ParseError do
-    defexception [message: "Unable to parse assert_value arguments"]
+    defexception message: "Unable to parse assert_value arguments"
   end
 
   # Parse file with test code and returns {:ok, parsed} on success
@@ -44,8 +43,12 @@ defmodule AssertValue.Parser do
   # Returns {:error, :parse_error} on failure
   #
   def parse_assert_value(
-    filename, line_num, assertion_ast, actual_ast, expected_ast
-  ) do
+        filename,
+        line_num,
+        assertion_ast,
+        actual_ast,
+        expected_ast
+      ) do
     {prefix, suffix} =
       File.read!(filename)
       |> String.split("\n")
@@ -90,6 +93,7 @@ defmodule AssertValue.Parser do
         else
           [_, operator, _, rest] = Regex.run(~r/((\)|\s)*==\s*)(.*)/s, rest)
           {expected, rest} = find_ast_in_code(rest, expected_ast)
+
           {
             assert_value_prefix <> operator,
             expected,
@@ -97,15 +101,16 @@ defmodule AssertValue.Parser do
           }
         end
 
-      {:ok, %{
-        prefix: prefix,
-        suffix: suffix,
-        assert_value: assert_value,
-        assert_value_prefix: assert_value_prefix,
-        assert_value_suffix: assert_value_suffix,
-        expected: expected,
-        indentation: indentation
-      }}
+      {:ok,
+       %{
+         prefix: prefix,
+         suffix: suffix,
+         assert_value: assert_value,
+         assert_value_prefix: assert_value_prefix,
+         assert_value_suffix: assert_value_suffix,
+         expected: expected,
+         indentation: indentation
+       }}
     rescue
       AssertValue.Parser.ParseError ->
         {:error, :parse_error}
@@ -146,6 +151,7 @@ defmodule AssertValue.Parser do
       case String.next_grapheme(code) do
         {first_grapheme, rest} ->
           find_ast_in_code(rest, ast, accumulator <> first_grapheme)
+
         nil ->
           # No more characters left and still not match?
           raise AssertValue.Parser.ParseError
@@ -156,18 +162,23 @@ defmodule AssertValue.Parser do
   # Returns true if code's AST match the second parameter
   # Empty code does not match anything
   defp code_match_ast?("", _ast), do: false
+
   defp code_match_ast?(code, ast) do
     case Code.string_to_quoted(code) do
       {:ok, quoted} ->
-        quoted = if is_binary(quoted) do
-          String.replace(quoted, "<NOEOL>\\n", "")
-        else
-          quoted
-        end
+        quoted =
+          if is_binary(quoted) do
+            String.replace(quoted, "<NOEOL>\\n", "")
+          else
+            quoted
+          end
+
         ast_match?(quoted, ast)
+
       _ ->
         false
     end
+
     # Elixir 1.13 raises MatchError on some escape characters
     # https://github.com/elixir-lang/elixir/issues/11813
   rescue
@@ -199,15 +210,14 @@ defmodule AssertValue.Parser do
   #
   defp trim_parens(code, left_parens_acc \\ "", right_parens_acc \\ "") do
     with [_, lp, trimmed, rp] <-
-        Regex.run(~r/^(\s*\(\s*)(.*)(\s*\)\s*)$/s, code),
-      {:ok, original_code_ast} <- Code.string_to_quoted(code),
-      {:ok, trimmed_code_ast} <- Code.string_to_quoted(trimmed),
-      true <- ast_match?(trimmed_code_ast, original_code_ast) do
-        trim_parens(trimmed, left_parens_acc <> lp, rp <> right_parens_acc)
+           Regex.run(~r/^(\s*\(\s*)(.*)(\s*\)\s*)$/s, code),
+         {:ok, original_code_ast} <- Code.string_to_quoted(code),
+         {:ok, trimmed_code_ast} <- Code.string_to_quoted(trimmed),
+         true <- ast_match?(trimmed_code_ast, original_code_ast) do
+      trim_parens(trimmed, left_parens_acc <> lp, rp <> right_parens_acc)
     else
       _ ->
         {code, left_parens_acc, right_parens_acc}
     end
   end
-
 end

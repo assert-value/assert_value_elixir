@@ -1,7 +1,6 @@
-ExUnit.start([timeout: :infinity])
+ExUnit.start(timeout: :infinity)
 
 defmodule AssertValue.IntegrationTest.Support do
-
   # This helper is used to start external process, feed it with input,
   # and collect output.
   #
@@ -19,9 +18,14 @@ defmodule AssertValue.IntegrationTest.Support do
   #   {output, exit_code} = AssertValue.System.exec("mix",
   #      ["test", "--seed", "0", "/tmp/intergration_test.exs"], input: "y\ny\n")
   def exec(cmd, args, env, opts) do
-    cmd = cmd |> System.find_executable
-    port = Port.open({:spawn_executable, cmd},
-      [{:args, args}, {:env, env}, :binary, :exit_status])
+    cmd = cmd |> System.find_executable()
+
+    port =
+      Port.open(
+        {:spawn_executable, cmd},
+        [{:args, args}, {:env, env}, :binary, :exit_status]
+      )
+
     Port.command(port, opts[:input])
     handle_output(port, "")
   end
@@ -32,6 +36,7 @@ defmodule AssertValue.IntegrationTest.Support do
     receive do
       {^port, {:data, data}} ->
         handle_output(port, output <> data)
+
       {^port, {:exit_status, exit_code}} ->
         {output, exit_code}
     end
@@ -55,22 +60,23 @@ defmodule AssertValue.IntegrationTest.Support do
 
   def latest_compatible_output_file(version, path) do
     versioned_paths = Path.wildcard("#{path}.*")
+
     if Enum.empty?(versioned_paths) do
       path
     else
       compatible_versions =
         versioned_paths
         # get version from filename "parser_test.exs.output.1.8" => "1.8"
-        |> Enum.map(&(String.replace(&1, "#{path}.", "")))
+        |> Enum.map(&String.replace(&1, "#{path}.", ""))
         # find compatible versions
-        |> Enum.filter(&(Version.match?(version, "~>#{&1}")))
+        |> Enum.filter(&Version.match?(version, "~>#{&1}"))
 
       if Enum.empty?(compatible_versions) do
         path
       else
         latest_compatible_version =
           compatible_versions
-          |> Enum.max_by(&(Version.parse("#{&1}.0")))
+          |> Enum.max_by(&Version.parse("#{&1}.0"))
 
         "#{path}.#{latest_compatible_version}"
       end
@@ -82,13 +88,13 @@ defmodule AssertValue.IntegrationTest.Support do
     # We look for lines like '# prompt: y'
     prompt_responses =
       Regex.scan(~r/#\s*prompt:\s*(.)/, File.read!(filename))
-      |> Enum.map_join("\n", fn([_, x]) -> x end)
+      |> Enum.map_join("\n", fn [_, x] -> x end)
       |> Kernel.<>("\n")
 
     # Elixir 1.13 changed default failed testcase exit status to 2
     # and introduced --exit-status param
     exec_params =
-      if Version.match?(System.version, ">= 1.13.0") do
+      if Version.match?(System.version(), ">= 1.13.0") do
         ["test", "--seed", "0", "--exit-status", "1", filename]
       else
         ["test", "--seed", "0", filename]
@@ -113,8 +119,8 @@ defmodule AssertValue.IntegrationTest.Support do
       |> String.replace(~r/(_test.exs:)\d+/, "\\1##")
       # canonicalize ExUnit error formatting:
       # - remove fancy spacing
-      |> String.replace(~r/\s{5}code:\s+actual/m,   "     code: actual")
-      |> String.replace(~r/\s{5}(left):\s+"/m,  "     left: \"")
+      |> String.replace(~r/\s{5}code:\s+actual/m, "     code: actual")
+      |> String.replace(~r/\s{5}(left):\s+"/m, "     left: \"")
       |> String.replace(~r/\s{5}(right):\s+"/m, "     right: \"")
       # canonicalize messages about raised exceptions
       # ExUnit in Elixir 1.5 has "code:" line in message:
@@ -139,13 +145,15 @@ defmodule AssertValue.IntegrationTest.Support do
   end
 
   def prepare_expected_files(filenames, runnable_test_dir) do
-    Enum.map(filenames, fn(filename) ->
+    Enum.map(filenames, fn filename ->
       before_path = Path.expand(filename <> ".before", @integration_test_dir)
       after_path = Path.expand(filename <> ".after", @integration_test_dir)
       runnable_path = Path.expand(filename, runnable_test_dir)
+
       if File.exists?(before_path) do
         File.cp!(before_path, runnable_path)
       end
+
       [runnable_path, after_path]
     end)
   end
@@ -175,30 +183,40 @@ defmodule AssertValue.IntegrationTest.Support do
     test_name = "running integration #{module_name}"
 
     quote do
-
       defmodule unquote(module_name) do
         use ExUnit.Case, async: true
 
         import AssertValue
-        import AssertValue.IntegrationTest.Support, only: [
-          prepare_runnable_test: 2, prepare_expected_files: 2, run_tests: 2
-        ]
+
+        import AssertValue.IntegrationTest.Support,
+          only: [
+            prepare_runnable_test: 2,
+            prepare_expected_files: 2,
+            run_tests: 2
+          ]
 
         setup_all do
           # Make sure we delete temporary dir even if tests fail
-          on_exit fn ->
+          on_exit(fn ->
             File.rm_rf!(unquote(runnable_test_dir))
-          end
+          end)
+
           :ok
         end
 
         test unquote(test_name) do
-          {runnable_path, after_path, output_path} = prepare_runnable_test(
-            unquote(test_filename), unquote(runnable_test_dir)
-          )
-          expected_files = prepare_expected_files(
-            unquote(expected_files), unquote(runnable_test_dir)
-          )
+          {runnable_path, after_path, output_path} =
+            prepare_runnable_test(
+              unquote(test_filename),
+              unquote(runnable_test_dir)
+            )
+
+          expected_files =
+            prepare_expected_files(
+              unquote(expected_files),
+              unquote(runnable_test_dir)
+            )
+
           {output, exit_code} = run_tests(runnable_path, unquote(opts[:env]))
           assert exit_code == unquote(expected_exit_code)
           test_source_result = File.read!(runnable_path)
@@ -207,13 +225,16 @@ defmodule AssertValue.IntegrationTest.Support do
           Code.string_to_quoted!(test_source_result)
           assert_value test_source_result == File.read!(after_path)
           assert_value output == File.read!(output_path)
-          Enum.each(expected_files, fn([runnable_path, after_path]) ->
+
+          Enum.each(expected_files, fn [runnable_path, after_path] ->
             assert_value(File.read!(runnable_path) == File.read!(after_path))
           end)
         end
       end
+    end
 
-    end # quote do
-  end # defmacro
+    # quote do
+  end
 
+  # defmacro
 end
