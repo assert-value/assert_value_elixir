@@ -19,6 +19,12 @@ formatter_test.exs:##:"test integer variants" assert_value failed
 Accept new value? [y,n,?] 
 formatter_test.exs:##:"test integer variants" assert_value failed
 
+-    assert_value 42.0e15
++    assert_value 42.0e15 == 4.2e16
+
+Accept new value? [y,n,?] 
+formatter_test.exs:##:"test integer variants" assert_value failed
+
 -    assert_value 0x2A
 +    assert_value 0x2A == 42
 

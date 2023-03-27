@@ -14,6 +14,9 @@ defmodule FormatterTest do
     assert_value 43.0e+5 == 4.3e6
 
     # prompt: y
+    assert_value 42.0e15 == 4.2e16
+
+    # prompt: y
     assert_value 0x2A == 42
   end
 
