@@ -52,4 +52,5 @@ jobs:
       - run: |
           mix deps.get --only dev
           MIX_ENV=dev mix credo --format=oneline
+          mix format --check-formatted
         if: matrix.lint
