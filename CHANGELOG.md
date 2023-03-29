@@ -1,5 +1,10 @@
 # Changelog
-## v0.10 - May XX, 2022
+## v0.10.1 - March 29, 2023
+
+ * Enhancements
+   * Add support for Elixir 1.14
+
+## v0.10 - May 25, 2022
 
  * Enhancements
    * Add support for Elixir 1.13. Drop support for Elixir < 1.7
