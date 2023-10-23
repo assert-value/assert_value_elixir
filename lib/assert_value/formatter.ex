@@ -6,7 +6,11 @@ defmodule AssertValue.Formatter do
       format_as_heredoc(actual)
     else
       actual
-      |> Kernel.inspect(limit: :infinity, printable_limit: :infinity)
+      |> Kernel.inspect(
+        limit: :infinity,
+        printable_limit: :infinity,
+        custom_options: [sort_maps: true]
+      )
       |> Code.format_string!()
       |> IO.iodata_to_binary()
     end

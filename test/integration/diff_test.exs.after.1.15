@@ -1,0 +1,73 @@
+defmodule DiffTest do
+  use ExUnit.Case, async: true
+
+  import AssertValue
+
+  test "empty string" do
+    # prompt: y
+    assert_value "" == ""
+  end
+
+  test "nil" do
+    # prompt: y
+    assert_value nil == nil
+
+    # prompt: y
+    assert_value nil == nil
+  end
+
+  test "integer and string" do
+    # prompt: y
+    assert_value 1 == 1
+  end
+
+
+  test "diff" do
+    a = """
+    aaa
+    bbb
+    ccc
+    ddd
+    eee
+    fff
+    """
+    b = """
+    aaa
+    xxx
+    ddd
+    eee
+    fff
+    GGG
+    """
+
+    # prompt: y
+    assert_value a == """
+                 aaa
+                 bbb
+                 ccc
+                 ddd
+                 eee
+                 fff
+                 """
+
+    # prompt: y
+    assert_value nil == nil
+
+    # prompt: y
+    assert_value a == """
+                 aaa
+                 bbb
+                 ccc
+                 ddd
+                 eee
+                 fff
+                 """
+  end
+
+  test "char list diff" do
+    # prompt: y
+    assert_value ~c"aaa\nbbb\nccc\nddd\neee\nfff\n" ==
+                   ~c"aaa\nbbb\nccc\nddd\neee\nfff\n"
+  end
+
+end

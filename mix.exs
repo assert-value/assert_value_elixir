@@ -41,7 +41,6 @@ defmodule AssertValue.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:temp, "~> 0.4", only: :test, runtime: false},
       {:credo, "~> 1.7", only: :dev, runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev}
     ]

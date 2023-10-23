@@ -111,7 +111,7 @@ defmodule AssertValue.IntegrationTest.Support do
     # Canonicalize output
     output =
       output
-      |> String.replace(~r{\/tmp\/assert-value-\d+-\d+-\w+/}, "")
+      |> String.replace(~r{\/tmp\/assert-value-\w+/}, "")
       |> String.replace(~r/\n+Finished in[^\n]+\n+/m, "\n")
       |> String.replace(~r/\n+(\d+ tests)/m, "\n\\1")
       |> String.replace(~r/\nRandomized with seed.*\n/m, "")
@@ -179,7 +179,7 @@ defmodule AssertValue.IntegrationTest.Support do
   defmacro build_test_module(module_name, test_filename, opts \\ []) do
     expected_files = Keyword.get(opts, :expected_files, [])
     expected_exit_code = Keyword.get(opts, :expected_exit_code, 0)
-    {:ok, runnable_test_dir} = Temp.mkdir("assert-value")
+    runnable_test_dir = make_temp_dir("assert-value")
     test_name = "running integration #{module_name}"
 
     quote do
@@ -232,9 +232,22 @@ defmodule AssertValue.IntegrationTest.Support do
         end
       end
     end
-
-    # quote do
   end
 
-  # defmacro
+  def make_temp_dir(basename) do
+    random_string =
+      :rand.uniform(0x100000000)
+      |> Integer.to_string(36)
+      |> String.downcase()
+
+    dirname =
+      Path.expand(
+        basename <> "-" <> random_string,
+        System.tmp_dir!()
+      )
+
+    File.mkdir!(dirname)
+    System.at_exit(fn _status -> File.rm_rf(dirname) end)
+    dirname
+  end
 end
