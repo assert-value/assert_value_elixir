@@ -20,9 +20,16 @@ defmodule AssertValue.ExUnitFormatter do
     {:ok, config}
   end
 
-  def handle_cast(test, config) do
-    {:noreply, config} = ExUnit.CLIFormatter.handle_cast(test, config)
-    AssertValue.Server.flush_ex_unit_io()
-    {:noreply, config}
+  def handle_cast(request, state) do
+    {:noreply, state} = ExUnit.CLIFormatter.handle_cast(request, state)
+
+    # Do not flush ExUnit IO at the end of the suite
+    # ExUnit may close StringIO faster then we try to call it
+    case request do
+      {:suite_finished, _} -> :ok
+      _ -> AssertValue.Server.flush_ex_unit_io()
+    end
+
+    {:noreply, state}
   end
 end

@@ -1,5 +1,5 @@
 defmodule AssertValue.Server do
-  use GenServer, restart: :temporary
+  use GenServer
   import AssertValue.StringTools
 
   def start_link(args) do
