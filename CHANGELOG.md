@@ -1,4 +1,11 @@
 # Changelog
+## v0.10.2 - Oct 30, 2023
+
+ * Bugfixes
+   * Fix crashes and subsequent test failures in umbrella apps at the end of
+     test suite in Elixir 1.15/OTP 26
+   * Fix rare cases of missing test results summaries in Elixir 1.15/OTP 26
+
 ## v0.10.1 - March 29, 2023
 
  * Enhancements
