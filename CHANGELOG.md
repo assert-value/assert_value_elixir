@@ -1,4 +1,11 @@
 # Changelog
+## v0.10.3 - Oct 31, 2023
+
+ * Enhancements
+   * Full support for Elixir 1.15
+   * Map keys are now sorted when creating new expected values to
+     ensure predictable test results in Elixir 1.15/OTP 26
+
 ## v0.10.2 - Oct 30, 2023
 
  * Bugfixes
