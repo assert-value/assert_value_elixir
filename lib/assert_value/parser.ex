@@ -196,7 +196,7 @@ defmodule AssertValue.Parser do
   # iex> remove_ast_meta({:foo, [line: 10, counter: 6], []})
   # {:foo, [], []}
   defp remove_ast_meta(ast) do
-    cleaner = &Keyword.drop(&1, [:line, :counter])
+    cleaner = &Keyword.drop(&1, [:line, :column, :counter])
     Macro.prewalk(ast, &Macro.update_meta(&1, cleaner))
   end
 
