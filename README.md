@@ -1,5 +1,5 @@
 # assert_value for Elixir
-[![Build Status](https://travis-ci.org/assert-value/assert_value_elixir.svg?branch=master)](https://travis-ci.org/assert-value/assert_value_elixir)
+[![Build Status](https://github.com/assert-value/assert_value_elixir/actions/workflows/ci.yml/badge.svg)](https://github.com/assert-value/assert_value_elixir/actions/workflows/ci.yml)
 [![Hex Version](https://img.shields.io/hexpm/v/assert_value.svg)](https://hex.pm/packages/assert_value)
 
 `assert_value` is ExUnit's `assert` on steroids. It writes and updates tests for you.
