@@ -164,10 +164,7 @@ defmodule AssertValue.Server do
         {:ok, parsed} ->
           formatter_options = formatter_options_for_file(opts[:caller][:file])
 
-          new_expected =
-            AssertValue.Formatter.new_expected_from_actual_value(
-              opts[:actual_value]
-            )
+          new_expected = AssertValue.Formatter.new_expected_from_actual_value(opts[:actual_value])
 
           new_assert_value =
             parsed.assert_value_prefix <>
@@ -244,12 +241,26 @@ defmodule AssertValue.Server do
         "#{file}:#{line}:\"#{function}\" assert_value failed"
       end
 
+    all_context =
+      case Keyword.fetch(opts, :context) do
+        {:ok, context} ->
+          """
+          #{diff_context}
+
+          = Context =
+          #{context}
+          """
+
+        _ ->
+          diff_context
+      end
+
     diff_lines_count = String.split(diff, "\n") |> Enum.count()
-    IO.puts("\n" <> diff_context <> "\n")
+    IO.puts("\n" <> all_context <> "\n")
     IO.puts(diff)
     # If diff is too long diff context does not fit to screen
     # we need to repeat it
-    if diff_lines_count > 37, do: IO.puts(diff_context)
+    if diff_lines_count > 37, do: IO.puts(all_context)
   end
 
   defp get_answer(diff, opts, state) do
