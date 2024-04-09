@@ -147,6 +147,150 @@ defmodule AssertValue.Server do
          diff: AssertValue.Diff.diff(opts[:expected_value], opts[:actual_value])
        }}
     else
+      line_nr = opts[:caller][:line]
+      f = File.read!(opts[:caller][:file])
+      f_ast = Sourceror.parse_string!(f)
+
+      IO.inspect(opts, label: "opts")
+      IO.inspect(f_ast, label: "f_ast")
+
+      x =
+        {:assert_value,
+         [
+           trailing_comments: [],
+           leading_comments: [],
+           line: 7,
+           column: 5
+         ],
+         [
+           {:==, [trailing_comments: [], newlines: 1, line: 7, column: 71],
+            [
+              {:<>, [trailing_comments: [], line: 7, column: 34],
+               [
+                 {:__block__,
+                  [
+                    trailing_comments: [],
+                    leading_comments: [],
+                    delimiter: "\"",
+                    line: 7,
+                    column: 18
+                  ], ["39393eei99393"]},
+                 {:__block__,
+                  [
+                    trailing_comments: [],
+                    leading_comments: [],
+                    delimiter: "\"",
+                    line: 7,
+                    column: 37
+                  ], ["-------------------------------"]}
+               ]},
+              {:__block__,
+               [
+                 trailing_comments: [],
+                 leading_comments: [],
+                 delimiter: "\"",
+                 line: 8,
+                 column: 20
+               ], ["39393ee99393-------------------------------"]}
+            ]},
+           [
+             {{:__block__,
+               [
+                 trailing_comments: [],
+                 leading_comments: [],
+                 format: :keyword,
+                 line: 9,
+                 column: 18
+               ], [:with_context]},
+              {:context,
+               [
+                 trailing_comments: [],
+                 leading_comments: [],
+                 line: 9,
+                 column: 32
+               ], nil}},
+             {{:__block__,
+               [
+                 trailing_comments: [],
+                 leading_comments: [],
+                 format: :keyword,
+                 line: 10,
+                 column: 18
+               ], [:context]},
+              {:__block__,
+               [
+                 trailing_comments: [],
+                 leading_comments: [],
+                 delimiter: "\"",
+                 line: 10,
+                 column: 27
+               ], [""]}}
+           ]
+         ]}
+
+      f_str =
+        f_ast
+        |> Macro.postwalk(fn
+          quoted =
+              {:assert_value, assert_value_meta,
+               [
+                 {:==, assertion_meta,
+                  [
+                    assertion_lhs,
+                    {:__block__, assertion_rhs_meta, [assertion_rhs_value]}
+                  ]},
+                 [
+                   {{:__block__, with_context_meta, [:with_context]},
+                    with_context_meta_value_meta},
+                   {{:__block__, context_meta, [:context]},
+                    {:__block__, context_value_meta, [_context]}}
+                 ]
+               ]} ->
+            assert_value_meta_line_nr = Keyword.get(assert_value_meta, :line)
+
+            if assert_value_meta_line_nr === line_nr do
+              context_value = opts[:context]
+
+              context_value_meta =
+                if length(to_lines(context_value)) > 1 do
+                  Keyword.put(context_value_meta, :delimiter, "\"\"\"")
+                else
+                  context_value_meta
+                  Keyword.put(context_value_meta, :delimiter, "\"")
+                end
+
+              {:assert_value, assert_value_meta,
+               [
+                 {:==, assertion_meta,
+                  [
+                    assertion_lhs,
+                    {:__block__, assertion_rhs_meta, [opts[:actual_value]]}
+                  ]},
+                 [
+                   {{:__block__, with_context_meta, [:with_context]},
+                    with_context_meta_value_meta},
+                   {{:__block__, context_meta, [:context]},
+                    {:__block__, context_value_meta, [opts[:context]]}}
+                 ]
+               ]}
+            else
+              quoted
+            end
+
+          quoted ->
+            quoted
+        end)
+        |> Sourceror.to_string()
+        |> Code.format_string!(formatter_options_for_file(opts[:caller][:file]))
+
+      IO.puts("""
+      NEW CODE
+      -------------
+
+      #{f_str}
+      -------------
+      """)
+
       current_line_number =
         current_line_number(
           state.file_changes,
@@ -164,7 +308,10 @@ defmodule AssertValue.Server do
         {:ok, parsed} ->
           formatter_options = formatter_options_for_file(opts[:caller][:file])
 
-          new_expected = AssertValue.Formatter.new_expected_from_actual_value(opts[:actual_value])
+          new_expected =
+            AssertValue.Formatter.new_expected_from_actual_value(
+              opts[:actual_value]
+            )
 
           new_assert_value =
             parsed.assert_value_prefix <>
@@ -190,7 +337,8 @@ defmodule AssertValue.Server do
 
           diff = AssertValue.Diff.diff(old_assert_value, new_assert_value)
 
-          new_file_content = parsed.prefix <> new_assert_value <> parsed.suffix
+          # parsed.prefix <> new_assert_value <> parsed.suffix
+          new_file_content = f_str
 
           {:ok,
            %{

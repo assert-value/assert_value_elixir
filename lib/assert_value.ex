@@ -118,7 +118,8 @@ defmodule AssertValue do
 
   defmacro assert_value(
              {:==, _, [left, right]} = assertion,
-             with_context: context
+             with_context: context,
+             context: _context
            ) do
     {expected_type, expected_file} =
       case right do
