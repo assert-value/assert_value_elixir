@@ -169,17 +169,34 @@ defmodule AssertValue.Server do
                     assertion_lhs,
                     {_, assertion_rhs_meta, [assertion_rhs_value]}
                   ]},
-                 [
-                   {{:__block__, with_context_meta, [:with_context]},
-                    with_context_meta_value_meta},
-                   {{:__block__, context_meta, [:context]},
-                    {:__block__, context_value_meta, [_context]}}
-                 ]
+                 context_args
                ]} ->
             assert_value_meta_line_nr = Keyword.get(assert_value_meta, :line)
 
             if assert_value_meta_line_nr === line_nr do
+              {with_context_meta, with_context_meta_value_meta, context_meta, context_value_meta} =
+                case context_args do
+                  [
+                    {{:__block__, with_context_meta, [:with_context]},
+                     with_context_meta_value_meta},
+                    {{:__block__, context_meta, [:context]},
+                     {:__block__, context_value_meta, [_context]}}
+                  ] ->
+                    {with_context_meta, with_context_meta_value_meta, context_meta,
+                     context_value_meta}
+
+                  [
+                    {{:__block__, with_context_meta, [:with_context]},
+                     with_context_meta_value_meta}
+                  ] ->
+                    {with_context_meta, with_context_meta_value_meta,
+                     [format: :keyword, line: assert_value_meta_line_nr + 2], []}
+                end
+
               context_value = opts[:context]
+
+              IO.inspect(context_meta, label: "context_meta")
+              IO.inspect(context_value_meta, label: "context_value_meta")
 
               context_value_meta =
                 if length(to_lines(context_value)) > 1 do
@@ -200,7 +217,7 @@ defmodule AssertValue.Server do
                    {{:__block__, with_context_meta, [:with_context]},
                     with_context_meta_value_meta},
                    {{:__block__, context_meta, [:context]},
-                    {:__block__, context_value_meta, [opts[:context]]}}
+                    {:__block__, context_value_meta, [context_value]}}
                  ]
                ]}
             else

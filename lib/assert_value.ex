@@ -1,4 +1,5 @@
 defmodule AssertValue do
+  require AssertValue
   # Assertions with right argument like "assert_value actual == expected"
   defmacro assert_value({:==, _, [left, right]} = assertion) do
     {expected_type, expected_file} =
@@ -113,6 +114,15 @@ defmodule AssertValue do
           # to show readable error message and stacktrace
           raise AssertValue.Parser.ParseError
       end
+    end
+  end
+
+  defmacro assert_value(
+             {:==, _, [_, _]} = assertion,
+             with_context: context
+           ) do
+    quote do
+      assert_value(unquote(assertion), with_context: unquote(context), context: unquote(context))
     end
   end
 
