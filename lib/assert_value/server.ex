@@ -150,83 +150,13 @@ defmodule AssertValue.Server do
       line_nr = opts[:caller][:line]
       f = File.read!(opts[:caller][:file])
       f_ast = Sourceror.parse_string!(f)
+      actual_ast_str = Macro.to_string(opts[:actual_value])
 
       IO.inspect(opts, label: "opts")
       IO.inspect(f_ast, label: "f_ast")
-
-      x =
-        {:assert_value,
-         [
-           trailing_comments: [],
-           leading_comments: [],
-           line: 7,
-           column: 5
-         ],
-         [
-           {:==, [trailing_comments: [], newlines: 1, line: 7, column: 71],
-            [
-              {:<>, [trailing_comments: [], line: 7, column: 34],
-               [
-                 {:__block__,
-                  [
-                    trailing_comments: [],
-                    leading_comments: [],
-                    delimiter: "\"",
-                    line: 7,
-                    column: 18
-                  ], ["39393eei99393"]},
-                 {:__block__,
-                  [
-                    trailing_comments: [],
-                    leading_comments: [],
-                    delimiter: "\"",
-                    line: 7,
-                    column: 37
-                  ], ["-------------------------------"]}
-               ]},
-              {:__block__,
-               [
-                 trailing_comments: [],
-                 leading_comments: [],
-                 delimiter: "\"",
-                 line: 8,
-                 column: 20
-               ], ["39393ee99393-------------------------------"]}
-            ]},
-           [
-             {{:__block__,
-               [
-                 trailing_comments: [],
-                 leading_comments: [],
-                 format: :keyword,
-                 line: 9,
-                 column: 18
-               ], [:with_context]},
-              {:context,
-               [
-                 trailing_comments: [],
-                 leading_comments: [],
-                 line: 9,
-                 column: 32
-               ], nil}},
-             {{:__block__,
-               [
-                 trailing_comments: [],
-                 leading_comments: [],
-                 format: :keyword,
-                 line: 10,
-                 column: 18
-               ], [:context]},
-              {:__block__,
-               [
-                 trailing_comments: [],
-                 leading_comments: [],
-                 delimiter: "\"",
-                 line: 10,
-                 column: 27
-               ], [""]}}
-           ]
-         ]}
+      IO.inspect(actual_ast_str, label: "actual_ast_str")
+      actual_ast_sourceror = Sourceror.parse_string!(actual_ast_str)
+      IO.inspect(actual_ast_sourceror, label: "actual_ast_sourceror")
 
       f_str =
         f_ast
@@ -237,7 +167,7 @@ defmodule AssertValue.Server do
                  {:==, assertion_meta,
                   [
                     assertion_lhs,
-                    {:__block__, assertion_rhs_meta, [assertion_rhs_value]}
+                    {_, assertion_rhs_meta, [assertion_rhs_value]}
                   ]},
                  [
                    {{:__block__, with_context_meta, [:with_context]},
@@ -253,10 +183,10 @@ defmodule AssertValue.Server do
 
               context_value_meta =
                 if length(to_lines(context_value)) > 1 do
-                  Keyword.put(context_value_meta, :delimiter, "\"\"\"")
+                  Keyword.replace(context_value_meta, :delimiter, "\"\"\"")
                 else
                   context_value_meta
-                  Keyword.put(context_value_meta, :delimiter, "\"")
+                  Keyword.replace(context_value_meta, :delimiter, "\"")
                 end
 
               {:assert_value, assert_value_meta,
@@ -264,7 +194,7 @@ defmodule AssertValue.Server do
                  {:==, assertion_meta,
                   [
                     assertion_lhs,
-                    {:__block__, assertion_rhs_meta, [opts[:actual_value]]}
+                    {:__block__, assertion_rhs_meta, [actual_ast_sourceror]}
                   ]},
                  [
                    {{:__block__, with_context_meta, [:with_context]},
@@ -308,10 +238,7 @@ defmodule AssertValue.Server do
         {:ok, parsed} ->
           formatter_options = formatter_options_for_file(opts[:caller][:file])
 
-          new_expected =
-            AssertValue.Formatter.new_expected_from_actual_value(
-              opts[:actual_value]
-            )
+          new_expected = AssertValue.Formatter.new_expected_from_actual_value(opts[:actual_value])
 
           new_assert_value =
             parsed.assert_value_prefix <>
@@ -337,7 +264,6 @@ defmodule AssertValue.Server do
 
           diff = AssertValue.Diff.diff(old_assert_value, new_assert_value)
 
-          # parsed.prefix <> new_assert_value <> parsed.suffix
           new_file_content = f_str
 
           {:ok,
