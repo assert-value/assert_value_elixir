@@ -161,16 +161,38 @@ defmodule AssertValue.Server do
       f_str =
         f_ast
         |> Macro.postwalk(fn
-          quoted =
+          {:assert_value, assert_value_meta,
+           [
+             {:==, assertion_meta,
+              [
+                assertion_lhs,
+                {a, assertion_rhs_meta, [_assertion_rhs_value]}
+              ]}
+           ]} = quoted ->
+            assert_value_meta_line_nr = Keyword.get(assert_value_meta, :line)
+
+            if assert_value_meta_line_nr === line_nr do
               {:assert_value, assert_value_meta,
                [
                  {:==, assertion_meta,
                   [
                     assertion_lhs,
-                    {_, assertion_rhs_meta, [assertion_rhs_value]}
-                  ]},
-                 context_args
-               ]} ->
+                    {a, assertion_rhs_meta, [actual_ast_sourceror]}
+                  ]}
+               ]}
+            else
+              quoted
+            end
+
+          {:assert_value, assert_value_meta,
+           [
+             {:==, assertion_meta,
+              [
+                assertion_lhs,
+                {_, assertion_rhs_meta, [assertion_rhs_value]}
+              ]},
+             context_args
+           ]} = quoted ->
             assert_value_meta_line_nr = Keyword.get(assert_value_meta, :line)
 
             if assert_value_meta_line_nr === line_nr do
