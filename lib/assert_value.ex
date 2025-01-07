@@ -13,6 +13,27 @@ defmodule AssertValue do
           {:other, nil}
       end
 
+    expected_value =
+      case expected_type do
+        :string ->
+          quote do
+            unquote(right)
+            |> String.replace(~r/<NOEOL>\n\Z/, "", global: false)
+          end
+
+        # TODO: should deal with a no-bang File.read instead, may
+        # want to deal with different errors differently
+        :file ->
+          quote do
+            (File.exists?(unquote(expected_file)) &&
+               File.read!(unquote(expected_file))) ||
+              ""
+          end
+
+        :other ->
+          right
+      end
+
     quote do
       assertion_ast = unquote(Macro.escape(assertion))
       actual_ast = unquote(Macro.escape(left))
@@ -20,23 +41,7 @@ defmodule AssertValue do
       expected_type = unquote(expected_type)
       expected_file = unquote(expected_file)
       expected_ast = unquote(Macro.escape(right))
-
-      expected_value =
-        case expected_type do
-          :string ->
-            unquote(right)
-            |> String.replace(~r/<NOEOL>\n\Z/, "", global: false)
-
-          # TODO: should deal with a no-bang File.read instead, may
-          # want to deal with different errors differently
-          :file ->
-            (File.exists?(expected_file) &&
-               File.read!(expected_file)) ||
-              ""
-
-          :other ->
-            unquote(right)
-        end
+      expected_value = unquote(expected_value)
 
       check_serializable(actual_value)
       check_string_and_file_read(actual_value, expected_type)
