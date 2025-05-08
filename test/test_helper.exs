@@ -111,6 +111,7 @@ defmodule AssertValue.IntegrationTest.Support do
     # Canonicalize output
     output =
       output
+      |> String.replace(~r/Running ExUnit with seed.*\n+/m, "\n")
       |> String.replace(~r{\/tmp\/assert-value-\w+/}, "")
       |> String.replace(~r/\n+Finished in[^\n]+\n+/m, "\n")
       |> String.replace(~r/\n+(\d+ tests)/m, "\n\\1")
@@ -140,6 +141,8 @@ defmodule AssertValue.IntegrationTest.Support do
         ~r/(\*\* \(.*?Error\).*?)\n\s{5}code:.*?\n/,
         "\\1\n"
       )
+      |> String.trim("\n")
+      |> Kernel.<>("\n")
 
     {output, exit_code}
   end

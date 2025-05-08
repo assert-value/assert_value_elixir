@@ -1,4 +1,3 @@
-
 decline_all_test.exs:##:"test all fail" assert_value failed
 
 -    assert_value "foo" == """

@@ -1,4 +1,3 @@
-
 diff_and_help_prompt_test.exs:##:"test promt help and accept" assert_value failed
 
 -    assert_value "foo"

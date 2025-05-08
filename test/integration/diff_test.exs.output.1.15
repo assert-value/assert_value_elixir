@@ -1,4 +1,3 @@
-
 diff_test.exs:##:"test empty string" assert_value failed
 
 -    assert_value ""
