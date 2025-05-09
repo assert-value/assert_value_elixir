@@ -9,16 +9,20 @@ on:
 jobs:
   mix_test:
     name: mix test (Elixir ${{matrix.elixir}} | OTP ${{matrix.otp}})
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
         include:
           # We run linter only for last Elixir version
-          - elixir: 1.16.x
-            otp: 26
+          - elixir: 1.18.x
+            otp: 27
             warnings_as_errors: true
             lint: true
+          - elixir: 1.17.x
+            otp: 27
+          - elixir: 1.16.x
+            otp: 26
           - elixir: 1.15.x
             otp: 26
           - elixir: 1.14.x
@@ -28,15 +32,7 @@ jobs:
           - elixir: 1.12.x
             otp: 24
           - elixir: 1.11.x
-            otp: 23
-          - elixir: 1.10.x
-            otp: 22
-          - elixir: 1.9.x
-            otp: 22
-          - elixir: 1.8.x
-            otp: 22
-          - elixir: 1.7.x
-            otp: 21
+            otp: 24
     env:
       MIX_ENV: test
     steps:
