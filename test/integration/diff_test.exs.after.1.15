@@ -3,6 +3,20 @@ defmodule DiffTest do
 
   import AssertValue
 
+  def f_nil() do
+    # The way to dynamically generate nil, to avoid "type violation" warnings
+    List.first([])
+  end
+
+  def f_int() do
+    1
+  end
+
+  def f_str() do
+    # Dynamic binary to avoid "type violation" warnings
+    Enum.join(~w[aaa bbb ccc ddd eee fff] ++ [""], "\n")
+  end
+
   test "empty string" do
     # prompt: y
     assert_value "" == ""
@@ -10,15 +24,15 @@ defmodule DiffTest do
 
   test "nil" do
     # prompt: y
-    assert_value nil == nil
+    assert_value f_nil() == nil
 
     # prompt: y
-    assert_value nil == nil
+    assert_value f_nil() == nil
   end
 
   test "integer and string" do
     # prompt: y
-    assert_value 1 == 1
+    assert_value f_int() == 1
   end
 
 
@@ -51,10 +65,10 @@ defmodule DiffTest do
                  """
 
     # prompt: y
-    assert_value nil == nil
+    assert_value f_nil() == nil
 
     # prompt: y
-    assert_value a == """
+    assert_value f_str() == """
                  aaa
                  bbb
                  ccc

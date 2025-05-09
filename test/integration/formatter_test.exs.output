@@ -1,4 +1,3 @@
-
 formatter_test.exs:##:"test integer variants" assert_value failed
 
 -    assert_value 42_000_000

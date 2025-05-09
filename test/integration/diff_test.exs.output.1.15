@@ -6,20 +6,20 @@ diff_test.exs:##:"test empty string" assert_value failed
 Accept new value? [y,n,?] .
 diff_test.exs:##:"test nil" assert_value failed
 
--    assert_value nil == ""
-+    assert_value nil == nil
+-    assert_value f_nil() == ""
++    assert_value f_nil() == nil
 
 Accept new value? [y,n,?] 
 diff_test.exs:##:"test nil" assert_value failed
 
--    assert_value nil == 1
-+    assert_value nil == nil
+-    assert_value f_nil() == 1
++    assert_value f_nil() == nil
 
 Accept new value? [y,n,?] .
 diff_test.exs:##:"test integer and string" assert_value failed
 
--    assert_value 1 == "1"
-+    assert_value 1 == 1
+-    assert_value f_int() == "1"
++    assert_value f_int() == 1
 
 Accept new value? [y,n,?] .
 diff_test.exs:##:"test diff" assert_value failed
@@ -37,14 +37,14 @@ diff_test.exs:##:"test diff" assert_value failed
 Accept new value? [y,n,?] 
 diff_test.exs:##:"test diff" assert_value failed
 
--    assert_value nil == b
-+    assert_value nil == nil
+-    assert_value f_nil() == b
++    assert_value f_nil() == nil
 
 Accept new value? [y,n,?] 
 diff_test.exs:##:"test diff" assert_value failed
 
--    assert_value a == nil
-+    assert_value a == """
+-    assert_value f_str() == nil
++    assert_value f_str() == """
 +                 aaa
 +                 bbb
 +                 ccc
@@ -57,7 +57,7 @@ Accept new value? [y,n,?] .
 diff_test.exs:##:"test char list diff" assert_value failed
 
      assert_value ~c"aaa\nbbb\nccc\nddd\neee\nfff\n" ==
--                   "aaa\nxxx\nddd\neee\nfff\nGGG\n"
+-                   ~c"aaa\nxxx\nddd\neee\nfff\nGGG\n"
 +                   ~c"aaa\nbbb\nccc\nddd\neee\nfff\n"
 
 Accept new value? [y,n,?] .

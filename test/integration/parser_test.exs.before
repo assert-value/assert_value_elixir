@@ -12,6 +12,27 @@ defmodule ParserTest do
     def foo, do: "foo"
   end
 
+  def f_nil() do
+    # The way to dynamically generate nil, to avoid "type violation" warnings
+    List.first([])
+  end
+
+  def f_false() do
+    List.first([false])
+  end
+
+  def f_true() do
+    List.first([true])
+  end
+
+  def f_atom_foo() do
+    List.first([:foo])
+  end
+
+  def f_atom_bar() do
+    List.first([:bar])
+  end
+
   import AssertValue
 
   # Literals
@@ -55,13 +76,13 @@ defmodule ParserTest do
     assert_value <<256 :: utf8>>
 
     # prompt: y
-    assert_value 'forty-two'
+    assert_value ~c"forty-two"
 
     # prompt: y
-    assert_value '''
+    assert_value ~c"""
     forty-two
     сорок два
-    '''
+    """
     # prompt: y
     assert_value ~C(forty-two)
 
@@ -116,13 +137,13 @@ defmodule ParserTest do
 
   test "actual and expected literals" do
     # prompt: y
-    assert_value nil == false
+    assert_value nil == f_false()
 
     # prompt: y
-    assert_value true == false
+    assert_value true == f_false()
 
     # prompt: y
-    assert_value :foo == :bar
+    assert_value :foo == f_atom_bar()
 
     # prompt: y
     assert_value "forty-two" == "forty-three"
@@ -155,16 +176,16 @@ defmodule ParserTest do
     assert_value <<256 :: utf8>> == <<267 :: utf8>>
 
     # prompt: y
-    assert_value 'forty-two' == 'forty-three'
+    assert_value ~c"forty-two" == ~c"forty-three"
 
     # prompt: y
-    assert_value '''
+    assert_value ~c"""
     forty-two
     сорок два
-    ''' == '''
+    """ == ~c"""
     forty-three
     сорок три
-    '''
+    """
 
     # prompt: y
     assert_value ~C(forty-two) == ~C(forty-three)
@@ -191,7 +212,7 @@ defmodule ParserTest do
     assert_value [4, 2, true, nil, "42"] == [4, 3, true, nil, "42"]
 
     # prompt: y
-    assert_value %{a: "forty", b: 2, c: nil} == %{a: "forty", b: 2, c: true}
+    assert_value %{a: "forty", b: 2, c: nil} == %{a: "forty", b: 2, c: f_true()}
 
     # prompt: y
     assert_value ~N[2018-01-01 21:01:50] == ~N[2018-01-02 21:01:51]
@@ -200,7 +221,7 @@ defmodule ParserTest do
     assert_value ~T[23:00:07] == ~T[23:00:07.001004]
 
     # prompt: y
-    assert_value {:ok, 42} == {:error, 42}
+    assert_value {:ok, 42} == {f_atom_bar(), 42}
 
     # prompt: y
     assert_value %User{} == %User{age: 42}
@@ -223,22 +244,22 @@ defmodule ParserTest do
 
   test "expected literal" do
     # prompt: y
-    assert_value "foo" == nil
+    assert_value Foo.foo() == nil
 
     # prompt: y
-    assert_value "foo" == true
+    assert_value Foo.foo() == true
 
     # prompt: y
-    assert_value "foo" == false
+    assert_value Foo.foo() == false
 
     # prompt: y
-    assert_value "foo" == :foo
+    assert_value Foo.foo() == :foo
 
     # prompt: y
-    assert_value "foo" == "forty-two"
+    assert_value Foo.foo() == "forty-two"
 
     # prompt: y
-    assert_value "foo" == """
+    assert_value Foo.foo() == """
     forty-three
     сорок два
     quarante deux
@@ -246,76 +267,76 @@ defmodule ParserTest do
     """
 
     # prompt: y
-    assert_value "foo" == ~S(forty-two)
+    assert_value Foo.foo() == ~S(forty-two)
 
     # prompt: y
-    assert_value "foo" == ~s(forty-two)
+    assert_value Foo.foo() == ~s(forty-two)
 
     # prompt: y
-    assert_value "foo" == <<65, 66, 67>>
+    assert_value Foo.foo() == <<65, 66, 67>>
 
     # prompt: y
-    assert_value "foo" == <<256 :: utf8>>
+    assert_value Foo.foo() == <<256 :: utf8>>
 
     # prompt: y
-    assert_value "foo" == 'forty-three'
+    assert_value Foo.foo() == ~c"forty-two"
 
     # prompt: y
-    assert_value "foo" == '''
+    assert_value Foo.foo() == ~c"""
     forty-three
     сорок три
-    '''
+    """
 
     # prompt: y
-    assert_value "foo" == ~C(forty-two)
+    assert_value Foo.foo() == ~C(forty-two)
 
     # prompt: y
-    assert_value "foo" == ~c(forty-two)
+    assert_value Foo.foo() == ~c(forty-two)
 
     # prompt: y
-    assert_value "foo" == ~D[2018-01-01]
+    assert_value Foo.foo() == ~D[2018-01-01]
 
     # prompt: y
-    assert_value "foo" == 0.42
+    assert_value Foo.foo() == 0.42
 
     # prompt: y
-    assert_value "foo" == -0.42
+    assert_value Foo.foo() == -0.42
 
     # prompt: y
-    assert_value "foo" == 42
+    assert_value Foo.foo() == 42
 
     # prompt: y
-    assert_value "foo" == -42
+    assert_value Foo.foo() == -42
 
     # prompt: y
-    assert_value "foo" == [4, 3, true, nil, "42"]
+    assert_value Foo.foo() == [4, 3, true, nil, "42"]
 
     # prompt: y
-    assert_value "foo" == %{a: "forty", b: 2, c: nil}
+    assert_value Foo.foo() == %{a: "forty", b: 2, c: nil}
 
     # prompt: y
-    assert_value "foo" == ~N[2018-01-01 21:01:50]
+    assert_value Foo.foo() == ~N[2018-01-01 21:01:50]
 
     # prompt: y
-    assert_value "foo" == ~r/foo/
+    assert_value Foo.foo() == ~r/foo/
 
     # prompt: y
-    assert_value "foo" == ~T[23:00:07]
+    assert_value Foo.foo() == ~T[23:00:07]
 
     # prompt: y
-    assert_value "foo" == {:ok, 42}
+    assert_value Foo.foo() == {:ok, 42}
 
     # prompt: y
-    assert_value "foo" == %User{}
+    assert_value Foo.foo() == %User{}
 
     # prompt: y
-    assert_value "foo" == %User{age: 43}
+    assert_value Foo.foo() == %User{age: 43}
 
     # prompt: y
-    assert_value "foo" == ~W(foo bar)
+    assert_value Foo.foo() == ~W(foo bar)
 
     # prompt: y
-    assert_value "foo" == [%{a: 42, b: {:left, :light}, c: [%User{}, 2]}, nil]
+    assert_value Foo.foo() == [%{a: 42, b: {:left, :light}, c: [%User{}, 2]}, nil]
   end
 
   test "create file" do

@@ -12,6 +12,27 @@ defmodule ParserTest do
     def foo, do: "foo"
   end
 
+  def f_nil() do
+    # The way to dynamically generate nil, to avoid "type violation" warnings
+    List.first([])
+  end
+
+  def f_false() do
+    List.first([false])
+  end
+
+  def f_true() do
+    List.first([true])
+  end
+
+  def f_atom_foo() do
+    List.first([:foo])
+  end
+
+  def f_atom_bar() do
+    List.first([:bar])
+  end
+
   import AssertValue
 
   # Literals
@@ -287,91 +308,91 @@ defmodule ParserTest do
 
   test "expected literal" do
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
 
     # prompt: y
-    assert_value "foo" == "foo"
+    assert_value Foo.foo() == "foo"
   end
 
   test "create file" do

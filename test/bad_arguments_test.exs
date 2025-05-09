@@ -35,9 +35,10 @@ defmodule AssertValue.BadArgumentsTest do
 
   test "bad actual" do
     f = fn -> true end
+    g = fn -> true end
 
     assert_raise AssertValue.ArgumentError, fn ->
-      assert_value f == :foo
+      assert_value f == g
     end
 
     task = Task.async(f)
@@ -77,7 +78,7 @@ defmodule AssertValue.BadArgumentsTest do
     end
 
     assert_raise AssertValue.ArgumentError, fn ->
-      assert_value '0' == File.read!("any.txt")
+      assert_value to_charlist("0") == File.read!("any.txt")
     end
 
     assert_raise AssertValue.ArgumentError, fn ->
@@ -119,13 +120,14 @@ defmodule AssertValue.BadArgumentsTest do
 
   test "nested not-serializable type" do
     f = fn -> true end
+    g = fn -> true end
 
     assert_raise AssertValue.ArgumentError, fn ->
       assert_value %{f: f}
     end
 
     assert_raise AssertValue.ArgumentError, fn ->
-      assert_value %{f: f} == :foo
+      assert_value %{x: f} == %{x: g}
     end
   end
 

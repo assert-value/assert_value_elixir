@@ -228,19 +228,19 @@ parser_test.exs:##:"test actual literals" assert_value failed
 Accept new value? [y,n,?] .
 parser_test.exs:##:"test actual and expected literals" assert_value failed
 
--    assert_value nil == false
+-    assert_value nil == f_false()
 +    assert_value nil == nil
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test actual and expected literals" assert_value failed
 
--    assert_value true == false
+-    assert_value true == f_false()
 +    assert_value true == true
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test actual and expected literals" assert_value failed
 
--    assert_value :foo == :bar
+-    assert_value :foo == f_atom_bar()
 +    assert_value :foo == :foo
 
 Accept new value? [y,n,?] 
@@ -383,7 +383,7 @@ parser_test.exs:##:"test actual and expected literals" assert_value failed
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test actual and expected literals" assert_value failed
 
--    assert_value %{a: "forty", b: 2, c: nil} == %{a: "forty", b: 2, c: true}
+-    assert_value %{a: "forty", b: 2, c: nil} == %{a: "forty", b: 2, c: f_true()}
 +    assert_value %{a: "forty", b: 2, c: nil} == %{a: "forty", b: 2, c: nil}
 
 Accept new value? [y,n,?] 
@@ -401,7 +401,7 @@ parser_test.exs:##:"test actual and expected literals" assert_value failed
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test actual and expected literals" assert_value failed
 
--    assert_value {:ok, 42} == {:error, 42}
+-    assert_value {:ok, 42} == {f_atom_bar(), 42}
 +    assert_value {:ok, 42} == {:ok, 42}
 
 Accept new value? [y,n,?] 
@@ -449,184 +449,187 @@ parser_test.exs:##:"test actual and expected literals" assert_value failed
 Accept new value? [y,n,?] .
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == nil
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == nil
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == true
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == true
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == false
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == false
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == :foo
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == :foo
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == "forty-two"
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == "forty-two"
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == """
+-    assert_value Foo.foo() == """
 -                 forty-three
 -                 сорок два
 -                 quarante deux
 -                 cuarenta y dos
 -                 """
-+    assert_value "foo" == "foo"
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == ~S(forty-two)
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == ~S(forty-two)
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == ~s(forty-two)
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == ~s(forty-two)
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == <<65, 66, 67>>
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == <<65, 66, 67>>
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == <<256::utf8>>
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == <<256::utf8>>
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == ~c"forty-three"
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == ~c"forty-two"
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == ~c"""
+-    assert_value Foo.foo() == ~c"""
 -                 forty-three
 -                 сорок три
 -                 """
-+    assert_value "foo" == "foo"
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == ~C(forty-two)
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == ~C(forty-two)
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == ~c(forty-two)
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == ~c(forty-two)
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == ~D[2018-01-01]
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == ~D[2018-01-01]
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == 0.42
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == 0.42
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == -0.42
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == -0.42
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == 42
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == 42
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == -42
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == -42
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == [4, 3, true, nil, "42"]
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == [4, 3, true, nil, "42"]
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == %{a: "forty", b: 2, c: nil}
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == %{a: "forty", b: 2, c: nil}
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == ~N[2018-01-01 21:01:50]
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == ~N[2018-01-01 21:01:50]
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == ~r/foo/
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == ~r/foo/
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == ~T[23:00:07]
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == ~T[23:00:07]
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == {:ok, 42}
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == {:ok, 42}
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == %User{}
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == %User{}
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == %User{age: 43}
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == %User{age: 43}
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == ~W(foo bar)
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == ~W(foo bar)
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] 
 parser_test.exs:##:"test expected literal" assert_value failed
 
--    assert_value "foo" == [%{a: 42, b: {:left, :light}, c: [%User{}, 2]}, nil]
-+    assert_value "foo" == "foo"
+-    assert_value Foo.foo() == [
+-                   %{a: 42, b: {:left, :light}, c: [%User{}, 2]},
+-                   nil
+-                 ]
++    assert_value Foo.foo() == "foo"
 
 Accept new value? [y,n,?] .
 parser_test.exs:##:"test create file" assert_value "aaa\nbbb\nccc\n" == File.read!(Path.exp... failed
