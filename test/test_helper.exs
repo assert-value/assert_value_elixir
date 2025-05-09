@@ -19,6 +19,12 @@ defmodule AssertValue.IntegrationTest.Support do
   #      ["test", "--seed", "0", "/tmp/intergration_test.exs"], input: "y\ny\n")
   def exec(cmd, args, env, opts) do
     cmd = cmd |> System.find_executable()
+    # A Port’s :env option expects {:env, [{k, v}, ...]} with k and v
+    # as charlists. We specify them as binary because it is easier to
+    # write "y", then ~c"y" and we have them a lot
+    env = Enum.map(env, fn {k, v} ->
+        {to_charlist(k), to_charlist(v)}
+    end)
 
     port =
       Port.open(
