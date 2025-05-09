@@ -322,8 +322,27 @@ defmodule AssertValue.Server do
   # Use user's formatter options but force locals_without_parens
   # for assert_value
   defp formatter_options_for_file(file) do
-    # TODO This method will be deprecated in Elixir 1.17
-    opts = Mix.Tasks.Format.formatter_opts_for_file(file)
+    # Handle deprecation and maintain backward compatibility:
+    #
+    #   * `formatter_for_file` was introduced in Elixir >= 1.13
+    #   * `formatter_opts_for_file` was deprecated in Elixir >= 1.17
+    #
+    # The code below calls `formatter_for_file` when available, and
+    # falls back to `formatter_opts_for_file` in older versions
+    #
+    # `apply` keeps the compiler from emitting "deprecated” or
+    # “undefined function” warnings
+    # `apply` is considered unnecessary when the module and function names
+    # are known, so we also suppress Credo that would normally flag it
+    opts =
+      if function_exported?(Mix.Tasks.Format, :formatter_for_file, 2) do
+        # credo:disable-for-next-line
+        {_, opts} = apply(Mix.Tasks.Format, :formatter_for_file, [file, []])
+        opts
+      else
+        # credo:disable-for-next-line
+        apply(Mix.Tasks.Format, :formatter_opts_for_file, [file])
+      end
 
     # Force locals_without_parens for assert_value. We don't eval
     # formatter options from all user dependencies (including assert_value).
