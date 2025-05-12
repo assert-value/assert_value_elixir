@@ -106,6 +106,21 @@ defmodule AssertValue.IntegrationTest.Support do
         ["test", "--seed", "0", filename]
       end
 
+   # In Elixir 1.18, mix locks the _build directory on compile.
+   # Even without actual compilation the lock is briefly acquired.
+   # Running many 'mix test' subprocesses concurrently in integration
+   # tests may produce many "Waiting for lock on the build directory"
+   # messages.
+   #
+   # Spawned child tests don’t require compilation, so we disable
+   # the _build lock to avoid it.
+   env =
+      if Version.match?(System.version(), ">= 1.18.0") do
+        env ++ [{"MIX_OS_CONCURRENCY_LOCK", "false"}]
+      else
+        env
+      end
+
     {output, exit_code} =
       AssertValue.IntegrationTest.Support.exec(
         "mix",
