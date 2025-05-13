@@ -147,6 +147,119 @@ defmodule AssertValue.Server do
          diff: AssertValue.Diff.diff(opts[:expected_value], opts[:actual_value])
        }}
     else
+      line_nr = opts[:caller][:line]
+      f = File.read!(opts[:caller][:file])
+      f_ast = Sourceror.parse_string!(f)
+      actual_ast_str = Macro.to_string(opts[:actual_value])
+
+      IO.inspect(opts, label: "opts")
+      IO.inspect(f_ast, label: "f_ast")
+      IO.inspect(actual_ast_str, label: "actual_ast_str")
+      actual_ast_sourceror = Sourceror.parse_string!(actual_ast_str)
+      IO.inspect(actual_ast_sourceror, label: "actual_ast_sourceror")
+
+      f_str =
+        f_ast
+        |> Macro.postwalk(fn
+          {:assert_value, assert_value_meta,
+           [
+             {:==, assertion_meta,
+              [
+                assertion_lhs,
+                {a, assertion_rhs_meta, [_assertion_rhs_value]}
+              ]}
+           ]} = quoted ->
+            assert_value_meta_line_nr = Keyword.get(assert_value_meta, :line)
+
+            if assert_value_meta_line_nr === line_nr do
+              {:assert_value, assert_value_meta,
+               [
+                 {:==, assertion_meta,
+                  [
+                    assertion_lhs,
+                    {a, assertion_rhs_meta, [actual_ast_sourceror]}
+                  ]}
+               ]}
+            else
+              quoted
+            end
+
+          {:assert_value, assert_value_meta,
+           [
+             {:==, assertion_meta,
+              [
+                assertion_lhs,
+                {_, assertion_rhs_meta, [assertion_rhs_value]}
+              ]},
+             context_args
+           ]} = quoted ->
+            assert_value_meta_line_nr = Keyword.get(assert_value_meta, :line)
+
+            if assert_value_meta_line_nr === line_nr do
+              {with_context_meta, with_context_meta_value_meta, context_meta, context_value_meta} =
+                case context_args do
+                  [
+                    {{:__block__, with_context_meta, [:with_context]},
+                     with_context_meta_value_meta},
+                    {{:__block__, context_meta, [:context]},
+                     {:__block__, context_value_meta, [_context]}}
+                  ] ->
+                    {with_context_meta, with_context_meta_value_meta, context_meta,
+                     context_value_meta}
+
+                  [
+                    {{:__block__, with_context_meta, [:with_context]},
+                     with_context_meta_value_meta}
+                  ] ->
+                    {with_context_meta, with_context_meta_value_meta,
+                     [format: :keyword, line: assert_value_meta_line_nr + 2], []}
+                end
+
+              context_value = opts[:context]
+
+              IO.inspect(context_meta, label: "context_meta")
+              IO.inspect(context_value_meta, label: "context_value_meta")
+
+              context_value_meta =
+                if length(to_lines(context_value)) > 1 do
+                  Keyword.replace(context_value_meta, :delimiter, "\"\"\"")
+                else
+                  context_value_meta
+                  Keyword.replace(context_value_meta, :delimiter, "\"")
+                end
+
+              {:assert_value, assert_value_meta,
+               [
+                 {:==, assertion_meta,
+                  [
+                    assertion_lhs,
+                    {:__block__, assertion_rhs_meta, [actual_ast_sourceror]}
+                  ]},
+                 [
+                   {{:__block__, with_context_meta, [:with_context]},
+                    with_context_meta_value_meta},
+                   {{:__block__, context_meta, [:context]},
+                    {:__block__, context_value_meta, [context_value]}}
+                 ]
+               ]}
+            else
+              quoted
+            end
+
+          quoted ->
+            quoted
+        end)
+        |> Sourceror.to_string()
+        |> Code.format_string!(formatter_options_for_file(opts[:caller][:file]))
+
+      IO.puts("""
+      NEW CODE
+      -------------
+
+      #{f_str}
+      -------------
+      """)
+
       current_line_number =
         current_line_number(
           state.file_changes,
@@ -164,10 +277,7 @@ defmodule AssertValue.Server do
         {:ok, parsed} ->
           formatter_options = formatter_options_for_file(opts[:caller][:file])
 
-          new_expected =
-            AssertValue.Formatter.new_expected_from_actual_value(
-              opts[:actual_value]
-            )
+          new_expected = AssertValue.Formatter.new_expected_from_actual_value(opts[:actual_value])
 
           new_assert_value =
             parsed.assert_value_prefix <>
@@ -193,7 +303,7 @@ defmodule AssertValue.Server do
 
           diff = AssertValue.Diff.diff(old_assert_value, new_assert_value)
 
-          new_file_content = parsed.prefix <> new_assert_value <> parsed.suffix
+          new_file_content = f_str
 
           {:ok,
            %{
@@ -244,12 +354,26 @@ defmodule AssertValue.Server do
         "#{file}:#{line}:\"#{function}\" assert_value failed"
       end
 
+    all_context =
+      case Keyword.fetch(opts, :context) do
+        {:ok, context} ->
+          """
+          #{diff_context}
+
+          = Context =
+          #{context}
+          """
+
+        _ ->
+          diff_context
+      end
+
     diff_lines_count = String.split(diff, "\n") |> Enum.count()
-    IO.puts("\n" <> diff_context <> "\n")
+    IO.puts("\n" <> all_context <> "\n")
     IO.puts(diff)
     # If diff is too long diff context does not fit to screen
     # we need to repeat it
-    if diff_lines_count > 37, do: IO.puts(diff_context)
+    if diff_lines_count > 37, do: IO.puts(all_context)
   end
 
   defp get_answer(diff, opts, state) do
