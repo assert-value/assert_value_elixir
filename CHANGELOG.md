@@ -1,4 +1,9 @@
 # Changelog
+## v0.10.5 - May 14, 2025
+
+ * Enhancements
+   * Add support for Elixir 1.17, 1.18
+
 ## v0.10.4 - January 22, 2024
 
  * Enhancements
