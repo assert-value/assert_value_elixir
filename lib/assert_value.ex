@@ -1,6 +1,26 @@
 defmodule AssertValue do
+  require AssertValue
   # Assertions with right argument like "assert_value actual == expected"
   defmacro assert_value({:==, _, [left, right]} = assertion) do
+    quote do
+      assert_value(unquote(assertion), with_context: :_not_present, context: :_not_present)
+    end
+  end
+
+  defmacro assert_value(
+             {:==, _, [_, _]} = assertion,
+             with_context: context
+           ) do
+    quote do
+      assert_value(unquote(assertion), with_context: unquote(context), context: unquote(context))
+    end
+  end
+
+  defmacro assert_value(
+             {:==, _, [left, right]} = assertion,
+             with_context: context,
+             context: _context
+           ) do
     {expected_type, expected_file} =
       case right do
         {{:., _, [{:__aliases__, _, [:File]}, :read!]}, _, [filename]} ->
@@ -45,10 +65,10 @@ defmodule AssertValue do
 
       check_serializable(actual_value)
       check_string_and_file_read(actual_value, expected_type)
+      same = actual_value == expected_value
       # We need to check for reformat_expected? first to disable
       # "this check/guard will always yield the same result" warnings
-      if AssertValue.Server.reformat_expected?() ||
-           actual_value != expected_value do
+      if AssertValue.Server.reformat_expected?() || not same do
         decision =
           AssertValue.Server.ask_user_about_diff(
             caller: [
@@ -62,7 +82,8 @@ defmodule AssertValue do
             expected_type: expected_type,
             expected_ast: expected_ast,
             expected_value: expected_value,
-            expected_file: expected_file
+            expected_file: expected_file,
+            context: unquote(context)
           )
 
         case decision do
