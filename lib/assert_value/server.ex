@@ -54,7 +54,9 @@ defmodule AssertValue.Server do
     state = %{
       captured_ex_unit_io_pid: nil,
       file_changes: %{},
-      recurring_answer: recurring_answer
+      recurring_answer: recurring_answer,
+      tests_waiting_to_ask: [],
+      tests_waiting_to_finish: []
     }
 
     {:ok, state}
@@ -70,19 +72,61 @@ defmodule AssertValue.Server do
     {:noreply, state}
   end
 
+  def handle_cast({:test_finished, filename_and_test}, state) do
+    tests_left_to_finish =
+      state.tests_waiting_to_finish
+      |> Enum.reject(&(&1 == filename_and_test))
+
+    contents = StringIO.flush(state.captured_ex_unit_io_pid)
+    if contents != "", do: IO.write(contents)
+
+    if tests_left_to_finish == [] and state.tests_waiting_to_ask != [] do
+      [{reply_to, opts} | tests_left_to_ask] = state.tests_waiting_to_ask
+
+      tests_waiting_to_finish =
+        tests_left_to_finish ++ [filename_and_test(opts)]
+
+      {reply, state} = do_ask(opts, state)
+      GenServer.reply(reply_to, reply)
+
+      {:noreply,
+       %{
+         state
+         | tests_waiting_to_ask: tests_left_to_ask,
+           tests_waiting_to_finish: tests_waiting_to_finish
+       }}
+    else
+      {:noreply, %{state | tests_waiting_to_finish: tests_left_to_finish}}
+    end
+  end
+
   def handle_call({:reformat_expected?}, _from, state) do
     {:reply, state.recurring_answer == :reformat, state}
   end
 
-  def handle_call({:ask_user_about_diff, opts}, _from, state) do
-    # Hack: We try to wait until previous test asking about diff (and fail) will
-    # output test results. Otherwise user will get previous failed test result
-    # message right after the answer for current test.
-    # TODO: Refactor to messaging
-    Process.sleep(30)
-    contents = StringIO.flush(state.captured_ex_unit_io_pid)
-    if contents != "", do: IO.write(contents)
+  def handle_call({:ask_user_about_diff, opts}, from, state) do
+    filename_and_test = filename_and_test(opts)
+    # Ensure no other tests are waiting to finish output,
+    # and this is not the same one we previously asked in.
+    other_tests_left_to_finish =
+      state.tests_waiting_to_finish
+      |> Enum.reject(&(&1 == filename_and_test))
 
+    if other_tests_left_to_finish == [] do
+      tests_waiting_to_finish = [filename_and_test]
+      state = %{state | tests_waiting_to_finish: tests_waiting_to_finish}
+      {reply, state} = do_ask(opts, state)
+      {:reply, reply, state}
+    else
+      {:noreply,
+       %{
+         state
+         | tests_waiting_to_ask: state.tests_waiting_to_ask ++ [{from, opts}]
+       }}
+    end
+  end
+
+  def do_ask(opts, state) do
     case prepare_formatted_diff_and_new_code(opts, state) do
       {:ok, prepared} ->
         {answer, state} = prompt_for_action(prepared.diff, opts, state)
@@ -104,11 +148,10 @@ defmodule AssertValue.Server do
               )
             end
 
-          {:reply, :ok, %{state | file_changes: file_changes}}
+          {:ok, %{state | file_changes: file_changes}}
         else
           # Fail test. Pass exception up to the caller and throw it there
-          {:reply,
-           {:error, :ex_unit_assertion_error,
+          {{:error, :ex_unit_assertion_error,
             [
               left: opts[:actual_value],
               right: opts[:expected_value],
@@ -118,7 +161,7 @@ defmodule AssertValue.Server do
         end
 
       {:error, :parse_error} ->
-        {:reply, {:error, :parse_error}, state}
+        {{:error, :parse_error}, state}
     end
   end
 
@@ -130,6 +173,10 @@ defmodule AssertValue.Server do
     GenServer.cast(__MODULE__, {:flush_ex_unit_io})
   end
 
+  def test_finished(filename_and_test) do
+    GenServer.cast(__MODULE__, {:test_finished, filename_and_test})
+  end
+
   # All calls get :infinity timeout because GenServer may wait for user input
 
   def reformat_expected? do
@@ -138,6 +185,12 @@ defmodule AssertValue.Server do
 
   def ask_user_about_diff(opts) do
     GenServer.call(__MODULE__, {:ask_user_about_diff, opts}, :infinity)
+  end
+
+  defp filename_and_test(opts) do
+    test_filename = opts[:caller][:file]
+    {test_name, _arity} = opts[:caller][:function]
+    {test_filename, test_name}
   end
 
   defp prepare_formatted_diff_and_new_code(opts, state) do

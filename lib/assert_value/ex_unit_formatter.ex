@@ -23,11 +23,19 @@ defmodule AssertValue.ExUnitFormatter do
   def handle_cast(request, state) do
     {:noreply, state} = ExUnit.CLIFormatter.handle_cast(request, state)
 
-    # Do not flush ExUnit IO at the end of the suite
-    # ExUnit may close StringIO faster then we try to call it
     case request do
-      {:suite_finished, _} -> :ok
-      _ -> AssertValue.Server.flush_ex_unit_io()
+      # Do not flush ExUnit IO at the end of the suite
+      # ExUnit may close StringIO faster than we try to call it
+      {:suite_finished, _} ->
+        :ok
+
+      # Notify AssertValue.Server that test is finished,
+      # so it will process and flush all pending outputs
+      {:test_finished, test} ->
+        AssertValue.Server.test_finished({test.tags.file, test.name})
+
+      _ ->
+        AssertValue.Server.flush_ex_unit_io()
     end
 
     {:noreply, state}
