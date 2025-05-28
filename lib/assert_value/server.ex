@@ -53,6 +53,7 @@ defmodule AssertValue.Server do
 
     state = %{
       captured_ex_unit_io_pid: nil,
+      original_group_leader: nil,
       file_changes: %{},
       recurring_answer: recurring_answer,
       tests_waiting_to_ask: [],
@@ -64,6 +65,10 @@ defmodule AssertValue.Server do
 
   def handle_cast({:set_captured_ex_unit_io_pid, pid}, state) do
     {:noreply, %{state | captured_ex_unit_io_pid: pid}}
+  end
+
+  def handle_cast({:set_original_group_leader, gl}, state) do
+    {:noreply, %{state | original_group_leader: gl}}
   end
 
   def handle_cast({:flush_ex_unit_io}, state) do
@@ -98,6 +103,10 @@ defmodule AssertValue.Server do
     else
       {:noreply, %{state | tests_waiting_to_finish: tests_left_to_finish}}
     end
+  end
+
+  def handle_call({:get_original_group_leader}, _from, state) do
+    {:reply, state.original_group_leader, state}
   end
 
   def handle_call({:reformat_expected?}, _from, state) do
@@ -169,6 +178,10 @@ defmodule AssertValue.Server do
     GenServer.cast(__MODULE__, {:set_captured_ex_unit_io_pid, pid})
   end
 
+  def set_original_group_leader(gl) do
+    GenServer.cast(__MODULE__, {:set_original_group_leader, gl})
+  end
+
   def flush_ex_unit_io do
     GenServer.cast(__MODULE__, {:flush_ex_unit_io})
   end
@@ -178,6 +191,10 @@ defmodule AssertValue.Server do
   end
 
   # All calls get :infinity timeout because GenServer may wait for user input
+
+  def get_original_group_leader do
+    GenServer.call(__MODULE__, {:get_original_group_leader}, :infinity)
+  end
 
   def reformat_expected? do
     GenServer.call(__MODULE__, {:reformat_expected?}, :infinity)
