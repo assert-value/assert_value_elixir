@@ -55,8 +55,8 @@ defmodule AssertValue.Server do
       captured_ex_unit_io_pid: nil,
       file_changes: %{},
       recurring_answer: recurring_answer,
-      tests_waiting_to_ask: [],
-      tests_waiting_to_finish: []
+      tests_waiting_to_ask: :queue.new(),
+      tests_waiting_to_finish: :queue.new()
     }
 
     {:ok, state}
@@ -74,17 +74,18 @@ defmodule AssertValue.Server do
 
   def handle_cast({:test_finished, filename_and_test}, state) do
     tests_left_to_finish =
-      state.tests_waiting_to_finish
-      |> Enum.reject(&(&1 == filename_and_test))
+      :queue.filter(&(&1 != filename_and_test), state.tests_waiting_to_finish)
 
     contents = StringIO.flush(state.captured_ex_unit_io_pid)
     if contents != "", do: IO.write(contents)
 
-    if tests_left_to_finish == [] and state.tests_waiting_to_ask != [] do
-      [{reply_to, opts} | tests_left_to_ask] = state.tests_waiting_to_ask
+    if :queue.is_empty(tests_left_to_finish) and
+         not :queue.is_empty(state.tests_waiting_to_ask) do
+      {{:value, {reply_to, opts}}, tests_left_to_ask} =
+        :queue.out(state.tests_waiting_to_ask)
 
       tests_waiting_to_finish =
-        tests_left_to_finish ++ [filename_and_test(opts)]
+        :queue.in(filename_and_test(opts), tests_left_to_finish)
 
       {reply, state} = do_ask(opts, state)
       GenServer.reply(reply_to, reply)
@@ -109,11 +110,10 @@ defmodule AssertValue.Server do
     # Ensure no other tests are waiting to finish output,
     # and this is not the same one we previously asked in.
     other_tests_left_to_finish =
-      state.tests_waiting_to_finish
-      |> Enum.reject(&(&1 == filename_and_test))
+      :queue.filter(&(&1 != filename_and_test), state.tests_waiting_to_finish)
 
-    if other_tests_left_to_finish == [] do
-      tests_waiting_to_finish = [filename_and_test]
+    if :queue.is_empty(other_tests_left_to_finish) do
+      tests_waiting_to_finish = :queue.in(filename_and_test, :queue.new())
       state = %{state | tests_waiting_to_finish: tests_waiting_to_finish}
       {reply, state} = do_ask(opts, state)
       {:reply, reply, state}
@@ -121,7 +121,8 @@ defmodule AssertValue.Server do
       {:noreply,
        %{
          state
-         | tests_waiting_to_ask: state.tests_waiting_to_ask ++ [{from, opts}]
+         | tests_waiting_to_ask:
+             :queue.in({from, opts}, state.tests_waiting_to_ask)
        }}
     end
   end
