@@ -1,4 +1,30 @@
 defmodule AssertValue.Server do
+  # This GenServer coordinates user interaction when an `assert_value` check
+  # fails. It prompts the user about diffs, applies accepted changes to the
+  # appropriate file, and tracks line offsets.
+  #
+  # Prompt and the subsequent output from the same test are treated as an
+  # *atomic* unit; they must not interleave with prompts or output from other
+  # tests to preserve a clear, deterministic log.
+  #
+  # ExUnit prints test output asynchronously, so by default outputs from
+  # different tests are mixed.
+  #
+  # This server ensures that only one test interacted with the
+  # user prints output immediately afterwards, so outputs and prompts from
+  # different tests don't mixed together and printed in order.
+  #
+  # To keep the output in order we capture ExUnit's IO and manage two
+  # queues of tests:
+  #
+  #   * `tests_waiting_to_finish` - tests that already asked the user and
+  #     whose final output hasn't been flushed yet
+  #   * `tests_waiting_to_ask`    - tests waiting for their turn to prompt
+  #
+  # Synchronization between these queues happens in
+  # `handle_call({:ask_user_about_diff, opts}, from, state)` and
+  # `handle_cast({:test_finished, filename_and_test}, state)`.
+
   use GenServer
   import AssertValue.StringTools
 
@@ -77,6 +103,16 @@ defmodule AssertValue.Server do
     {:noreply, state}
   end
 
+  # This function manages the waiting_to_ask and waiting_to_finish queues
+  # created by handle_call({:ask_user_about_diff}).
+  #
+  # When any test finishes:
+  # * it flushes the output (releases captured and suppressed IO)
+  # * removes the test from the tests_waiting_to_finish queue and
+  # * if the tests_waiting_to_finish queue is now empty,
+  #   it takes the next test from the waiting_to_ask queue,
+  #   asks the user, replies to the waiting process,
+  #   and adds the test to the waiting_to_finish queue
   def handle_cast({:test_finished, filename_and_test}, state) do
     tests_left_to_finish =
       state.tests_waiting_to_finish
@@ -113,10 +149,24 @@ defmodule AssertValue.Server do
     {:reply, state.recurring_answer == :reformat, state}
   end
 
+  # ExUnit outputs results asynchronously, but we want to show test output
+  # immediately after the user replies to assert_value. We manage async output
+  # using two queues: tests_waiting_to_ask and tests_waiting_to_finish, to
+  # ensure the output appears in the correct order.
+  #
+  # This function ensures no previously asked tests are still finishing
+  # their output, unless it's a test with multiple assert_value calls and
+  # we're asking again
+  #
+  # * If no other tests are waiting to finish, ask the user about the diff
+  #   and add this test to the finish queue
+  # * If it's a test we've already asked, ignore the output (anything is fine),
+  #   ask again, and add it back to the finish queue
+  # * If other tests are still finishing, queue this test to ask later
+  #   (see handle_cast({:test_finished})). The calling process will wait
   def handle_call({:ask_user_about_diff, opts}, from, state) do
     filename_and_test = filename_and_test(opts)
-    # Ensure no other tests are waiting to finish output,
-    # and this is not the same one we previously asked in.
+
     other_tests_left_to_finish =
       state.tests_waiting_to_finish
       |> Enum.reject(&(&1 == filename_and_test))
