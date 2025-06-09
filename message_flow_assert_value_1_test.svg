@@ -24,8 +24,8 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="1.2800001"
-     inkscape:cx="419.14061"
-     inkscape:cy="326.95311"
+     inkscape:cx="269.1406"
+     inkscape:cy="264.4531"
      inkscape:window-width="1920"
      inkscape:window-height="1023"
      inkscape:window-x="0"
@@ -35,6 +35,20 @@
      inkscape:lockguides="true" />
   <defs
      id="defs2">
+    <marker
+       style="overflow:visible"
+       id="Arrow1Mstart"
+       refX="0.0"
+       refY="0.0"
+       orient="auto"
+       inkscape:stockid="Arrow1Mstart"
+       inkscape:isstock="true">
+      <path
+         transform="scale(0.4) translate(10,0)"
+         style="fill-rule:evenodd;fill:context-stroke;stroke:context-stroke;stroke-width:1.0pt"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         id="path1582" />
+    </marker>
     <marker
        style="overflow:visible;"
        id="marker1938"
@@ -1142,8 +1156,8 @@
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Lend-9-9)"
-       d="M 14.839516,83.12344 14.814436,111.316"
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.195829;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Lend-9-9)"
+       d="M 14.839516,84.287004 14.814436,111.316"
        id="path23218-4-5"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0" />
@@ -1898,8 +1912,8 @@
          x="118.32882"
          y="102.49389">IO.write</tspan></text>
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#af0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow1Lstart-6)"
-       d="m 112.28157,80.034408 50.17302,-0.189054"
+       style="fill:none;fill-rule:evenodd;stroke:#af0000;stroke-width:0.6;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow1Mstart)"
+       d="m 112.9435,80.563575 49.51109,-0.189054"
        id="path8128-9-6-0-3-0-9"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0" />
@@ -1917,7 +1931,7 @@
          y="79.168907">IO,gets</tspan></text>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#af0000;stroke-width:0.6;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Mend)"
-       d="M 111.95261,82.592173 15.798738,82.981906"
+       d="M 111.95261,83.650507 15.798738,84.04024"
        id="path8126-0-0-1"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0" />
@@ -1925,13 +1939,13 @@
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:1.64759px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#af0000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
        x="42.039436"
-       y="81.108093"
+       y="82.162277"
        id="text12272-5-3-4-0"
        transform="scale(0.99607656,1.0039389)"><tspan
          sodipodi:role="line"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:1.64759px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#af0000;fill-opacity:1;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
          x="42.039436"
-         y="81.108093"
+         y="82.162277"
          id="tspan151849">{:reply, result}</tspan></text>
     <text
        xml:space="preserve"
