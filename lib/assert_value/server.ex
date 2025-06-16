@@ -52,22 +52,11 @@ defmodule AssertValue.Server do
       end
 
     state = %{
-      captured_ex_unit_io_pid: nil,
       file_changes: %{},
       recurring_answer: recurring_answer
     }
 
     {:ok, state}
-  end
-
-  def handle_cast({:set_captured_ex_unit_io_pid, pid}, state) do
-    {:noreply, %{state | captured_ex_unit_io_pid: pid}}
-  end
-
-  def handle_cast({:flush_ex_unit_io}, state) do
-    contents = StringIO.flush(state.captured_ex_unit_io_pid)
-    if contents != "", do: IO.write(contents)
-    {:noreply, state}
   end
 
   def handle_call({:reformat_expected?}, _from, state) do
@@ -80,8 +69,6 @@ defmodule AssertValue.Server do
     # message right after the answer for current test.
     # TODO: Refactor to messaging
     Process.sleep(30)
-    contents = StringIO.flush(state.captured_ex_unit_io_pid)
-    if contents != "", do: IO.write(contents)
 
     case prepare_formatted_diff_and_new_code(opts, state) do
       {:ok, prepared} ->
@@ -120,14 +107,6 @@ defmodule AssertValue.Server do
       {:error, :parse_error} ->
         {:reply, {:error, :parse_error}, state}
     end
-  end
-
-  def set_captured_ex_unit_io_pid(pid) do
-    GenServer.cast(__MODULE__, {:set_captured_ex_unit_io_pid, pid})
-  end
-
-  def flush_ex_unit_io do
-    GenServer.cast(__MODULE__, {:flush_ex_unit_io})
   end
 
   # All calls get :infinity timeout because GenServer may wait for user input
