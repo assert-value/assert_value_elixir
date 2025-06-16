@@ -13,23 +13,26 @@ defmodule AssertValue.ExUnitFormatter do
 
   def init(opts) do
     {:ok, config} = ExUnit.CLIFormatter.init(opts)
-    # Get ExUnit's Formatter io device pid and tell it to AssertValue.Server
-    # We will use it to flush ExUnit's output before interactions with user
-    {:ok, captured_ex_unit_io_pid} = StringIO.open("")
-    AssertValue.Server.set_captured_ex_unit_io_pid(captured_ex_unit_io_pid)
+
+    Process.group_leader()
+    |> AssertValue.Server.set_original_group_leader()
+
+    # This will redirect all stdout IO to AssertValue.Server
+    Process.group_leader(self(), AssertValue.Server.get_pid())
+
     {:ok, config}
   end
 
   def handle_cast(request, state) do
     {:noreply, state} = ExUnit.CLIFormatter.handle_cast(request, state)
-
-    # Do not flush ExUnit IO at the end of the suite
-    # ExUnit may close StringIO faster then we try to call it
-    case request do
-      {:suite_finished, _} -> :ok
-      _ -> AssertValue.Server.flush_ex_unit_io()
-    end
-
     {:noreply, state}
+  end
+
+  def terminate(_reason, _state) do
+    # Bring back original :stdout IO on terminate
+    # otherwise we may lose some finishing output
+    # (like "Finished in...", "X tests, Y failures...", etc)
+    Process.group_leader(self(), AssertValue.Server.get_original_group_leader())
+    :ok
   end
 end

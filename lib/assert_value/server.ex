@@ -52,7 +52,7 @@ defmodule AssertValue.Server do
       end
 
     state = %{
-      captured_ex_unit_io_pid: nil,
+      original_group_leader: nil,
       file_changes: %{},
       recurring_answer: recurring_answer
     }
@@ -60,14 +60,29 @@ defmodule AssertValue.Server do
     {:ok, state}
   end
 
-  def handle_cast({:set_captured_ex_unit_io_pid, pid}, state) do
-    {:noreply, %{state | captured_ex_unit_io_pid: pid}}
+  # makes this server IO device
+  def handle_info({:io_request, from, ref, request}, state) do
+    case io_handle(request, state) do
+      {:ok, reply, new_state} ->
+        send(from, {:io_reply, ref, reply})
+        {:noreply, new_state}
+
+      {:error, reason, new_state} ->
+        send(from, {:io_reply, ref, {:error, reason}})
+        {:noreply, new_state}
+    end
   end
 
-  def handle_cast({:flush_ex_unit_io}, state) do
-    contents = StringIO.flush(state.captured_ex_unit_io_pid)
-    if contents != "", do: IO.write(contents)
-    {:noreply, state}
+  def handle_cast({:set_original_group_leader, gl}, state) do
+    {:noreply, %{state | original_group_leader: gl}}
+  end
+
+  def handle_call({:get_original_group_leader}, _from, state) do
+    {:reply, state.original_group_leader, state}
+  end
+
+  def handle_call({:get_pid}, _from, state) do
+    {:reply, self(), state}
   end
 
   def handle_call({:reformat_expected?}, _from, state) do
@@ -75,14 +90,6 @@ defmodule AssertValue.Server do
   end
 
   def handle_call({:ask_user_about_diff, opts}, _from, state) do
-    # Hack: We try to wait until previous test asking about diff (and fail) will
-    # output test results. Otherwise user will get previous failed test result
-    # message right after the answer for current test.
-    # TODO: Refactor to messaging
-    Process.sleep(30)
-    contents = StringIO.flush(state.captured_ex_unit_io_pid)
-    if contents != "", do: IO.write(contents)
-
     case prepare_formatted_diff_and_new_code(opts, state) do
       {:ok, prepared} ->
         {answer, state} = prompt_for_action(prepared.diff, opts, state)
@@ -122,15 +129,19 @@ defmodule AssertValue.Server do
     end
   end
 
-  def set_captured_ex_unit_io_pid(pid) do
-    GenServer.cast(__MODULE__, {:set_captured_ex_unit_io_pid, pid})
-  end
-
-  def flush_ex_unit_io do
-    GenServer.cast(__MODULE__, {:flush_ex_unit_io})
-  end
-
   # All calls get :infinity timeout because GenServer may wait for user input
+
+  def set_original_group_leader(gl) do
+    GenServer.cast(__MODULE__, {:set_original_group_leader, gl})
+  end
+
+  def get_original_group_leader do
+    GenServer.call(__MODULE__, {:get_original_group_leader}, :infinity)
+  end
+
+  def get_pid do
+    GenServer.call(__MODULE__, {:get_pid}, :infinity)
+  end
 
   def reformat_expected? do
     GenServer.call(__MODULE__, {:reformat_expected?}, :infinity)
@@ -139,6 +150,44 @@ defmodule AssertValue.Server do
   def ask_user_about_diff(opts) do
     GenServer.call(__MODULE__, {:ask_user_about_diff, opts}, :infinity)
   end
+
+  # implement IO device
+
+  # Plain chardata – used by IO.write/2, IO.puts/2, :io.format/3 (binary data)
+  defp io_handle({:put_chars, _enc, chars}, state) do
+    IO.write(state.original_group_leader, chars)
+    {:ok, :ok, state}
+  end
+
+  # MFA (Module-Function-Argument) variant – used by :io.format/3
+  defp io_handle({:put_chars, _enc, m, f, a}, state) do
+    data = apply(m, f, a)
+    IO.write(state.original_group_leader, data)
+    {:ok, :ok, state}
+  end
+
+  # One line (terminates on newline) – used by IO.gets/2, :io.read/1, etc.
+  defp io_handle({:get_line, _enc, prompt}, state) do
+    line = IO.gets(state.original_group_leader, prompt)
+    {:ok, line, state}
+  end
+
+  # Fixed-length read – used by IO.read/2 or :io.get_chars/4
+  defp io_handle({:get_chars, _enc, prompt, n}, state) do
+    data = IO.binread(state.original_group_leader, n) || :eof
+    if prompt != "", do: IO.write(state.original_group_leader, prompt)
+    {:ok, data, state}
+  end
+
+  # Accept call, but do nothing
+  defp io_handle(:getopts, state), do: {:ok, [], state}
+  defp io_handle({:setopts, _opts}, state), do: {:ok, :ok, state}
+  defp io_handle(:close, state), do: {:ok, :ok, state}
+
+  # Anything we don't understand
+  defp io_handle(_unknown, state), do: {:error, :not_supported, state}
+
+  # end implementing IO device
 
   defp prepare_formatted_diff_and_new_code(opts, state) do
     if opts[:expected_type] == :file do
@@ -213,12 +262,12 @@ defmodule AssertValue.Server do
     if state.recurring_answer do
       {state.recurring_answer, state}
     else
-      print_diff_and_context(diff, opts)
+      print_diff_and_context(diff, opts, state)
       get_answer(diff, opts, state)
     end
   end
 
-  defp print_diff_and_context(diff, opts) do
+  defp print_diff_and_context(diff, opts, state) do
     file =
       opts[:caller][:file]
       # make it shorter
@@ -245,25 +294,25 @@ defmodule AssertValue.Server do
       end
 
     diff_lines_count = String.split(diff, "\n") |> Enum.count()
-    IO.puts("\n" <> diff_context <> "\n")
-    IO.puts(diff)
+    IO.puts(state.original_group_leader, "\n" <> diff_context <> "\n")
+    IO.puts(state.original_group_leader, diff)
     # If diff is too long diff context does not fit to screen
     # we need to repeat it
-    if diff_lines_count > 37, do: IO.puts(diff_context)
+    if diff_lines_count > 37, do: IO.puts(state.original_group_leader, diff_context)
   end
 
   defp get_answer(diff, opts, state) do
     answer =
-      IO.gets("Accept new value? [y,n,?] ")
+      IO.gets(state.original_group_leader, "Accept new value? [y,n,?] ")
       |> String.trim_trailing("\n")
 
     case answer do
       "?" ->
-        print_help()
+        print_help(state)
         get_answer(diff, opts, state)
 
       "d" ->
-        print_diff_and_context(diff, opts)
+        print_diff_and_context(diff, opts, state)
         get_answer(diff, opts, state)
 
       c when c in ["Y", "N"] ->
@@ -275,19 +324,21 @@ defmodule AssertValue.Server do
     end
   end
 
-  defp print_help do
-    """
+  defp print_help(state) do
+    help =
+      """
 
-    y - Accept new value as correct. Will update expected value. Test will pass
-    n - Reject new value. Test will fail
-    Y - Accept all. Will accept this and all following new values in this run
-    N - Reject all. Will reject this and all following new values in this run
-    d - Show diff between actual and expected values
-    ? - This help
-    """
-    # Indent all lines
-    |> String.replace(~r/^/m, "    ")
-    |> IO.puts()
+      y - Accept new value as correct. Will update expected value. Test will pass
+      n - Reject new value. Test will fail
+      Y - Accept all. Will accept this and all following new values in this run
+      N - Reject all. Will reject this and all following new values in this run
+      d - Show diff between actual and expected values
+      ? - This help
+      """
+      # Indent all lines
+      |> String.replace(~r/^/m, "    ")
+
+    IO.puts(state.original_group_leader, help)
   end
 
   # Helpers to keep changes we make to files on updating expected values
