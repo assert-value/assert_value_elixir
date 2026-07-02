@@ -153,6 +153,23 @@ defmodule AssertValue do
         _ -> {:error, nil}
       end
 
+    # In Elixir 1.19, two compiled regexes are not equal even if
+    # they serialize to the same source:
+    #     ~r/foo/ != ~r/foo/
+    # Compare regexes by source and opts, ignoring the internal
+    # compiled pattern.
+    {value, evaluated_value} =
+      case {value, evaluated_value} do
+        {%Regex{} = value, %Regex{} = evaluated_value} ->
+          {
+            %Regex{value | re_pattern: nil},
+            %Regex{evaluated_value | re_pattern: nil}
+          }
+
+        _ ->
+          {value, evaluated_value}
+      end
+
     unless res == :ok and value == evaluated_value do
       raise AssertValue.ArgumentError,
         message: """
