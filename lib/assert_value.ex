@@ -48,7 +48,7 @@ defmodule AssertValue do
       # We need to check for reformat_expected? first to disable
       # "this check/guard will always yield the same result" warnings
       if AssertValue.Server.reformat_expected?() ||
-           actual_value != expected_value do
+           !AssertValue.equal?(actual_value, expected_value) do
         decision =
           AssertValue.Server.ask_user_about_diff(
             caller: [
@@ -123,6 +123,10 @@ defmodule AssertValue do
 
   defmodule ArgumentError do
     defexception [:message]
+  end
+
+  def equal?(left, right) do
+    left == right
   end
 
   def check_serializable(value) do
