@@ -75,11 +75,6 @@ defmodule AssertValue.Server do
   end
 
   def handle_call({:ask_user_about_diff, opts}, _from, state) do
-    # Hack: We try to wait until previous test asking about diff (and fail) will
-    # output test results. Otherwise user will get previous failed test result
-    # message right after the answer for current test.
-    # TODO: Refactor to messaging
-    Process.sleep(30)
     contents = StringIO.flush(state.captured_ex_unit_io_pid)
     if contents != "", do: IO.write(contents)
 
@@ -137,6 +132,11 @@ defmodule AssertValue.Server do
   end
 
   def ask_user_about_diff(opts) do
+    # Hack: We try to wait until previous test asking about diff (and fail) will
+    # output test results. Otherwise user will get previous failed test result
+    # message right after the answer for current test.
+    # TODO: Refactor to messaging
+    Process.sleep(30)
     GenServer.call(__MODULE__, {:ask_user_about_diff, opts}, :infinity)
   end
 
