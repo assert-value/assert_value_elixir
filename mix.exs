@@ -10,14 +10,8 @@ defmodule AssertValue.Mixfile do
       start_permanent: Mix.env() == :prod,
       description: description(),
       package: package(),
-      deps: deps(),
-      # Elixir 1.11 checks that all functions used by application belong
-      # to modules listed in deps, applications, or extra_applications,
-      # and emits warnings on compilation if they not.
-      # Since IEx is a part of Elixir and always present we can skip
-      # this check and suppress warning about IEx.Info.info/1
-      xref: [exclude: [{IEx.Info, :info, 1}]]
-    ]
+      deps: deps()
+    ] ++ undefined_warnings_options()
   end
 
   # Configuration for the OTP application
@@ -44,6 +38,19 @@ defmodule AssertValue.Mixfile do
       {:credo, "~> 1.7", only: :dev, runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev}
     ]
+  end
+
+  defp undefined_warnings_options do
+    # Elixir 1.11 checks that all functions used by application belong
+    # to modules listed in deps, applications, or extra_applications,
+    # and emits warnings on compilation if they not.
+    # Since IEx is a part of Elixir and always present we can skip
+    # this check and suppress warning about IEx.Info.info/1
+    if Version.match?(System.version(), ">= 1.10.0") do
+      [elixirc_options: [no_warn_undefined: [{IEx.Info, :info, 1}]]]
+    else
+      [xref: [exclude: [{IEx.Info, :info, 1}]]]
+    end
   end
 
   defp description do
