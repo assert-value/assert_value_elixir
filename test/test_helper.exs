@@ -134,11 +134,15 @@ defmodule AssertValue.IntegrationTest.Support do
       output
       |> String.replace(~r/Running ExUnit with seed.*\n+/m, "\n")
       |> String.replace(~r{\/tmp\/assert-value-\w+/}, "")
+      |> String.replace(~r{\/var\/folders\/.*?\/assert-value-\w+/}, "")
       |> String.replace(~r/\n+Finished in[^\n]+\n+/m, "\n")
       |> String.replace(~r/\n+(\d+ tests)/m, "\n\\1")
       |> String.replace(~r/\nRandomized with seed.*\n/m, "")
       # mask line numbers
       |> String.replace(~r/(_test.exs:)\d+/, "\\1##")
+      # canonicalize Elixir 1.20 ExUnit test results
+      |> String.replace(~r/Result: (\d+) passed/, "\\1 tests, 0 failures")
+      |> String.replace(~r/Result: \d+\/(\d+) passed\nFailed: (\d+) test(.*?)$/m, "\\1 tests, \\2 failure\\3")
       # canonicalize ExUnit error formatting:
       # - remove fancy spacing
       |> String.replace(~r/\s{5}code:\s+actual/m, "     code: actual")
