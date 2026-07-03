@@ -47,6 +47,12 @@ defmodule AssertValue do
       check_string_and_file_read(actual_value, expected_type)
       # We need to check for reformat_expected? first to disable
       # "this check/guard will always yield the same result" warnings
+      #
+      # AssertValue.equal? is needed to deal with Elixir 1.20 compile-time
+      # type checks. We are in a macro, so values are inlined into the code.
+      # With a direct comparison, the compiler will immediately emit a warning
+      # if the values have different types. Passing them as function arguments
+      # hides the direct comparison from the compiler.
       if AssertValue.Server.reformat_expected?() ||
            !AssertValue.equal?(actual_value, expected_value) do
         decision =
